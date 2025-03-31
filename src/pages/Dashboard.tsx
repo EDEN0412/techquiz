@@ -1,4 +1,4 @@
-import { Book, Code, Database, Github as Git, Terminal, Cpu } from 'lucide-react';
+import { Book, Code, Database, Github as Git, Terminal, Cpu, LayoutTemplate, Globe, FileCode } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
@@ -13,11 +13,44 @@ const categories = [
     bgColor: 'bg-orange-50',
   },
   {
+    id: 'ruby',
+    title: 'Ruby',
+    description: 'オブジェクト指向スクリプト言語の基礎',
+    icon: Book,
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
+  },
+  {
+    id: 'ruby-rails',
+    title: 'Ruby on Rails',
+    description: 'Rubyベースの高速Webアプリケーション開発',
+    icon: LayoutTemplate,
+    color: 'text-pink-500',
+    bgColor: 'bg-pink-50',
+  },
+  
+  {
+    id: 'javascript',
+    title: 'JavaScript',
+    description: 'Web開発に不可欠なプログラミング言語',
+    icon: FileCode,
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-50',
+  },
+  {
+    id: 'web-app-basic',
+    title: 'Webアプリケーション基礎',
+    description: 'Webアプリ開発の基礎知識とアーキテクチャ',
+    icon: Globe,
+    color: 'text-indigo-500',
+    bgColor: 'bg-indigo-50',
+  },
+  {
     id: 'python',
     title: 'Python',
-    description: 'Python プログラミングの基礎から応用まで',
-    icon: Terminal,
-    color: 'text-blue-500',
+    description: '汎用性の高い読みやすいプログラミング言語',
+    icon: Cpu,
+    color: 'text-blue-600',
     bgColor: 'bg-blue-50',
   },
   {
@@ -35,14 +68,6 @@ const categories = [
     icon: Terminal,
     color: 'text-yellow-500',
     bgColor: 'bg-yellow-50',
-  },
-  {
-    id: 'azure-ml',
-    title: 'Azure ML',
-    description: 'クラウドベースの機械学習',
-    icon: Cpu,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-50',
   },
   {
     id: 'database',
