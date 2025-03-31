@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Technical stack
+
+-Python for the backend with Django
+# バックエンドにはPythonとDjangoフレームワークを使用
+-TypeScript, React, Tailwind CSS for the frontend
+# フロントエンドにはTypeScript、React、Tailwind CSSを使用
+-Supabase for database
+# データベースにはSupabaseを使用
+-Separate databases for dev, test, and prod
+# 開発、テスト、本番環境それぞれに個別のデータベースを用意
+-Django test framework for backend testing
+# バックエンドのテストにはDjangoテストフレームワークを使用

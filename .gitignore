@@ -28,7 +28,6 @@ Thumbs.db
 .idea/
 *.sublime-workspace
 *.sublime-project
-.cursor/
 
 # Python関連
 __pycache__/

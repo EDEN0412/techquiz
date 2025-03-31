@@ -1,0 +1,100 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Project Rules
+
+## 1. General Coding Guidelines
+
+### 1.1 Core Principles
+- Use TypeScript for frontend development and Python for backend development
+- Prioritize readability and maintainability in all code
+- Ensure function and variable names are clear and descriptive
+- Use concise, meaningful comments for complex logic
+- Always prefer simple solutions
+- Avoid duplication of code whenever possible
+- Write code that takes into account different environments: dev, test, and prod
+
+### 1.2 Code Organization
+- Keep files under 200-300 lines of code; refactor when exceeding this limit
+- Focus on areas of code relevant to the task
+- Do not touch code unrelated to the task
+- Write thorough tests for all major functionality
+
+### 1.3 Bug Fixing and Refactoring
+- When fixing bugs, explore all options within existing implementation before introducing new patterns or technologies
+- When introducing new implementations, ensure old implementations are removed to avoid duplication
+- Avoid writing scripts in files when possible, especially for one-time use scripts
+
+## 2. Frontend Development Guidelines
+
+### 2.1 Core Technologies
+- Use TypeScript for all frontend development
+- Define strict type annotations for better code reliability
+- Apply Tailwind CSS for styling; avoid inline styles
+
+### 2.2 Component Design
+- Components should be modular and reusable
+- Maintain a consistent and clear component structure
+- Keep components small and focused on single responsibility
+- Use semantic HTML elements for better accessibility
+- Implement responsive design for all UI components
+
+## 3. Backend Development Guidelines
+
+### 3.1 API Development
+- Always validate API inputs before processing requests
+- Use async/await consistently; avoid callbacks
+- Follow RESTful API conventions for clear endpoint structures
+- Optimize database queries for performance and scalability
+- Log errors properly but avoid excessive debugging logs in production
+
+### 3.2 Code Quality
+- Write thorough tests for all endpoints and services
+- Implement proper error handling and logging
+- Maintain clear and consistent API documentation
+- Follow security best practices for all backend operations
+
+## 4. Development Workflow
+
+### 4.1 Code Changes
+- Always think about what other methods and areas of code might be affected by changes
+- Avoid making major changes to working features unless explicitly instructed
+- Check for existing similar functionality before implementing new features
+- Keep the codebase clean and organized
+
+### 4.2 Testing and Quality
+- Write tests for all new functionality
+- Ensure changes don't break existing tests
+- Review code for security implications
+- Optimize performance where applicable
+
+### 4.3 Task Management
+- Automatically add new tasks to implementation-plan.mdc when identifying missing requirements
+- Keep the implementation plan up-to-date with all necessary tasks
+
+## 5. Environment and Configuration
+
+### 5.1 Environment Management
+- Maintain separate configurations for dev, test, and prod environments
+- Never overwrite .env files without confirmation
+- Keep environment-specific code isolated
+- Use appropriate logging levels for each environment
+
+### 5.2 Version Control
+- Write clear, descriptive commit messages
+- Keep commits focused and atomic
+- Follow branch naming conventions
+- Review changes before committing
+
+### 5.3 Test Data and Environment
+- Use mock data only for tests, never in development or production environments
+- Never add stubbing or fake data patterns to code that affects development or production environments
+
+
+---
+description: Comprehensive coding standards and development guidelines
+globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+alwaysApply: true
+---
