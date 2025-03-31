@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# システムの依存関係をインストール
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Poetryのインストール
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# 依存関係ファイルをコピー
+COPY backend/pyproject.toml backend/poetry.lock ./
+
+# 依存関係のインストール
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
+
+# アプリケーションコードをコピー
+COPY backend .
+
+# Djangoアプリケーションを起動
+CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
