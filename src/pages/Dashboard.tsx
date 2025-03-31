@@ -1,6 +1,7 @@
 import { Book, Code, Database, Github as Git, Terminal, Cpu } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 const categories = [
   {
@@ -78,6 +79,12 @@ const recentActivity = [
 ];
 
 export function Dashboard() {
+  const navigate = useNavigate();
+
+  const handleStartQuiz = (categoryId: string) => {
+    navigate(`/quiz/${categoryId}/difficulty`);
+  };
+
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -115,7 +122,12 @@ export function Dashboard() {
                   <CardDescription>{category.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full">クイズを開始</Button>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => handleStartQuiz(category.id)}
+                  >
+                    クイズを開始
+                  </Button>
                 </CardContent>
               </Card>
             );
