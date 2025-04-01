@@ -30,7 +30,9 @@ alwaysApply: true
   GitHub Actionsを使用したDockerビルド・テスト用のワークフローを設定しました。
 
 ### 2. Django API連携と認証機能
-- [ ] Django API Clientの設定と初期化
+-  [x] Django API Clientの設定と初期化
+  Done
+  Axiosを使用したAPIクライアントを実装し、認証・クイズ・ユーザー関連の各APIサービスを作成しました。
 - [ ] Django認証フローの実装（JWT）
 - [ ] サインアップ機能の実装
 - [ ] ログイン機能の実装
