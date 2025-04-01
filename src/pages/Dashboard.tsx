@@ -1,4 +1,5 @@
 import { Book, Code, Database, Github as Git, Terminal, Cpu, LayoutTemplate, Globe, FileCode } from 'lucide-react';
+import { SiHtml5, SiCss3, SiRuby, SiRubyonrails, SiJavascript, SiPython, SiLinux } from 'react-icons/si';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +9,7 @@ const categories = [
     id: 'html-css',
     title: 'HTML & CSS',
     description: 'Webの基礎とスタイリングを習得',
-    icon: Code,
+    icon: SiHtml5,
     color: 'text-orange-500',
     bgColor: 'bg-orange-50',
   },
@@ -16,24 +17,24 @@ const categories = [
     id: 'ruby',
     title: 'Ruby',
     description: 'オブジェクト指向スクリプト言語の基礎',
-    icon: Book,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
+    icon: SiRuby,
+    color: 'text-red-700',
+    bgColor: 'bg-red-100',
   },
   {
     id: 'ruby-rails',
     title: 'Ruby on Rails',
     description: 'Rubyベースの高速Webアプリケーション開発',
-    icon: LayoutTemplate,
-    color: 'text-pink-500',
-    bgColor: 'bg-pink-50',
+    icon: SiRubyonrails,
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-100',
   },
   
   {
     id: 'javascript',
     title: 'JavaScript',
     description: 'Web開発に不可欠なプログラミング言語',
-    icon: FileCode,
+    icon: SiJavascript,
     color: 'text-amber-500',
     bgColor: 'bg-amber-50',
   },
@@ -49,9 +50,9 @@ const categories = [
     id: 'python',
     title: 'Python',
     description: '汎用性の高い読みやすいプログラミング言語',
-    icon: Cpu,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
+    icon: SiPython,
+    color: 'text-[#4584b6]',
+    bgColor: 'bg-[#ffde57]/20',
   },
   {
     id: 'git',
@@ -65,9 +66,9 @@ const categories = [
     id: 'linux',
     title: 'Linux コマンド',
     description: '基本的なターミナル操作',
-    icon: Terminal,
-    color: 'text-yellow-500',
-    bgColor: 'bg-yellow-50',
+    icon: SiLinux,
+    color: 'text-yellow-600',
+    bgColor: 'bg-yellow-100',
   },
   {
     id: 'database',
