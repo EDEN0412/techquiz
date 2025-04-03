@@ -11,10 +11,15 @@ erDiagram
     User {
         uuid id PK
         string username "ユーザー名"
+        string email "メールアドレス"
         string password_hash "パスワードハッシュ"
         datetime created_at "作成日時"
         boolean is_staff "スタッフ権限"
         boolean is_superuser "管理者権限"
+        string reset_token "パスワードリセットトークン"
+        datetime reset_token_expires "トークン有効期限"
+        boolean email_verified "メール確認済みフラグ"
+        datetime last_login "最終ログイン日時"
     }
     
     Category {
@@ -43,6 +48,9 @@ erDiagram
         int time_limit "制限時間"
         int pass_score "合格点"
         boolean is_active "アクティブ状態"
+        string thumbnail_url "サムネイル画像URL"
+        string banner_image_url "バナー画像URL"
+        string media_type "メディア種類"
         datetime created_at "作成日時"
         datetime updated_at "更新日時"
     }
@@ -56,6 +64,10 @@ erDiagram
         string explanation "解説"
         int points "ポイント"
         int display_order "表示順序"
+        string code_snippet "コードスニペット"
+        string image_url "画像URL"
+        string media_type "メディアタイプ(コード/画像/図表)"
+        string syntax_highlight "シンタックスハイライト言語"
     }
     
     Answer {
