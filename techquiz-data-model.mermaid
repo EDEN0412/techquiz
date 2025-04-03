@@ -1,0 +1,103 @@
+erDiagram
+    User ||--o{ QuizResult : "完了する"
+    User ||--o{ UserStatistics : "所有する"
+    User ||--o{ ActivityHistory : "生成する"
+    Category ||--o{ Quiz : "含む"
+    DifficultyLevel ||--o{ Quiz : "定義する"
+    Quiz ||--o{ Question : "所有する"
+    Question ||--o{ Answer : "所有する"
+    Quiz ||--o{ QuizResult : "生成する"
+    
+    User {
+        uuid id PK
+        string username "ユーザー名"
+        string password_hash "パスワードハッシュ"
+        datetime created_at "作成日時"
+        boolean is_staff "スタッフ権限"
+        boolean is_superuser "管理者権限"
+    }
+    
+    Category {
+        int id PK
+        string name "カテゴリ名"
+        string description "説明"
+        string icon "アイコン"
+        int display_order "表示順序"
+        boolean is_active "アクティブ状態"
+    }
+    
+    DifficultyLevel {
+        int id PK
+        string name "難易度名"
+        string description "説明"
+        int point_multiplier "ポイント倍率"
+        int time_limit "制限時間"
+    }
+    
+    Quiz {
+        int id PK
+        int category_id FK "カテゴリID"
+        int difficulty_id FK "難易度ID"
+        string title "タイトル"
+        string description "説明"
+        int time_limit "制限時間"
+        int pass_score "合格点"
+        boolean is_active "アクティブ状態"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
+    }
+    
+    Question {
+        int id PK
+        int quiz_id FK "クイズID"
+        string question_text "問題文"
+        string question_type "問題タイプ"
+        string hint "ヒント"
+        string explanation "解説"
+        int points "ポイント"
+        int display_order "表示順序"
+    }
+    
+    Answer {
+        int id PK
+        int question_id FK "問題ID"
+        string answer_text "回答テキスト"
+        boolean is_correct "正解フラグ"
+        string feedback "フィードバック"
+    }
+    
+    QuizResult {
+        int id PK
+        uuid user_id FK "ユーザーID"
+        int quiz_id FK "クイズID"
+        int score "スコア"
+        int total_possible "満点"
+        float percentage "正答率"
+        int time_taken "所要時間"
+        boolean passed "合格フラグ"
+        datetime completed_at "完了日時"
+    }
+    
+    UserStatistics {
+        int id PK
+        uuid user_id FK "ユーザーID"
+        int category_id FK "カテゴリID（任意）"
+        int difficulty_id FK "難易度ID（任意）"
+        int quizzes_completed "完了クイズ数"
+        int total_points "合計ポイント"
+        float avg_score "平均スコア"
+        int highest_score "最高スコア"
+        datetime last_quiz_date "最終クイズ日"
+    }
+    
+    ActivityHistory {
+        int id PK
+        uuid user_id FK "ユーザーID"
+        int quiz_id FK "クイズID"
+        int category_id FK "カテゴリID"
+        int difficulty_id FK "難易度ID"
+        int score "スコア"
+        float percentage "正答率"
+        datetime activity_date "活動日時"
+        string activity_type "活動タイプ（クイズ完了、復習など）"
+    }
