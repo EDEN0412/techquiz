@@ -65,11 +65,17 @@ alwaysApply: true
 
 
 ### 3. Supabaseデータベース設定
-- [ ] Supabaseプロジェクト設定
-- [ ] PostgreSQLデータベース接続設定
+- [x] Supabaseプロジェクト設定
+  Done
+  Supabaseプロジェクトを作成し、必要な設定を完了。プロジェクトURLとAPIキーを取得しました。
+- [x] PostgreSQLデータベース接続設定
+  Done
+  Supabaseが提供するPostgreSQLデータベースへの接続設定を完了。接続テストも成功しました。
 - [ ] Djangoとの接続設定
 - [ ] データベースマイグレーション設定
-- [ ] Row Level Securityの設定
+- [x] Row Level Securityの設定
+  Done
+  Supabase管理画面からテーブルごとにRLSを設定。認証プロバイダー設定（メールアドレス認証、GitHub連携、Google連携）を実装しました。
 
 ### 4. Django API開発
 - [x] Djangoプロジェクト初期設定
