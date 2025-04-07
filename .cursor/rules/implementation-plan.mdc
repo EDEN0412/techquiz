@@ -71,7 +71,9 @@ alwaysApply: true
 - [x] PostgreSQLデータベース接続設定
   Done
   Supabaseが提供するPostgreSQLデータベースへの接続設定を完了。接続テストも成功しました。
-- [ ] Djangoとの接続設定
+- [x] Djangoとの接続設定
+  Done
+  Djangoとの連携を設定し、Supabaseクライアントを初期化する機能を実装。SupabaseModelMixinを作成し、Supabaseテーブルを操作するための機能を追加しました。
 - [ ] データベースマイグレーション設定
 - [x] Row Level Securityの設定
   Done
