@@ -42,4 +42,7 @@ env.bak/
 venv.bak/
 *.egg-info/
 .installed.cfg
-*.egg 
+*.egg
+
+# Supabase接続テスト用の一時ファイル
+src/components/SupabaseTest.tsx 
