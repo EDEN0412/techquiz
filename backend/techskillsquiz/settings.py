@@ -41,16 +41,29 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # サードパーティアプリ
+    "rest_framework",
+    "corsheaders",
+    # プロジェクトアプリ
+    "users",
+    "quiz",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS用ミドルウェア
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+# CORS設定
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # 開発環境のみすべてのオリジンを許可
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # フロントエンド開発サーバー
 ]
 
 ROOT_URLCONF = "techskillsquiz.urls"
@@ -77,13 +90,43 @@ WSGI_APPLICATION = "techskillsquiz.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# 開発環境ではSQLiteを使用し、本番環境ではSupabaseのPostgreSQLを使用
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    # 本番環境またはSupabaseを使用する場合
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("SUPABASE_DB_NAME", "postgres"),
+            "USER": os.environ.get("SUPABASE_DB_USER", "postgres"),
+            "PASSWORD": os.environ.get("SUPABASE_DB_PASSWORD", ""),
+            "HOST": os.environ.get("SUPABASE_DB_HOST", "localhost"),
+            "PORT": os.environ.get("SUPABASE_DB_PORT", "5432"),
+        }
+    }
 
+# Supabase設定
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+
+# REST Framework設定
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -107,9 +150,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ja"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Tokyo"
 
 USE_I18N = True
 
@@ -120,6 +163,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -46,3 +46,8 @@ venv.bak/
 
 # Supabase接続テスト用の一時ファイル
 src/components/SupabaseTest.tsx 
+
+# バックエンド環境変数とテストファイル
+backend/.env
+backend/test_supabase_connection.py
+backend/test_supabase_model.py
