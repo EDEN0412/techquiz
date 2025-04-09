@@ -75,6 +75,30 @@ alwaysApply: true
   Done
   Djangoとの連携を設定し、Supabaseクライアントを初期化する機能を実装。SupabaseModelMixinを作成し、Supabaseテーブルを操作するための機能を追加しました。
 - [ ] データベースマイグレーション設定
+  - [ ] ローカルSupabase開発環境のセットアップ
+    - [ ] docker-compose.ymlの作成（Supabase Local用）
+    - [ ] 初期セットアップスクリプト（setup.sql）の作成
+    - [ ] 開発環境用.env.developmentファイルの作成
+  - [ ] settings.pyの修正（開発環境でもPostgreSQLを使用）
+  - [ ] マイグレーション後のフック機能の実装（Djangoマイグレーション後にSupabaseテーブルを更新）
+  - [ ] 開発サーバー起動スクリプト（dev.sh）の作成
+- [ ] Supabase CLI導入と設定
+  - [ ] Supabase CLIのインストール
+  - [ ] supabase/config.tomlの設定
+  - [ ] DBマイグレーションの管理手順の整備
+  - [ ] ローカル環境と本番環境の連携方法の確立
+- [ ] 既存モデルのSupabase対応
+  - [ ] モデルクラスへのSupabaseModelMixinの適用
+  - [ ] supabase_tableプロパティの設定
+  - [ ] pre_save/post_saveシグナルでのSupabase同期実装
+- [ ] テスト環境のSupabase設定
+  - [ ] テスト用.env.testファイルの作成
+  - [ ] テスト実行時のデータベース設定
+  - [ ] pytest.iniの設定
+- [ ] CI/CD設定のSupabase対応
+  - [ ] GitHub ActionsでのSupabaseマイグレーション実行
+  - [ ] デプロイ時のSupabaseスキーマ更新自動化
+  - [ ] 本番/ステージング環境のSupabase設定分離
 - [x] Row Level Securityの設定
   Done
   Supabase管理画面からテーブルごとにRLSを設定。認証プロバイダー設定（メールアドレス認証、GitHub連携、Google連携）を実装しました。
