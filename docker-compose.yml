@@ -12,6 +12,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+    restart: unless-stopped
 
   backend:
     build:
@@ -25,4 +26,39 @@ services:
       - PYTHONPATH=/app
       - ENVIRONMENT=development
     depends_on:
-      - frontend
+      - supabase
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  supabase:
+    image: supabase/supabase-local:latest
+    ports:
+      - "54321:54321"  # PostgreSQL Database
+      - "54322:54322"  # Studio
+      - "54323:54323"  # Inbucket
+      - "54324:54324"  # Auth
+      - "54325:54325"  # Storage
+      - "54326:54326"  # Edge Functions
+      - "54327:54327"  # Realtime
+      - "54328:54328"  # Analytics
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
+    volumes:
+      - ./supabase/data:/var/lib/postgresql/data
+      - ./supabase/migrations:/supabase/migrations
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
