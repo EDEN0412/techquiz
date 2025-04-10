@@ -76,14 +76,18 @@ alwaysApply: true
   Djangoとの連携を設定し、Supabaseクライアントを初期化する機能を実装。SupabaseModelMixinを作成し、Supabaseテーブルを操作するための機能を追加しました。
 - [ ] データベースマイグレーション設定
   - [ ] ローカルSupabase開発環境のセットアップ
-    - [ ] docker-compose.ymlの作成（Supabase Local用）
+    - [x] docker-compose.ymlの作成（Supabase Local用）
+    Done
+    docker-compose.ymlの作成から始め、最終的にSupabase CLIを使用した方法に移行。環境変数を適切に設定し、Supabase Studioが正常に動作することを確認しました。
     - [ ] 初期セットアップスクリプト（setup.sql）の作成
     - [ ] 開発環境用.env.developmentファイルの作成
   - [ ] settings.pyの修正（開発環境でもPostgreSQLを使用）
   - [ ] マイグレーション後のフック機能の実装（Djangoマイグレーション後にSupabaseテーブルを更新）
   - [ ] 開発サーバー起動スクリプト（dev.sh）の作成
 - [ ] Supabase CLI導入と設定
-  - [ ] Supabase CLIのインストール
+  - [x] Supabase CLIのインストール
+    Done
+    Supabase CLIをインストールし、supabase initコマンドでプロジェクトを初期化しました。
   - [ ] supabase/config.tomlの設定
   - [ ] DBマイグレーションの管理手順の整備
   - [ ] ローカル環境と本番環境の連携方法の確立
