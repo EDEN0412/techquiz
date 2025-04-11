@@ -79,7 +79,9 @@ alwaysApply: true
     - [x] docker-compose.ymlの作成（Supabase Local用）
     Done
     docker-compose.ymlの作成から始め、最終的にSupabase CLIを使用した方法に移行。環境変数を適切に設定し、Supabase Studioが正常に動作することを確認しました。
-    - [ ] 初期セットアップスクリプト（setup.sql）の作成
+    - [x] 初期セットアップスクリプト（setup.sql）の作成
+    Done
+    ERダイアグラムに基づいてテーブル構造、関連付け、RLSポリシー、自動更新トリガー、サンプルデータを含むSQLスクリプトを作成。PG関数を使って統計情報の自動更新と古いデータのアーカイブ機能も実装しました。
     - [ ] 開発環境用.env.developmentファイルの作成
   - [ ] settings.pyの修正（開発環境でもPostgreSQLを使用）
   - [ ] マイグレーション後のフック機能の実装（Djangoマイグレーション後にSupabaseテーブルを更新）
