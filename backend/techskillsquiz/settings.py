@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# 環境変数の読み込み
+# 本番環境では.env、開発環境では.env.developmentを使用
+env_file = '.env.development' if os.path.exists(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env.development')) else '.env'
+env_path = Path(__file__).resolve().parent.parent.parent / env_file
+load_dotenv(dotenv_path=env_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +36,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-mbp&xcilfkgn5-
 # DEBUG = True
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+if ALLOWED_HOSTS == [""]:
+    ALLOWED_HOSTS = []
 
 
 # Application definition

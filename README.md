@@ -13,3 +13,65 @@ URL	デプロイ済みのURLを記載。デプロイが済んでいない場合�
 工夫したポイント	制作背景・使用技術・開発方法・タスク管理など、企業へＰＲしたい事柄を記載。
 改善点	より改善するとしたらどこか、それはどのようにしてやるのか。
 制作時間	アプリケーションを制作するのにかけた時間。
+
+# TechQuiz
+
+技術スキル向上のためのクイズアプリケーション
+
+## 開発環境のセットアップ
+
+### 前提条件
+- Node.js v18以上
+- Python 3.9以上
+- Docker & Docker Compose（ローカルSupabase環境用）
+
+### 環境変数の設定
+
+1. 開発環境用の`.env.development`を設定する:
+```bash
+# リポジトリのルートディレクトリにコピーして使用
+cp .env.example .env.development
+```
+
+2. 必要な環境変数を設定:
+   - Supabase接続情報
+   - データベース接続情報
+   - Djangoの設定値
+
+### フロントエンド（React + TypeScript）
+
+```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
+```
+
+### バックエンド（Django）
+
+```bash
+# 仮想環境の作成と有効化
+python -m venv venv
+source venv/bin/activate  # Windowsの場合: venv\Scripts\activate
+
+# 依存関係のインストール
+cd backend
+pip install -r requirements.txt
+
+# 開発サーバーの起動
+python manage.py runserver
+```
+
+### ローカルSupabase環境
+
+```bash
+# Supabase CLIがインストールされていることを確認
+supabase --version
+
+# ローカルSupabase環境の起動
+supabase start
+
+# ブラウザでStudioにアクセス
+open http://localhost:54323
+```
