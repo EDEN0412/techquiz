@@ -99,26 +99,26 @@ WSGI_APPLICATION = "techskillsquiz.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# 開発環境ではSQLiteを使用し、本番環境ではSupabaseのPostgreSQLを使用
-if DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+# 開発環境・本番環境ともにPostgreSQLを使用
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DATABASE_NAME", os.environ.get("SUPABASE_DB_NAME", "postgres")),
+        "USER": os.environ.get("DATABASE_USER", os.environ.get("SUPABASE_DB_USER", "postgres")),
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD", os.environ.get("SUPABASE_DB_PASSWORD", "postgres")),
+        "HOST": os.environ.get("DATABASE_HOST", os.environ.get("SUPABASE_DB_HOST", "localhost")),
+        "PORT": os.environ.get("DATABASE_PORT", os.environ.get("SUPABASE_DB_PORT", "54322")),
     }
-else:
-    # 本番環境またはSupabaseを使用する場合
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("SUPABASE_DB_NAME", "postgres"),
-            "USER": os.environ.get("SUPABASE_DB_USER", "postgres"),
-            "PASSWORD": os.environ.get("SUPABASE_DB_PASSWORD", ""),
-            "HOST": os.environ.get("SUPABASE_DB_HOST", "localhost"),
-            "PORT": os.environ.get("SUPABASE_DB_PORT", "5432"),
-        }
-    }
+}
+
+# 開発環境でSQLiteを使用したい場合はコメントを外してください
+# if DEBUG and os.environ.get("USE_SQLITE", "False") == "True":
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
+#     }
 
 # Supabase設定
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
