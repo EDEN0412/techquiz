@@ -85,7 +85,9 @@ alwaysApply: true
     - [x] 開発環境用.env.developmentファイルの作成
     Done
     開発環境で必要な環境変数を含む.env.developmentファイルを作成。Django、Supabase接続情報、データベース接続情報などを設定し、.gitignoreにも追加しました。また、Djangoの設定ファイルが.env.developmentを読み込むように修正しました。
-  - [ ] settings.pyの修正（開発環境でもPostgreSQLを使用）
+  - [x] settings.pyの修正（開発環境でもPostgreSQLを使用）
+    Done
+    開発環境と本番環境の両方でPostgreSQLを使用するように設定を変更。データベース接続情報の環境変数参照順序を整理し、ローカルSupabaseに適したデフォルト値を設定しました。SQLiteに戻す場合のオプションも用意しました。
   - [ ] マイグレーション後のフック機能の実装（Djangoマイグレーション後にSupabaseテーブルを更新）
   - [ ] 開発サーバー起動スクリプト（dev.sh）の作成
 - [ ] Supabase CLI導入と設定
