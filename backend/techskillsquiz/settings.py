@@ -123,6 +123,10 @@ DATABASES = {
 # Supabase設定
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
+
+# マイグレーション後に自動的にSupabaseテーブルを同期するかどうか
+SUPABASE_AUTO_SYNC = os.environ.get("SUPABASE_AUTO_SYNC", "False").lower() in ("true", "1", "t")
 
 # REST Framework設定
 REST_FRAMEWORK = {

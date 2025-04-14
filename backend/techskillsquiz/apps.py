@@ -23,4 +23,15 @@ class TechskillsquizConfig(AppConfig):
                 initialize_supabase()
                 print("Supabaseクライアントが正常に初期化されました。")
             except Exception as e:
-                print(f"Supabaseクライアントの初期化に失敗しました: {e}") 
+                print(f"Supabaseクライアントの初期化に失敗しました: {e}")
+                
+        # マイグレーション後のSupabase同期ハンドラを登録
+        try:
+            from django.db.models.signals import post_migrate
+            from .supabase_sync import post_migration_sync_handler
+            
+            # post_migrate信号にハンドラを接続
+            post_migrate.connect(post_migration_sync_handler, sender=self)
+            print("Supabase同期ハンドラが登録されました。")
+        except Exception as e:
+            print(f"Supabase同期ハンドラの登録に失敗しました: {e}") 
