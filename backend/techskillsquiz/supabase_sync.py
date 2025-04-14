@@ -456,23 +456,73 @@ def get_model_cleanup_sql(model: Type[models.Model]) -> str:
     table_name = model._meta.db_table
     return f"DELETE FROM {table_name};"
 
-def post_migration_sync_handler(*args, **kwargs):
+def post_migration_sync_handler(sender, **kwargs):
     """
     Djangoマイグレーション後に自動的に呼び出される関数。
     全てのSupabaseモデルをSupabaseに同期します。
     
+    Args:
+        sender: シグナルを送信したアプリケーション
+        **kwargs: シグナルから渡される追加パラメータ
+    
     Djangoのpost_migrateシグナルハンドラとして使用します。
     """
-    if settings.SUPABASE_AUTO_SYNC:
-        logger.info("マイグレーション後のSupabase同期を開始します")
-        results = sync_all_models_to_supabase()
+    # アプリケーション名を取得（ロギング用）
+    app_name = sender.name if hasattr(sender, 'name') else 'unknown'
+    
+    # 設定でAutoSyncが有効になっているか確認
+    if not getattr(settings, 'SUPABASE_AUTO_SYNC', False):
+        logger.info(f"マイグレーション後の自動Supabase同期が無効です（app: {app_name}）")
+        return
+    
+    # Supabaseの接続情報が設定されているか確認
+    if not all([settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY]):
+        logger.warning(f"Supabase接続情報が設定されていないため、同期をスキップします（app: {app_name}）")
+        return
+    
+    try:
+        logger.info(f"アプリケーション '{app_name}' のマイグレーション後Supabase同期を開始します")
         
+        # このアプリケーションのSupabaseモデルのみを取得
+        app_models = []
+        for model in get_supabase_models():
+            model_app = model._meta.app_label
+            if model_app == app_name or app_name == 'techskillsquiz':  # 'techskillsquiz'はメインアプリなので全てのモデルを対象
+                app_models.append(model)
+        
+        if not app_models:
+            logger.info(f"アプリケーション '{app_name}' にはSupabaseと同期するモデルがありません")
+            return
+        
+        # モデルごとに同期
+        results = {}
+        for model in app_models:
+            model_name = f"{model._meta.app_label}.{model.__name__}"
+            logger.info(f"モデル '{model_name}' の同期を開始します")
+            
+            try:
+                success = sync_django_model_to_supabase(model)
+                results[model_name] = success
+                
+                if success:
+                    logger.info(f"モデル '{model_name}' の同期が成功しました")
+                else:
+                    logger.error(f"モデル '{model_name}' の同期に失敗しました")
+            except Exception as e:
+                logger.exception(f"モデル '{model_name}' の同期中に例外が発生しました: {str(e)}")
+                results[model_name] = False
+        
+        # 結果の集計
         success_count = sum(1 for success in results.values() if success)
         total_count = len(results)
         
-        logger.info(f"Supabase同期が完了しました。{success_count}/{total_count}のモデルが正常に同期されました。")
+        if total_count > 0:
+            logger.info(f"アプリケーション '{app_name}' のSupabase同期が完了しました。{success_count}/{total_count}のモデルが正常に同期されました。")
+            
+            # 失敗したモデルがあれば警告
+            failed_models = [model for model, success in results.items() if not success]
+            if failed_models:
+                logger.warning(f"次のモデルの同期に失敗しました: {', '.join(failed_models)}")
         
-        # 失敗したモデルがあれば警告
-        failed_models = [model for model, success in results.items() if not success]
-        if failed_models:
-            logger.warning(f"次のモデルの同期に失敗しました: {', '.join(failed_models)}") 
+    except Exception as e:
+        logger.exception(f"マイグレーション後のSupabase同期中に予期しない例外が発生しました: {str(e)}") 
