@@ -62,3 +62,6 @@ media/
 # OS生成ファイル
 .DS_Store
 Thumbs.db
+
+# Supabase
+supabase/data/
