@@ -33,6 +33,25 @@ if [ ! -f "backend/.env" ]; then
   exit 1
 fi
 
+# 必要なツールの確認
+if ! command -v node &> /dev/null; then
+  echo -e "${RED}エラー: Node.js がインストールされていません${NC}"
+  echo -e "${YELLOW}Node.js をインストールしてから再度実行してください${NC}"
+  exit 1
+fi
+
+if ! command -v npx &> /dev/null; then
+  echo -e "${RED}エラー: npx がインストールされていません${NC}"
+  echo -e "${YELLOW}Node.js を最新版にアップデートするか、npm install -g npx を実行してください${NC}"
+  exit 1
+fi
+
+# Supabase CLI の確認
+if ! npx supabase --version &> /dev/null; then
+  echo -e "${YELLOW}警告: Supabase CLI が見つかりません。インストールします...${NC}"
+  npm install -g supabase
+fi
+
 # Docker が実行中か確認
 if ! command -v docker &> /dev/null; then
   echo -e "${RED}エラー: Docker がインストールされていません${NC}"
@@ -43,6 +62,13 @@ if ! docker info &> /dev/null; then
   echo -e "${RED}エラー: Docker デーモンが実行されていません${NC}"
   echo -e "${YELLOW}Docker を起動してから再度実行してください${NC}"
   exit 1
+fi
+
+# Poetry の確認
+HAS_POETRY=true
+if ! command -v poetry &> /dev/null; then
+  echo -e "${YELLOW}警告: Poetry がインストールされていません。通常の Python を使用します${NC}"
+  HAS_POETRY=false
 fi
 
 # 仮想環境のチェック
@@ -66,7 +92,11 @@ SUPABASE_PID=$!
 # バックグラウンドでバックエンドサーバーを起動
 echo -e "${YELLOW}バックエンドサーバーを起動中...${NC}"
 cd backend || exit
-python manage.py runserver 0.0.0.0:8000 &
+if [ "$HAS_POETRY" = true ]; then
+  poetry run python manage.py runserver 0.0.0.0:8000 &
+else
+  python manage.py runserver 0.0.0.0:8000 &
+fi
 BACKEND_PID=$!
 cd ..
 
