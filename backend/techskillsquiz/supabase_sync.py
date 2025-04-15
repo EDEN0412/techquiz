@@ -61,15 +61,30 @@ def get_supabase_models() -> List[Type[SupabaseModelMixin]]:
     Returns:
         SupabaseModelMixinを継承したモデルのリスト
     """
+    import sys
     supabase_models = []
     
     # 全アプリケーションのモデルを調べる
     for app_config in apps.get_app_configs():
+        print(f"アプリケーション確認: {app_config.name}", file=sys.stderr)
         for model in app_config.get_models():
+            print(f"  モデル確認: {model.__name__}", file=sys.stderr)
+            
             # SupabaseModelMixinを継承しているか確認
-            if issubclass(model, SupabaseModelMixin) and model.supabase_table:
-                supabase_models.append(model)
+            is_supabase_model = False
+            try:
+                is_supabase_model = issubclass(model, SupabaseModelMixin)
+                if is_supabase_model:
+                    print(f"    SupabaseModelMixinを継承: {model.__name__}", file=sys.stderr)
+                    if hasattr(model, 'supabase_table') and model.supabase_table:
+                        print(f"    supabase_table設定あり: {model.supabase_table}", file=sys.stderr)
+                        supabase_models.append(model)
+                    else:
+                        print(f"    supabase_table設定なし: {model.__name__}", file=sys.stderr)
+            except (TypeError, AttributeError) as e:
+                print(f"    継承チェックエラー: {model.__name__}, {e}", file=sys.stderr)
                 
+    print(f"Supabaseモデル検索結果: {len(supabase_models)}件", file=sys.stderr)
     return supabase_models
 
 def get_django_field_type(field: Field) -> Tuple[str, Dict[str, Any]]:
@@ -467,31 +482,51 @@ def post_migration_sync_handler(sender, **kwargs):
     
     Djangoのpost_migrateシグナルハンドラとして使用します。
     """
+    import sys
+    print(f"post_migration_sync_handler: シグナル受信 sender={sender}, kwargs={kwargs}", file=sys.stderr)
+    
     # アプリケーション名を取得（ロギング用）
     app_name = sender.name if hasattr(sender, 'name') else 'unknown'
+    print(f"アプリケーション名: {app_name}", file=sys.stderr)
     
     # 設定でAutoSyncが有効になっているか確認
-    if not getattr(settings, 'SUPABASE_AUTO_SYNC', False):
+    auto_sync = getattr(settings, 'SUPABASE_AUTO_SYNC', False)
+    print(f"SUPABASE_AUTO_SYNC: {auto_sync}", file=sys.stderr)
+    
+    if not auto_sync:
         logger.info(f"マイグレーション後の自動Supabase同期が無効です（app: {app_name}）")
+        print(f"マイグレーション後の自動Supabase同期が無効です（app: {app_name}）", file=sys.stderr)
         return
     
     # Supabaseの接続情報が設定されているか確認
-    if not all([settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY]):
+    has_connection_info = all([settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY])
+    print(f"Supabase接続情報: URL={bool(settings.SUPABASE_URL)}, SERVICE_KEY={bool(settings.SUPABASE_SERVICE_KEY)}", file=sys.stderr)
+    
+    if not has_connection_info:
         logger.warning(f"Supabase接続情報が設定されていないため、同期をスキップします（app: {app_name}）")
+        print(f"Supabase接続情報が設定されていないため、同期をスキップします（app: {app_name}）", file=sys.stderr)
         return
     
     try:
         logger.info(f"アプリケーション '{app_name}' のマイグレーション後Supabase同期を開始します")
+        print(f"アプリケーション '{app_name}' のマイグレーション後Supabase同期を開始します", file=sys.stderr)
         
         # このアプリケーションのSupabaseモデルのみを取得
         app_models = []
-        for model in get_supabase_models():
+        all_models = get_supabase_models()
+        print(f"取得したSupabaseモデル数: {len(all_models)}", file=sys.stderr)
+        
+        for model in all_models:
             model_app = model._meta.app_label
+            print(f"モデル確認: {model.__name__}, app_label={model_app}", file=sys.stderr)
             if model_app == app_name or app_name == 'techskillsquiz':  # 'techskillsquiz'はメインアプリなので全てのモデルを対象
                 app_models.append(model)
         
+        print(f"同期対象モデル数: {len(app_models)}", file=sys.stderr)
+        
         if not app_models:
             logger.info(f"アプリケーション '{app_name}' にはSupabaseと同期するモデルがありません")
+            print(f"アプリケーション '{app_name}' にはSupabaseと同期するモデルがありません", file=sys.stderr)
             return
         
         # モデルごとに同期
@@ -499,6 +534,7 @@ def post_migration_sync_handler(sender, **kwargs):
         for model in app_models:
             model_name = f"{model._meta.app_label}.{model.__name__}"
             logger.info(f"モデル '{model_name}' の同期を開始します")
+            print(f"モデル '{model_name}' の同期を開始します", file=sys.stderr)
             
             try:
                 success = sync_django_model_to_supabase(model)
@@ -506,10 +542,15 @@ def post_migration_sync_handler(sender, **kwargs):
                 
                 if success:
                     logger.info(f"モデル '{model_name}' の同期が成功しました")
+                    print(f"モデル '{model_name}' の同期が成功しました", file=sys.stderr)
                 else:
                     logger.error(f"モデル '{model_name}' の同期に失敗しました")
+                    print(f"モデル '{model_name}' の同期に失敗しました", file=sys.stderr)
             except Exception as e:
                 logger.exception(f"モデル '{model_name}' の同期中に例外が発生しました: {str(e)}")
+                print(f"モデル '{model_name}' の同期中に例外が発生しました: {str(e)}", file=sys.stderr)
+                import traceback
+                traceback.print_exc()
                 results[model_name] = False
         
         # 結果の集計
@@ -518,11 +559,16 @@ def post_migration_sync_handler(sender, **kwargs):
         
         if total_count > 0:
             logger.info(f"アプリケーション '{app_name}' のSupabase同期が完了しました。{success_count}/{total_count}のモデルが正常に同期されました。")
+            print(f"アプリケーション '{app_name}' のSupabase同期が完了しました。{success_count}/{total_count}のモデルが正常に同期されました。", file=sys.stderr)
             
             # 失敗したモデルがあれば警告
             failed_models = [model for model, success in results.items() if not success]
             if failed_models:
                 logger.warning(f"次のモデルの同期に失敗しました: {', '.join(failed_models)}")
+                print(f"次のモデルの同期に失敗しました: {', '.join(failed_models)}", file=sys.stderr)
         
     except Exception as e:
-        logger.exception(f"マイグレーション後のSupabase同期中に予期しない例外が発生しました: {str(e)}") 
+        logger.exception(f"マイグレーション後のSupabase同期中に予期しない例外が発生しました: {str(e)}")
+        print(f"マイグレーション後のSupabase同期中に予期しない例外が発生しました: {str(e)}", file=sys.stderr)
+        import traceback
+        traceback.print_exc() 

@@ -63,7 +63,6 @@ alwaysApply: true
   Done
   データの増加に対応するため、古い活動履歴の自動アーカイブや削除のポリシーを設計。
 
-
 ### 3. Supabaseデータベース設定
 - [x] Supabaseプロジェクト設定
   Done
@@ -94,16 +93,10 @@ alwaysApply: true
     - [x] Supabase同期用ユーティリティモジュールの作成
     Done
     DjangoモデルとSupabaseテーブルを同期するためのユーティリティモジュールを作成。モデル情報の解析、テーブル作成/変更、データ移行、マイグレーション後の自動同期機能を実装しました。また、SUPABASE_AUTO_SYNC設定を追加し、Djangoのsignalsを使用して自動同期の仕組みを構築しました。
-    - [ ] マイグレーション後のシグナルハンドラ実装
-    - [ ] SupabaseModelMixinの機能拡張
+    - [x] マイグレーション後のシグナルハンドラ実装
+    Done
+    Djangoのpost_migrateシグナルを受け取り、SupabaseModelMixinを継承したモデルをSupabaseと同期するハンドラを実装しました。アプリケーション別の同期機能、詳細なエラーハンドリング、ロギング機能を追加し、同期の信頼性を向上させました。テストモデル（Category、DifficultyLevel）も実装し、同期機能を検証しました。
     - [ ] 手動同期用のmanage.pyコマンド実装
-  - [ ] 開発サーバー起動スクリプト（dev.sh）の作成
-    - [ ] マイグレーション後のシグナルハンドラ実装
-    - [ ] SupabaseModelMixinの機能拡張
-    - [ ] 手動同期用のmanage.pyコマンド実装
-    - [ ] モデルごとのテーブル同期ロジック実装
-    - [ ] テスト環境での動作検証
-    - [ ] エラーハンドリングとロギング機能の追加
   - [ ] 開発サーバー起動スクリプト（dev.sh）の作成
 - [ ] Supabase CLI導入と設定
   - [x] Supabase CLIのインストール

@@ -99,26 +99,25 @@ WSGI_APPLICATION = "techskillsquiz.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# 開発環境・本番環境ともにPostgreSQLを使用
+# 開発環境ではSQLiteを使用
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DATABASE_NAME", os.environ.get("SUPABASE_DB_NAME", "postgres")),
-        "USER": os.environ.get("DATABASE_USER", os.environ.get("SUPABASE_DB_USER", "postgres")),
-        "PASSWORD": os.environ.get("DATABASE_PASSWORD", os.environ.get("SUPABASE_DB_PASSWORD", "postgres")),
-        "HOST": os.environ.get("DATABASE_HOST", os.environ.get("SUPABASE_DB_HOST", "localhost")),
-        "PORT": os.environ.get("DATABASE_PORT", os.environ.get("SUPABASE_DB_PORT", "54322")),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
-# 開発環境でSQLiteを使用したい場合はコメントを外してください
-# if DEBUG and os.environ.get("USE_SQLITE", "False") == "True":
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": BASE_DIR / "db.sqlite3",
-#         }
+# 本番環境・テスト環境でPostgreSQLを使用する場合はコメントを外す
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.environ.get("DATABASE_NAME", os.environ.get("SUPABASE_DB_NAME", "postgres")),
+#         "USER": os.environ.get("DATABASE_USER", os.environ.get("SUPABASE_DB_USER", "postgres")),
+#         "PASSWORD": os.environ.get("DATABASE_PASSWORD", os.environ.get("SUPABASE_DB_PASSWORD", "postgres")),
+#         "HOST": os.environ.get("DATABASE_HOST", os.environ.get("SUPABASE_DB_HOST", "localhost")),
+#         "PORT": os.environ.get("DATABASE_PORT", os.environ.get("SUPABASE_DB_PORT", "54322")),
 #     }
+# }
 
 # Supabase設定
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
@@ -182,3 +181,44 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Logging設定
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'supabase_sync.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'techskillsquiz.supabase_sync': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
