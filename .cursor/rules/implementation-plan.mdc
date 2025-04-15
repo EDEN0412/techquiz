@@ -87,9 +87,11 @@ alwaysApply: true
     Done
     開発環境で必要な環境変数を含む.env.developmentファイルを作成。Django、Supabase接続情報、データベース接続情報などを設定し、.gitignoreにも追加しました。また、Djangoの設定ファイルが.env.developmentを読み込むように修正しました。
   - [x] settings.pyの修正（開発環境でもPostgreSQLを使用）
-    Done
-    開発環境と本番環境の両方でPostgreSQLを使用するように設定を変更。データベース接続情報の環境変数参照順序を整理し、ローカルSupabaseに適したデフォルト値を設定しました。SQLiteに戻す場合のオプションも用意しました。
-  - [ ] マイグレーション後のフック機能の実装（Djangoマイグレーション後にSupabaseテーブルを更新）
+  Done
+  開発環境と本番環境の両方でPostgreSQLを使用するように設定を変更。データベース接続情報の環境変数参照順序を整理し、ローカルSupabaseに適したデフォルト値を設定しました。SQLiteに戻す場合のオプションも用意しました。
+  - [x] マイグレーション後のフック機能の実装（Djangoマイグレーション後にSupabaseテーブルを更新）
+  Done
+  Djangoのpost_migrateシグナルを利用した自動同期機能を実装。SupabaseModelMixinを拡張し、Django-Supabase間のデータ同期機能と整合性チェック機能を追加しました。また、手動同期用コマンドsync_supabaseを拡張し、詳細なログ出力、整合性チェック、不整合の自動修正、詳細レポート生成などの機能を追加しました。
     - [x] Supabase同期用ユーティリティモジュールの作成
     Done
     DjangoモデルとSupabaseテーブルを同期するためのユーティリティモジュールを作成。モデル情報の解析、テーブル作成/変更、データ移行、マイグレーション後の自動同期機能を実装しました。また、SUPABASE_AUTO_SYNC設定を追加し、Djangoのsignalsを使用して自動同期の仕組みを構築しました。

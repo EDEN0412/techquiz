@@ -483,7 +483,17 @@ def post_migration_sync_handler(sender, **kwargs):
     Djangoのpost_migrateシグナルハンドラとして使用します。
     """
     import sys
-    print(f"post_migration_sync_handler: シグナル受信 sender={sender}, kwargs={kwargs}", file=sys.stderr)
+    import time
+    from django.core.management import color
+    
+    # 処理時間計測開始
+    start_time = time.time()
+    
+    # カラー出力のためのスタイルを取得
+    style = color.color_style()
+    
+    print(f"=== Supabase同期ハンドラ開始 ===", file=sys.stderr)
+    print(f"シグナル受信: sender={sender}, apps={kwargs.get('apps')}", file=sys.stderr)
     
     # アプリケーション名を取得（ロギング用）
     app_name = sender.name if hasattr(sender, 'name') else 'unknown'
@@ -495,7 +505,9 @@ def post_migration_sync_handler(sender, **kwargs):
     
     if not auto_sync:
         logger.info(f"マイグレーション後の自動Supabase同期が無効です（app: {app_name}）")
-        print(f"マイグレーション後の自動Supabase同期が無効です（app: {app_name}）", file=sys.stderr)
+        print(f"{style.WARNING('注意:')} マイグレーション後の自動Supabase同期が無効です（app: {app_name}）", file=sys.stderr)
+        print(f"自動同期を有効にするには .env.development ファイルで SUPABASE_AUTO_SYNC=True を設定してください。", file=sys.stderr)
+        print(f"または手動で同期を実行: python manage.py sync_supabase", file=sys.stderr)
         return
     
     # Supabaseの接続情報が設定されているか確認
@@ -504,12 +516,13 @@ def post_migration_sync_handler(sender, **kwargs):
     
     if not has_connection_info:
         logger.warning(f"Supabase接続情報が設定されていないため、同期をスキップします（app: {app_name}）")
-        print(f"Supabase接続情報が設定されていないため、同期をスキップします（app: {app_name}）", file=sys.stderr)
+        print(f"{style.ERROR('エラー:')} Supabase接続情報が設定されていないため、同期をスキップします（app: {app_name}）", file=sys.stderr)
+        print(f"接続情報を設定するには .env.development ファイルを確認してください。", file=sys.stderr)
         return
     
     try:
         logger.info(f"アプリケーション '{app_name}' のマイグレーション後Supabase同期を開始します")
-        print(f"アプリケーション '{app_name}' のマイグレーション後Supabase同期を開始します", file=sys.stderr)
+        print(f"{style.SUCCESS('開始:')} アプリケーション '{app_name}' のマイグレーション後Supabase同期を開始します", file=sys.stderr)
         
         # このアプリケーションのSupabaseモデルのみを取得
         app_models = []
@@ -526,49 +539,66 @@ def post_migration_sync_handler(sender, **kwargs):
         
         if not app_models:
             logger.info(f"アプリケーション '{app_name}' にはSupabaseと同期するモデルがありません")
-            print(f"アプリケーション '{app_name}' にはSupabaseと同期するモデルがありません", file=sys.stderr)
+            print(f"{style.WARNING('注意:')} アプリケーション '{app_name}' にはSupabaseと同期するモデルがありません", file=sys.stderr)
+            print(f"モデルにSupabaseModelMixinを継承させ、supabase_table属性を設定してください。", file=sys.stderr)
             return
         
         # モデルごとに同期
         results = {}
+        total_count = len(app_models)
+        current = 0
+        
         for model in app_models:
+            current += 1
             model_name = f"{model._meta.app_label}.{model.__name__}"
             logger.info(f"モデル '{model_name}' の同期を開始します")
-            print(f"モデル '{model_name}' の同期を開始します", file=sys.stderr)
+            print(f"[{current}/{total_count}] モデル '{model_name}' の同期を開始します...", file=sys.stderr)
             
             try:
+                start_model_time = time.time()
                 success = sync_django_model_to_supabase(model)
+                model_time = time.time() - start_model_time
                 results[model_name] = success
                 
                 if success:
-                    logger.info(f"モデル '{model_name}' の同期が成功しました")
-                    print(f"モデル '{model_name}' の同期が成功しました", file=sys.stderr)
+                    logger.info(f"モデル '{model_name}' の同期が成功しました ({model_time:.2f}秒)")
+                    print(f"{style.SUCCESS('✓')} モデル '{model_name}' の同期が成功しました ({model_time:.2f}秒)", file=sys.stderr)
                 else:
-                    logger.error(f"モデル '{model_name}' の同期に失敗しました")
-                    print(f"モデル '{model_name}' の同期に失敗しました", file=sys.stderr)
+                    logger.error(f"モデル '{model_name}' の同期に失敗しました ({model_time:.2f}秒)")
+                    print(f"{style.ERROR('✗')} モデル '{model_name}' の同期に失敗しました ({model_time:.2f}秒)", file=sys.stderr)
             except Exception as e:
                 logger.exception(f"モデル '{model_name}' の同期中に例外が発生しました: {str(e)}")
-                print(f"モデル '{model_name}' の同期中に例外が発生しました: {str(e)}", file=sys.stderr)
+                print(f"{style.ERROR('✗')} モデル '{model_name}' の同期中に例外が発生しました: {str(e)}", file=sys.stderr)
                 import traceback
-                traceback.print_exc()
+                traceback.print_exc(file=sys.stderr)
                 results[model_name] = False
+        
+        # 処理時間を計算
+        total_time = time.time() - start_time
         
         # 結果の集計
         success_count = sum(1 for success in results.values() if success)
         total_count = len(results)
         
         if total_count > 0:
-            logger.info(f"アプリケーション '{app_name}' のSupabase同期が完了しました。{success_count}/{total_count}のモデルが正常に同期されました。")
-            print(f"アプリケーション '{app_name}' のSupabase同期が完了しました。{success_count}/{total_count}のモデルが正常に同期されました。", file=sys.stderr)
+            logger.info(f"アプリケーション '{app_name}' のSupabase同期が完了しました。{success_count}/{total_count}のモデルが正常に同期されました。(合計: {total_time:.2f}秒)")
+            print(f"{style.SUCCESS('完了:')} アプリケーション '{app_name}' のSupabase同期が完了しました。", file=sys.stderr)
+            print(f"{style.SUCCESS(f'{success_count}/{total_count}')}のモデルが正常に同期されました。(合計: {total_time:.2f}秒)", file=sys.stderr)
             
             # 失敗したモデルがあれば警告
             failed_models = [model for model, success in results.items() if not success]
             if failed_models:
                 logger.warning(f"次のモデルの同期に失敗しました: {', '.join(failed_models)}")
-                print(f"次のモデルの同期に失敗しました: {', '.join(failed_models)}", file=sys.stderr)
+                print(f"{style.WARNING('警告:')} 次のモデルの同期に失敗しました:", file=sys.stderr)
+                for model in failed_models:
+                    print(f"  - {style.ERROR(model)}", file=sys.stderr)
+                print(f"手動で同期を再試行: python manage.py sync_supabase --model=[モデル名]", file=sys.stderr)
         
     except Exception as e:
         logger.exception(f"マイグレーション後のSupabase同期中に予期しない例外が発生しました: {str(e)}")
-        print(f"マイグレーション後のSupabase同期中に予期しない例外が発生しました: {str(e)}", file=sys.stderr)
+        print(f"{style.ERROR('致命的エラー:')} マイグレーション後のSupabase同期中に予期しない例外が発生しました: {str(e)}", file=sys.stderr)
         import traceback
-        traceback.print_exc() 
+        traceback.print_exc(file=sys.stderr)
+    
+    finally:
+        print(f"=== Supabase同期ハンドラ終了 ===", file=sys.stderr) 

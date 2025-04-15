@@ -42,6 +42,18 @@ class TechskillsquizConfig(AppConfig):
             # post_migrate信号にハンドラを接続
             post_migrate.connect(post_migration_sync_handler, sender=self)
             print("Supabase同期ハンドラが登録されました。", file=sys.stderr)
+            
+            # 環境変数の設定状況をログに出力
+            auto_sync = getattr(settings, 'SUPABASE_AUTO_SYNC', False)
+            has_connection = all([settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY])
+            print(f"Supabase自動同期設定: SUPABASE_AUTO_SYNC={auto_sync}, 接続情報あり={has_connection}", file=sys.stderr)
+            
+            if auto_sync and not has_connection:
+                print("警告: SUPABASE_AUTO_SYNCが有効ですが、接続情報が不足しています。", file=sys.stderr)
+        except ImportError as e:
+            print(f"Supabase同期ハンドラのインポートに失敗しました: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
         except Exception as e:
             print(f"Supabase同期ハンドラの登録に失敗しました: {e}", file=sys.stderr)
             import traceback
