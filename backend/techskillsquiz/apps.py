@@ -17,6 +17,10 @@ class TechskillsquizConfig(AppConfig):
         """
         print(f"TechskillsquizConfig.ready() が呼び出されました", file=sys.stderr)
         
+        # モジュールの自動検出（管理コマンドなど）
+        from django.utils.module_loading import autodiscover_modules
+        autodiscover_modules('management')
+        
         # Supabaseクライアントの初期化を試みる
         # デバッグモードまたは本番環境でのみ初期化
         from django.conf import settings

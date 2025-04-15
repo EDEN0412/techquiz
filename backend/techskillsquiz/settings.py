@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     # プロジェクトアプリ
+    "techskillsquiz",  # プロジェクトのメインアプリ
     "users",
     "quiz",
 ]
