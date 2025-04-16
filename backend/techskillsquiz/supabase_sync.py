@@ -239,7 +239,7 @@ def create_supabase_table(model: Type[models.Model]) -> bool:
         sql += "\n);"
         
         # テーブル作成
-        supabase.table(table_name).query(sql)
+        supabase.rpc('execute_sql', { 'sql': sql }).execute()
         
         # 外部キー制約の作成
         for fk in schema['foreign_keys']:
@@ -249,7 +249,7 @@ def create_supabase_table(model: Type[models.Model]) -> bool:
             FOREIGN KEY ({fk['column']}) 
             REFERENCES {fk['references']['table']}({fk['references']['column']});
             """
-            supabase.table(table_name).query(fk_sql)
+            supabase.rpc('execute_sql', { 'sql': fk_sql }).execute()
         
         logger.info(f"テーブル {table_name} を作成しました")
         return True
@@ -274,9 +274,9 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
         table_name = schema['table_name']
         
         # 既存のテーブル構造を取得
-        result = supabase.table("information_schema.columns").select(
-            "column_name", "data_type", "is_nullable"
-        ).eq("table_name", table_name).execute()
+        result = supabase.rpc("select_columns", {
+            "p_table_name": table_name
+        }).execute()
         
         existing_columns = {col['column_name']: col for col in result.data}
         model_columns = set(schema['fields'].keys())
@@ -300,7 +300,7 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
                     default_val = str(default_val).lower()
                 add_col_sql += f" DEFAULT {default_val}"
             
-            supabase.table(table_name).query(add_col_sql)
+            supabase.rpc('execute_sql', { 'sql': add_col_sql }).execute()
             logger.info(f"カラム {col_name} をテーブル {table_name} に追加しました")
         
         # 型の変更が必要なカラムを変更
@@ -311,7 +311,7 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
             # 型が異なる場合は変更
             if field_info['type'] != db_info['data_type']:
                 alter_col_sql = f"ALTER TABLE {table_name} ALTER COLUMN {col_name} TYPE {field_info['type']} USING {col_name}::{field_info['type']}"
-                supabase.table(table_name).query(alter_col_sql)
+                supabase.rpc('execute_sql', { 'sql': alter_col_sql }).execute()
                 logger.info(f"カラム {col_name} の型を {field_info['type']} に変更しました")
             
             # NULL制約の変更
@@ -321,7 +321,7 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
             if is_nullable != should_be_nullable:
                 null_sql = f"ALTER TABLE {table_name} ALTER COLUMN {col_name} "
                 null_sql += "DROP NOT NULL" if should_be_nullable else "SET NOT NULL"
-                supabase.table(table_name).query(null_sql)
+                supabase.rpc('execute_sql', { 'sql': null_sql }).execute()
                 logger.info(f"カラム {col_name} のNULL制約を {'解除' if should_be_nullable else '設定'} しました")
         
         # 削除対象のカラムを確認（安全のため実際には削除しない）
@@ -355,12 +355,10 @@ def sync_django_model_to_supabase(model: Type[models.Model]) -> bool:
         supabase = get_supabase_client()
         table_name = model._meta.db_table
         
-        # テーブルの存在確認
-        result = supabase.table("information_schema.tables").select(
-            "table_name"
-        ).eq("table_name", table_name).execute()
+        # テーブルの存在確認 - 複数の方法でフォールバックする拡張アプローチ
+        table_exists = check_table_exists_with_fallback(supabase, table_name)
         
-        if not result.data:
+        if not table_exists:
             # テーブルが存在しない場合は作成
             return create_supabase_table(model)
         else:
@@ -370,6 +368,67 @@ def sync_django_model_to_supabase(model: Type[models.Model]) -> bool:
     except Exception as e:
         logger.error(f"モデル {model.__name__} の同期中にエラーが発生しました: {str(e)}")
         return False
+
+def check_table_exists_with_fallback(supabase, table_name: str) -> bool:
+    """
+    テーブルが存在するかどうかを複数の方法でチェックします。
+    一つの方法が失敗した場合、別の方法にフォールバックします。
+    
+    Args:
+        supabase: Supabaseクライアントインスタンス
+        table_name: 確認するテーブル名
+        
+    Returns:
+        テーブルが存在する場合はTrue、存在しない場合はFalse
+    """
+    # 方法1: RPCを使用する従来の方法（最も安定）
+    try:
+        result = supabase.rpc("check_table_exists", {
+            "p_table_name": table_name
+        }).execute()
+        
+        if result.data and len(result.data) > 0:
+            logger.debug(f"RPCメソッドでテーブル {table_name} の存在を確認: {result.data[0]['table_exists']}")
+            return result.data[0]['table_exists']
+    except Exception as e:
+        logger.warning(f"RPCメソッドによるテーブル確認に失敗しました: {str(e)}")
+    
+    # 方法2: SELECTステートメントでテーブルからデータを取得してみる
+    try:
+        # 単にテーブルから制限付きで行を取得しようとする
+        # 例外が発生しなければテーブルは存在する
+        result = supabase.table(table_name).select("*").limit(1).execute()
+        logger.debug(f"SELECT方式でテーブル {table_name} の存在を確認: 成功")
+        return True
+    except Exception as e:
+        error_message = str(e)
+        # テーブルが存在しない場合のエラーメッセージを確認
+        if "does not exist" in error_message or "relation" in error_message:
+            logger.debug(f"SELECT方式でテーブル {table_name} の存在を確認: 存在しません")
+            return False
+        # その他のエラーの場合は次の方法を試す
+        logger.warning(f"SELECT方式によるテーブル確認に失敗しました: {error_message}")
+    
+    # 方法3: メタデータAPIを使用（pg_tables）
+    try:
+        # pg_tablesからテーブル情報を取得するSQLを実行
+        sql = f"""
+        SELECT EXISTS (
+            SELECT 1 FROM pg_tables 
+            WHERE tablename = '{table_name}' 
+            AND schemaname = 'public'
+        ) as table_exists;
+        """
+        result = supabase.rpc('execute_sql', {'sql': sql}).execute()
+        if result.data and len(result.data) > 0:
+            logger.debug(f"pg_tables方式でテーブル {table_name} の存在を確認: {result.data[0]['table_exists']}")
+            return result.data[0]['table_exists']
+    except Exception as e:
+        logger.warning(f"pg_tables方式によるテーブル確認に失敗しました: {str(e)}")
+    
+    # 全ての方法が失敗した場合は、デフォルトでテーブルが存在しないと判断
+    logger.error(f"テーブル {table_name} の存在確認に全ての方法が失敗しました。テーブルは存在しないと判断します。")
+    return False
 
 def sync_all_models_to_supabase() -> Dict[str, bool]:
     """
