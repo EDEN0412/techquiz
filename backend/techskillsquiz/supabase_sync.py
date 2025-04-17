@@ -349,23 +349,36 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
         supabase = get_supabase_client()
         table_name = schema['table_name']
         
-        # 既存のテーブル構造を取得
+        # 既存のテーブル構造を取得（RPC失敗時はinformation_schema.columnsへフォールバック）
         try:
-            result = supabase.rpc("select_columns", {
-                "p_table_name": table_name
-            }).execute()
+            rpc_res = supabase.rpc("select_columns", {"p_table_name": table_name}).execute()
+            columns_data = rpc_res.data
         except Exception as col_err:
-            error_context = f"テーブル {table_name} のカラム情報取得に失敗しました"
-            extra_info = {'table': table_name}
-            log_error_details(col_err, error_context, extra_info)
-            raise SupabaseOperationError(f"{error_context}: {str(col_err)}")
-        
-        if not result.data:
+            log_error_details(col_err, f"テーブル {table_name} のカラム情報取得に失敗しました (RPC)、フォールバックを試みます", {'table': table_name})
+            # pg_catalogを利用したフォールバック
+            pg_fallback_sql = f"""
+            SELECT a.attname AS column_name,
+                   pg_catalog.format_type(a.atttypid, a.atttypmod) AS data_type,
+                   (NOT a.attnotnull) AS is_nullable
+            FROM pg_catalog.pg_attribute a
+            JOIN pg_catalog.pg_class c ON a.attrelid = c.oid
+            JOIN pg_catalog.pg_namespace n ON c.relnamespace = n.oid
+            WHERE c.relname = '{table_name}' AND n.nspname = 'public'
+              AND a.attnum > 0 AND NOT a.attisdropped;
+            """
+            try:
+                fb_res = supabase.rpc('execute_sql', {'sql': pg_fallback_sql}).execute()
+                columns_data = fb_res.data
+                logger.info(f"pg_catalogフォールバックでテーブル {table_name} のカラム情報を取得しました")
+            except Exception as fb_err:
+                error_context = f"テーブル {table_name} のカラム情報取得フォールバックに失敗しました"
+                log_error_details(fb_err, error_context, {'table': table_name, 'sql': pg_fallback_sql})
+                raise SupabaseOperationError(f"{error_context}: {str(fb_err)}")
+        if not columns_data:
             error_context = f"テーブル {table_name} のカラム情報が取得できませんでした"
             logger.error(error_context)
             raise SupabaseDataError(error_context)
-            
-        existing_columns = {col['column_name']: col for col in result.data}
+        existing_columns = {col['column_name']: col for col in columns_data}
         model_columns = set(schema['fields'].keys())
         db_columns = set(existing_columns.keys())
         
@@ -513,83 +526,61 @@ def check_table_exists_with_fallback(supabase, table_name: str) -> bool:
     """
     テーブルが存在するかどうかを複数の方法でチェックします。
     一つの方法が失敗した場合、別の方法にフォールバックします。
-    
-    Args:
-        supabase: Supabaseクライアントインスタンス
-        table_name: 確認するテーブル名
-        
-    Returns:
-        テーブルが存在する場合はTrue、存在しない場合はFalse
-    
-    Raises:
-        SupabaseOperationError: 全ての確認方法が失敗した場合
     """
+    # エラーメッセージ収集用
     error_messages = []
-    
-    # 方法1: RPCを使用する従来の方法（最も安定）
+
+    # 方法1: REST API経由のSELECTで存在確認
     try:
-        result = supabase.rpc("check_table_exists", {
-            "p_table_name": table_name
-        }).execute()
-        
-        if result.data and len(result.data) > 0:
-            logger.debug(f"RPCメソッドでテーブル {table_name} の存在を確認: {result.data[0]['table_exists']}")
-            return result.data[0]['table_exists']
-    except Exception as e:
-        error_msg = f"RPCメソッドによるテーブル確認に失敗しました: {str(e)}"
-        logger.warning(error_msg)
-        error_messages.append(error_msg)
-    
-    # 方法2: SELECTステートメントでテーブルからデータを取得してみる
-    try:
-        # 単にテーブルから制限付きで行を取得しようとする
-        # 例外が発生しなければテーブルは存在する
-        result = supabase.table(table_name).select("*").limit(1).execute()
-        logger.debug(f"SELECT方式でテーブル {table_name} の存在を確認: 成功")
+        supabase.table(table_name).select("*").limit(1).execute()
+        logger.debug(f"REST APIでテーブル {table_name} の存在を確認: 成功")
         return True
     except Exception as e:
-        error_message = str(e)
-        # テーブルが存在しない場合のエラーメッセージを確認
-        if "does not exist" in error_message or "relation" in error_message:
-            logger.debug(f"SELECT方式でテーブル {table_name} の存在を確認: 存在しません")
+        msg = str(e)
+        if "does not exist" in msg or "relation" in msg:
+            logger.debug(f"REST APIでテーブル {table_name} の存在を確認: 存在しません")
             return False
-        # その他のエラーの場合は次の方法を試す
-        error_msg = f"SELECT方式によるテーブル確認に失敗しました: {error_message}"
-        logger.warning(error_msg)
-        error_messages.append(error_msg)
-    
-    # 方法3: メタデータAPIを使用（pg_tables）
+        warning_msg = f"REST APIによるテーブル確認に失敗しました: {msg}"
+        logger.warning(warning_msg)
+        error_messages.append(warning_msg)
+
+    # 方法2: pg_catalog.pg_tablesを使った確認
     try:
-        # pg_tablesからテーブル情報を取得するSQLを実行
-        sql = f"""
+        pg_sql = f"""
         SELECT EXISTS (
-            SELECT 1 FROM pg_tables 
-            WHERE tablename = '{table_name}' 
-            AND schemaname = 'public'
-        ) as table_exists;
+            SELECT 1 FROM pg_catalog.pg_tables
+            WHERE schemaname='public' AND tablename='{table_name}'
+        ) AS table_exists;
         """
-        result = supabase.rpc('execute_sql', {'sql': sql}).execute()
-        if result.data and len(result.data) > 0:
-            logger.debug(f"pg_tables方式でテーブル {table_name} の存在を確認: {result.data[0]['table_exists']}")
-            return result.data[0]['table_exists']
+        result = supabase.rpc('execute_sql', {'sql': pg_sql}).execute()
+        exists = bool(result.data and result.data[0].get('table_exists'))
+        logger.debug(f"pg_catalog方式でテーブル {table_name} の存在を確認: {exists}")
+        return exists
     except Exception as e:
-        error_msg = f"pg_tables方式によるテーブル確認に失敗しました: {str(e)}"
-        logger.warning(error_msg)
-        error_messages.append(error_msg)
-    
-    # 全ての方法が失敗した場合は、明示的に例外をスロー
+        warning_msg = f"pg_catalog方式によるテーブル確認に失敗しました: {str(e)}"
+        logger.warning(warning_msg)
+        error_messages.append(warning_msg)
+
+    # 方法3: RPCメソッドを最後の手段として使用
+    try:
+        result = supabase.rpc("check_table_exists", {"p_table_name": table_name}).execute()
+        if result.data and len(result.data) > 0:
+            exists = result.data[0].get('table_exists', False)
+            logger.debug(f"RPCでテーブル {table_name} の存在を確認: {exists}")
+            return exists
+    except Exception as e:
+        warning_msg = f"RPCメソッドによるテーブル確認に失敗しました: {str(e)}"
+        logger.warning(warning_msg)
+        error_messages.append(warning_msg)
+
+    # 全ての方法が失敗した場合
     error_summary = "\n".join(error_messages)
-    error_msg = f"テーブル {table_name} の存在確認に全ての方法が失敗しました。\n{error_summary}"
-    logger.error(error_msg)
-    
-    # 設定で例外を抑制するオプションがあるか確認
-    suppress_table_check_errors = getattr(settings, 'SUPABASE_SUPPRESS_TABLE_CHECK_ERRORS', False)
-    if suppress_table_check_errors:
-        logger.warning(f"テーブル確認エラーを抑制し、テーブルは存在しないと判断します。SUPABASE_SUPPRESS_TABLE_CHECK_ERRORS=True")
+    logger.error(f"テーブル {table_name} の存在確認に全ての方法が失敗しました。\n{error_summary}")
+    suppress = getattr(settings, 'SUPABASE_SUPPRESS_TABLE_CHECK_ERRORS', False)
+    if suppress:
+        logger.warning("テーブル確認エラーを抑制し、存在しないと判断します。")
         return False
-        
-    # より具体的な例外を発生させる
-    raise SupabaseOperationError(error_msg)
+    raise SupabaseOperationError(f"テーブル {table_name} の存在確認に失敗しました")
 
 def sync_all_models_to_supabase() -> Dict[str, bool]:
     """
