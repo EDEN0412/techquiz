@@ -6,9 +6,10 @@ Supabase Sync Utilities
 """
 
 import logging
-from typing import Type, Dict, Any, List, Optional, Tuple, Set
+from typing import Type, Dict, Any, List, Optional, Tuple, Set, Union
 import inspect
 import json
+import traceback
 from django.db import models
 from django.apps import apps
 from django.db.models.fields import Field
@@ -19,6 +20,61 @@ from .supabase import get_supabase_client
 from .supabase_mixins import SupabaseModelMixin
 
 logger = logging.getLogger(__name__)
+
+# SupabaseSync固有のエラークラス
+class SupabaseSyncError(Exception):
+    """Supabase同期処理中のエラーを表す基本例外クラス"""
+    pass
+
+class SupabaseConnectionError(SupabaseSyncError):
+    """Supabaseとの接続に関するエラー"""
+    pass
+
+class SupabaseSchemaError(SupabaseSyncError):
+    """テーブルスキーマに関するエラー"""
+    pass
+
+class SupabaseOperationError(SupabaseSyncError):
+    """Supabase操作（クエリ実行など）に関するエラー"""
+    pass
+
+class SupabaseDataError(SupabaseSyncError):
+    """データの互換性や整合性に関するエラー"""
+    pass
+
+# エラー情報収集とロギングのためのユーティリティ関数
+def log_error_details(e: Exception, context: str, extra_info: Dict[str, Any] = None) -> str:
+    """
+    例外の詳細情報をログに記録し、エラーメッセージを返します。
+    
+    Args:
+        e: 発生した例外
+        context: エラーが発生したコンテキスト情報
+        extra_info: 追加の情報辞書
+        
+    Returns:
+        詳細なエラーメッセージ
+    """
+    # スタックトレースの取得
+    tb_str = traceback.format_exc()
+    
+    # 詳細なエラー情報を構築
+    error_type = type(e).__name__
+    error_message = str(e)
+    
+    # 基本メッセージの構築
+    detail_message = f"{context}: {error_type} - {error_message}"
+    
+    # 追加情報があれば追加
+    if extra_info:
+        info_str = ", ".join(f"{k}={v}" for k, v in extra_info.items())
+        detail_message += f" [{info_str}]"
+    
+    # ログに記録
+    logger.error(detail_message)
+    logger.debug(f"スタックトレース:\n{tb_str}")
+    
+    return detail_message
 
 # Djangoフィールドタイプとそれに対応するPostgreSQLタイプのマッピング
 FIELD_TYPE_MAPPING = {
@@ -82,7 +138,8 @@ def get_supabase_models() -> List[Type[SupabaseModelMixin]]:
                     else:
                         print(f"    supabase_table設定なし: {model.__name__}", file=sys.stderr)
             except (TypeError, AttributeError) as e:
-                print(f"    継承チェックエラー: {model.__name__}, {e}", file=sys.stderr)
+                error_msg = log_error_details(e, f"モデル継承チェック中にエラー発生: {model.__name__}")
+                print(f"    継承チェックエラー: {error_msg}", file=sys.stderr)
                 
     print(f"Supabaseモデル検索結果: {len(supabase_models)}件", file=sys.stderr)
     return supabase_models
@@ -239,7 +296,14 @@ def create_supabase_table(model: Type[models.Model]) -> bool:
         sql += "\n);"
         
         # テーブル作成
-        supabase.rpc('execute_sql', { 'sql': sql }).execute()
+        try:
+            supabase.rpc('execute_sql', { 'sql': sql }).execute()
+        except Exception as rpc_err:
+            error_context = f"テーブル {table_name} の作成に失敗しました"
+            extra_info = {'table': table_name, 'sql': sql}
+            log_error_details(rpc_err, error_context, extra_info)
+            # より具体的な例外に変換
+            raise SupabaseOperationError(f"{error_context}: {str(rpc_err)}")
         
         # 外部キー制約の作成
         for fk in schema['foreign_keys']:
@@ -249,13 +313,25 @@ def create_supabase_table(model: Type[models.Model]) -> bool:
             FOREIGN KEY ({fk['column']}) 
             REFERENCES {fk['references']['table']}({fk['references']['column']});
             """
-            supabase.rpc('execute_sql', { 'sql': fk_sql }).execute()
+            try:
+                supabase.rpc('execute_sql', { 'sql': fk_sql }).execute()
+            except Exception as fk_err:
+                error_context = f"外部キー制約 {fk['name']} の作成に失敗しました"
+                extra_info = {'table': table_name, 'constraint': fk['name'], 'sql': fk_sql}
+                log_error_details(fk_err, error_context, extra_info)
+                # このエラーはログに記録するが、致命的とはしない（テーブル自体は作成済み）
+                logger.warning(f"{error_context}。テーブルは作成されましたが、外部キー制約の追加に失敗しました。")
         
         logger.info(f"テーブル {table_name} を作成しました")
         return True
         
+    except SupabaseSyncError as sse:
+        # 既に処理済みのSupabaseSyncError
+        return False
     except Exception as e:
-        logger.error(f"テーブル作成中にエラーが発生しました: {str(e)}")
+        error_context = f"テーブル作成中に予期しないエラーが発生しました"
+        extra_info = {'model': model.__name__, 'table': getattr(model, '_meta', {}).get('db_table', 'unknown')}
+        log_error_details(e, error_context, extra_info)
         return False
 
 def alter_supabase_table(model: Type[models.Model]) -> bool:
@@ -274,10 +350,21 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
         table_name = schema['table_name']
         
         # 既存のテーブル構造を取得
-        result = supabase.rpc("select_columns", {
-            "p_table_name": table_name
-        }).execute()
+        try:
+            result = supabase.rpc("select_columns", {
+                "p_table_name": table_name
+            }).execute()
+        except Exception as col_err:
+            error_context = f"テーブル {table_name} のカラム情報取得に失敗しました"
+            extra_info = {'table': table_name}
+            log_error_details(col_err, error_context, extra_info)
+            raise SupabaseOperationError(f"{error_context}: {str(col_err)}")
         
+        if not result.data:
+            error_context = f"テーブル {table_name} のカラム情報が取得できませんでした"
+            logger.error(error_context)
+            raise SupabaseDataError(error_context)
+            
         existing_columns = {col['column_name']: col for col in result.data}
         model_columns = set(schema['fields'].keys())
         db_columns = set(existing_columns.keys())
@@ -300,8 +387,15 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
                     default_val = str(default_val).lower()
                 add_col_sql += f" DEFAULT {default_val}"
             
-            supabase.rpc('execute_sql', { 'sql': add_col_sql }).execute()
-            logger.info(f"カラム {col_name} をテーブル {table_name} に追加しました")
+            try:
+                supabase.rpc('execute_sql', { 'sql': add_col_sql }).execute()
+                logger.info(f"カラム {col_name} をテーブル {table_name} に追加しました")
+            except Exception as add_err:
+                error_context = f"カラム {col_name} の追加に失敗しました"
+                extra_info = {'table': table_name, 'column': col_name, 'sql': add_col_sql}
+                log_error_details(add_err, error_context, extra_info)
+                # 続行する（他のカラムは追加できる可能性がある）
+                logger.warning(f"{error_context}。処理を続行します。")
         
         # 型の変更が必要なカラムを変更
         for col_name in model_columns.intersection(db_columns):
@@ -311,8 +405,21 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
             # 型が異なる場合は変更
             if field_info['type'] != db_info['data_type']:
                 alter_col_sql = f"ALTER TABLE {table_name} ALTER COLUMN {col_name} TYPE {field_info['type']} USING {col_name}::{field_info['type']}"
-                supabase.rpc('execute_sql', { 'sql': alter_col_sql }).execute()
-                logger.info(f"カラム {col_name} の型を {field_info['type']} に変更しました")
+                try:
+                    supabase.rpc('execute_sql', { 'sql': alter_col_sql }).execute()
+                    logger.info(f"カラム {col_name} の型を {field_info['type']} に変更しました")
+                except Exception as type_err:
+                    error_context = f"カラム {col_name} の型変更に失敗しました"
+                    extra_info = {
+                        'table': table_name, 
+                        'column': col_name, 
+                        'current_type': db_info['data_type'],
+                        'desired_type': field_info['type'],
+                        'sql': alter_col_sql
+                    }
+                    log_error_details(type_err, error_context, extra_info)
+                    # 続行する（他のカラムは変更できる可能性がある）
+                    logger.warning(f"{error_context}。処理を続行します。")
             
             # NULL制約の変更
             is_nullable = db_info['is_nullable'].lower() == 'yes'
@@ -321,8 +428,15 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
             if is_nullable != should_be_nullable:
                 null_sql = f"ALTER TABLE {table_name} ALTER COLUMN {col_name} "
                 null_sql += "DROP NOT NULL" if should_be_nullable else "SET NOT NULL"
-                supabase.rpc('execute_sql', { 'sql': null_sql }).execute()
-                logger.info(f"カラム {col_name} のNULL制約を {'解除' if should_be_nullable else '設定'} しました")
+                try:
+                    supabase.rpc('execute_sql', { 'sql': null_sql }).execute()
+                    logger.info(f"カラム {col_name} のNULL制約を {'解除' if should_be_nullable else '設定'} しました")
+                except Exception as null_err:
+                    error_context = f"カラム {col_name} のNULL制約変更に失敗しました"
+                    extra_info = {'table': table_name, 'column': col_name, 'sql': null_sql}
+                    log_error_details(null_err, error_context, extra_info)
+                    # 続行する
+                    logger.warning(f"{error_context}。処理を続行します。")
         
         # 削除対象のカラムを確認（安全のため実際には削除しない）
         columns_to_remove = db_columns - model_columns
@@ -332,8 +446,13 @@ def alter_supabase_table(model: Type[models.Model]) -> bool:
         
         return True
         
+    except SupabaseSyncError as sse:
+        # 既に処理済みのSupabaseSyncError
+        return False
     except Exception as e:
-        logger.error(f"テーブル変更中にエラーが発生しました: {str(e)}")
+        error_context = f"テーブル変更中に予期しないエラーが発生しました"
+        extra_info = {'model': model.__name__, 'table': getattr(model, '_meta', {}).get('db_table', 'unknown')}
+        log_error_details(e, error_context, extra_info)
         return False
 
 def sync_django_model_to_supabase(model: Type[models.Model]) -> bool:
@@ -352,21 +471,42 @@ def sync_django_model_to_supabase(model: Type[models.Model]) -> bool:
             logger.warning(f"モデル {model.__name__} はsupabase_tableが設定されていないため同期できません")
             return False
         
-        supabase = get_supabase_client()
+        try:
+            supabase = get_supabase_client()
+        except Exception as conn_err:
+            error_context = f"Supabaseクライアント取得中にエラーが発生しました"
+            log_error_details(conn_err, error_context)
+            raise SupabaseConnectionError(f"{error_context}: {str(conn_err)}")
+            
         table_name = model._meta.db_table
         
         # テーブルの存在確認 - 複数の方法でフォールバックする拡張アプローチ
-        table_exists = check_table_exists_with_fallback(supabase, table_name)
+        try:
+            table_exists = check_table_exists_with_fallback(supabase, table_name)
+        except Exception as check_err:
+            error_context = f"テーブル {table_name} の存在確認中にエラーが発生しました"
+            extra_info = {'table': table_name}
+            log_error_details(check_err, error_context, extra_info)
+            raise SupabaseOperationError(f"{error_context}: {str(check_err)}")
         
+        # 同期処理の実行
         if not table_exists:
+            logger.info(f"テーブル {table_name} が存在しないため作成します")
             # テーブルが存在しない場合は作成
             return create_supabase_table(model)
         else:
+            logger.info(f"テーブル {table_name} が存在するため変更します")
             # テーブルが存在する場合は変更
             return alter_supabase_table(model)
             
+    except SupabaseSyncError as sse:
+        # 既に処理済みのSupabaseSyncError
+        logger.error(f"モデル {model.__name__} の同期中にエラーが発生しました: {str(sse)}")
+        return False
     except Exception as e:
-        logger.error(f"モデル {model.__name__} の同期中にエラーが発生しました: {str(e)}")
+        error_context = f"モデル同期中に予期しないエラーが発生しました"
+        extra_info = {'model': model.__name__}
+        log_error_details(e, error_context, extra_info)
         return False
 
 def check_table_exists_with_fallback(supabase, table_name: str) -> bool:
@@ -380,7 +520,12 @@ def check_table_exists_with_fallback(supabase, table_name: str) -> bool:
         
     Returns:
         テーブルが存在する場合はTrue、存在しない場合はFalse
+    
+    Raises:
+        SupabaseOperationError: 全ての確認方法が失敗した場合
     """
+    error_messages = []
+    
     # 方法1: RPCを使用する従来の方法（最も安定）
     try:
         result = supabase.rpc("check_table_exists", {
@@ -391,7 +536,9 @@ def check_table_exists_with_fallback(supabase, table_name: str) -> bool:
             logger.debug(f"RPCメソッドでテーブル {table_name} の存在を確認: {result.data[0]['table_exists']}")
             return result.data[0]['table_exists']
     except Exception as e:
-        logger.warning(f"RPCメソッドによるテーブル確認に失敗しました: {str(e)}")
+        error_msg = f"RPCメソッドによるテーブル確認に失敗しました: {str(e)}"
+        logger.warning(error_msg)
+        error_messages.append(error_msg)
     
     # 方法2: SELECTステートメントでテーブルからデータを取得してみる
     try:
@@ -407,7 +554,9 @@ def check_table_exists_with_fallback(supabase, table_name: str) -> bool:
             logger.debug(f"SELECT方式でテーブル {table_name} の存在を確認: 存在しません")
             return False
         # その他のエラーの場合は次の方法を試す
-        logger.warning(f"SELECT方式によるテーブル確認に失敗しました: {error_message}")
+        error_msg = f"SELECT方式によるテーブル確認に失敗しました: {error_message}"
+        logger.warning(error_msg)
+        error_messages.append(error_msg)
     
     # 方法3: メタデータAPIを使用（pg_tables）
     try:
@@ -424,11 +573,23 @@ def check_table_exists_with_fallback(supabase, table_name: str) -> bool:
             logger.debug(f"pg_tables方式でテーブル {table_name} の存在を確認: {result.data[0]['table_exists']}")
             return result.data[0]['table_exists']
     except Exception as e:
-        logger.warning(f"pg_tables方式によるテーブル確認に失敗しました: {str(e)}")
+        error_msg = f"pg_tables方式によるテーブル確認に失敗しました: {str(e)}"
+        logger.warning(error_msg)
+        error_messages.append(error_msg)
     
-    # 全ての方法が失敗した場合は、デフォルトでテーブルが存在しないと判断
-    logger.error(f"テーブル {table_name} の存在確認に全ての方法が失敗しました。テーブルは存在しないと判断します。")
-    return False
+    # 全ての方法が失敗した場合は、明示的に例外をスロー
+    error_summary = "\n".join(error_messages)
+    error_msg = f"テーブル {table_name} の存在確認に全ての方法が失敗しました。\n{error_summary}"
+    logger.error(error_msg)
+    
+    # 設定で例外を抑制するオプションがあるか確認
+    suppress_table_check_errors = getattr(settings, 'SUPABASE_SUPPRESS_TABLE_CHECK_ERRORS', False)
+    if suppress_table_check_errors:
+        logger.warning(f"テーブル確認エラーを抑制し、テーブルは存在しないと判断します。SUPABASE_SUPPRESS_TABLE_CHECK_ERRORS=True")
+        return False
+        
+    # より具体的な例外を発生させる
+    raise SupabaseOperationError(error_msg)
 
 def sync_all_models_to_supabase() -> Dict[str, bool]:
     """
