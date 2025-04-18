@@ -378,6 +378,20 @@ class SupabaseModelMixin:
             raise ValueError(f"{cls.__name__}のsupabase_tableが設定されていません")
             
         try:
+            # テーブルの存在確認と必要に応じた作成
+            client = cls.get_supabase_client()
+            
+            # ユーティリティ関数をローカルにインポート（循環インポートを回避）
+            from .supabase_sync import check_table_exists_with_fallback, create_supabase_table
+            
+            table_exists = check_table_exists_with_fallback(client, cls.supabase_table)
+            
+            # テーブルが存在しない場合は作成
+            if not table_exists:
+                success = create_supabase_table(cls)
+                if not success:
+                    raise SupabaseDataError(f"テーブル {cls.supabase_table} の作成に失敗しました")
+            
             # Djangoモデルの全レコードを取得
             django_records = cls.objects.all()
             
@@ -405,6 +419,9 @@ class SupabaseModelMixin:
             
             return matched_count, len(mismatched_ids), mismatched_ids
             
+        except SupabaseDataError:
+            # 既に適切な例外なので再スロー
+            raise
         except Exception as e:
             error_details = traceback.format_exc()
             error_context = f"モデル {cls.__name__} の整合性検証中にエラーが発生しました"
@@ -424,7 +441,17 @@ class SupabaseModelMixin:
             
         try:
             # 整合性を検証
-            matched_count, mismatched_count, mismatched_ids = cls.verify_supabase_consistency()
+            try:
+                matched_count, mismatched_count, mismatched_ids = cls.verify_supabase_consistency()
+            except SupabaseDataError as e:
+                logger.error(f"整合性検証中にエラーが発生しました: {str(e)}")
+                # テーブルがなければ作成を試みる
+                from .supabase_sync import create_supabase_table
+                success = create_supabase_table(cls)
+                if not success:
+                    raise
+                # 再検証
+                matched_count, mismatched_count, mismatched_ids = 0, 0, []
             
             # 不一致がなければ終了
             if mismatched_count == 0:
