@@ -100,25 +100,25 @@ WSGI_APPLICATION = "techskillsquiz.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# 開発環境ではSQLiteを使用
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-# 本番環境・テスト環境でPostgreSQLを使用する場合はコメントを外す
+# 開発環境ではSQLiteを使用 (コメントアウト)
 # DATABASES = {
 #     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.environ.get("DATABASE_NAME", os.environ.get("SUPABASE_DB_NAME", "postgres")),
-#         "USER": os.environ.get("DATABASE_USER", os.environ.get("SUPABASE_DB_USER", "postgres")),
-#         "PASSWORD": os.environ.get("DATABASE_PASSWORD", os.environ.get("SUPABASE_DB_PASSWORD", "postgres")),
-#         "HOST": os.environ.get("DATABASE_HOST", os.environ.get("SUPABASE_DB_HOST", "localhost")),
-#         "PORT": os.environ.get("DATABASE_PORT", os.environ.get("SUPABASE_DB_PORT", "54322")),
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
 #     }
 # }
+
+# 本番環境・テスト環境・開発環境でPostgreSQLを使用
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DATABASE_NAME", os.environ.get("SUPABASE_DB_NAME", "postgres")),
+        "USER": os.environ.get("DATABASE_USER", os.environ.get("SUPABASE_DB_USER", "postgres")),
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD", os.environ.get("SUPABASE_DB_PASSWORD", "postgres")),
+        "HOST": os.environ.get("DATABASE_HOST", os.environ.get("SUPABASE_DB_HOST", "localhost")),
+        "PORT": os.environ.get("DATABASE_PORT", os.environ.get("SUPABASE_DB_PORT", "5432")),
+    }
+}
 
 # Supabase設定
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
