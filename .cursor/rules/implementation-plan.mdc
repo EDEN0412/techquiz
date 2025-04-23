@@ -118,14 +118,16 @@ alwaysApply: true
     Done
     check_table_exists_with_fallbackをREST APIとpg_catalog優先に変更しました
     alter_supabase_tableでカラム情報取得時にpg_catalogフォールバック処理を追加しました
-  - [ ] Supabase同期テストの実装
+  - [] Supabase同期テストの実装
     - [x] テスト用モデルを使った同期機能の単体テスト
     Done
     SupabaseModelMixinの同期機能をテストするユニットテストを実装。モデルの作成・更新・削除操作および一貫性検証機能のテストケースを作成しました。
     - [x] エラー条件下での動作テスト
     Done
     接続エラー発生時のリトライ機能および最大試行回数到達時のエラーハンドリングをテスト。全16テストが正常に完了し、エラー時の適切な処理が確認できました。
-    - [ ] 様々なモデル構造での同期テスト
+    - [x] 様々なモデル構造での同期テスト
+    DoneyField, OneToOneField, 継承モデルなど、ForeignKey, ManyToMan様々な関連を持つテストモデルを定義し、これらのモデルに対する同期処理（呼び出し）をテストするケースを追加しました。テスト実行時のエラー（ImportError, TypeError, AttributeError, InvalidBasesError, NameError, 設定のモック適用問題）を段階的に修正し、最終的に全テストがパスすることを確認しました。
+
 - [ ] Supabase CLI導入と設定
   - [x] Supabase CLIのインストール
     Done
