@@ -10,7 +10,7 @@ class TestSupabaseModel(models.Model, SupabaseModelMixin):
     """
     Supabase同期のテスト用モデル
     """
-    supabase_table = 'test_supabase_models'
+    supabase_table = 'quiz_testsupabasemodel'
     
     name = models.CharField(max_length=100, verbose_name='名前')
     description = models.TextField(blank=True, null=True, verbose_name='説明')

@@ -10,7 +10,7 @@ class Category(models.Model, SupabaseModelMixin):
     """
     クイズのカテゴリモデル
     """
-    supabase_table = 'categories'
+    supabase_table = 'quiz_category'
 
     name = models.CharField('カテゴリ名', max_length=100)
     slug = models.SlugField('スラッグ', max_length=100, unique=True)

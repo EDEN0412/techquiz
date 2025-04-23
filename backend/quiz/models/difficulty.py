@@ -10,7 +10,7 @@ class DifficultyLevel(models.Model, SupabaseModelMixin):
     """
     クイズの難易度レベルモデル
     """
-    supabase_table = 'difficulty_levels'
+    supabase_table = 'quiz_difficultylevel'
 
     name = models.CharField('難易度名', max_length=50)
     slug = models.SlugField('スラッグ', max_length=50, unique=True)

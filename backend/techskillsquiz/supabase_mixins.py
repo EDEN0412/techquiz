@@ -277,6 +277,7 @@ class SupabaseModelMixin:
     def to_supabase_dict(self) -> Dict[str, Any]:
         """
         モデルインスタンスをSupabase用の辞書に変換します。
+        datetime型は自動的にISO形式の文字列に変換されます。
         
         Returns:
             Supabaseテーブルに保存可能なデータ辞書
@@ -298,6 +299,11 @@ class SupabaseModelMixin:
                     if field_value is not None:
                         related_id_field = field.related_model._meta.pk.name
                         field_value = getattr(field_value, related_id_field)
+                
+                # datetime型を文字列に変換
+                from datetime import datetime, date
+                if isinstance(field_value, (datetime, date)):
+                    field_value = field_value.isoformat()
                 
                 # フィールド名をDBのカラム名に変換
                 column_name = field.column
