@@ -132,7 +132,9 @@ alwaysApply: true
   - [x] Supabase CLIのインストール
     Done
     Supabase CLIをインストールし、supabase initコマンドでプロジェクトを初期化しました。
-  - [ ] supabase/config.tomlの設定
+  - [x] supabase/config.tomlの設定
+    Done
+    ローカル開発・運用に必要な全主要サービス（API, DB, 認証, ストレージ等）の設定を完了。Django→Supabase同期運用に合わせた構成としました。
   - [ ] DBマイグレーションの管理手順の整備
   - [ ] ローカル環境と本番環境の連携方法の確立
 - [ ] 既存モデルのSupabase対応
