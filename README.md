@@ -75,3 +75,5 @@ supabase start
 # ブラウザでStudioにアクセス
 open http://localhost:54323
 ```
+# マイグレーション関連ファイル
+- [DBマイグレーション管理手順書](docs/db_migration_guidelines.md)
