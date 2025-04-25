@@ -128,7 +128,9 @@ alwaysApply: true
     - [x] 様々なモデル構造での同期テスト
     DoneyField, OneToOneField, 継承モデルなど、ForeignKey, ManyToMan様々な関連を持つテストモデルを定義し、これらのモデルに対する同期処理（呼び出し）をテストするケースを追加しました。テスト実行時のエラー（ImportError, TypeError, AttributeError, InvalidBasesError, NameError, 設定のモック適用問題）を段階的に修正し、最終的に全テストがパスすることを確認しました。
 
-- [ ] Supabase CLI導入と設定
+- [x] Supabase CLI導入と設定
+  Done
+  Supabase CLIのインストール、設定ファイルの構成、およびDBマイグレーション管理手順の整備が完了しました。これにより、ローカルでのSupabase開発環境が整いました。
   - [x] Supabase CLIのインストール
     Done
     Supabase CLIをインストールし、supabase initコマンドでプロジェクトを初期化しました。
