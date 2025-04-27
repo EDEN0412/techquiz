@@ -14,6 +14,7 @@ erDiagram
         string email "メールアドレス"
         string password_hash "パスワードハッシュ"
         datetime created_at "作成日時"
+        datetime updated_at "更新日時"
         boolean is_staff "スタッフ権限"
         boolean is_superuser "管理者権限"
         string reset_token "パスワードリセットトークン"
@@ -25,18 +26,25 @@ erDiagram
     Category {
         int id PK
         string name "カテゴリ名"
+        string slug "スラッグ（URL用識別子）"
         string description "説明"
         string icon "アイコン"
         int display_order "表示順序"
         boolean is_active "アクティブ状態"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
     }
     
     DifficultyLevel {
         int id PK
         string name "難易度名"
+        string slug "スラッグ（URL用識別子）"
+        int level "レベル値（順序）"
         string description "説明"
         int point_multiplier "ポイント倍率"
         int time_limit "制限時間"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
     }
     
     Quiz {
@@ -68,6 +76,8 @@ erDiagram
         string image_url "画像URL"
         string media_type "メディアタイプ(コード/画像/図表)"
         string syntax_highlight "シンタックスハイライト言語"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
     }
     
     Answer {
@@ -76,6 +86,9 @@ erDiagram
         string answer_text "回答テキスト"
         boolean is_correct "正解フラグ"
         string feedback "フィードバック"
+        int display_order "表示順序"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
     }
     
     QuizResult {
@@ -88,6 +101,8 @@ erDiagram
         int time_taken "所要時間"
         boolean passed "合格フラグ"
         datetime completed_at "完了日時"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
     }
     
     UserStatistics {
@@ -100,6 +115,8 @@ erDiagram
         float avg_score "平均スコア"
         int highest_score "最高スコア"
         datetime last_quiz_date "最終クイズ日"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
     }
     
     ActivityHistory {
@@ -112,4 +129,6 @@ erDiagram
         float percentage "正答率"
         datetime activity_date "活動日時"
         string activity_type "活動タイプ（クイズ完了、復習など）"
+        datetime created_at "作成日時"
+        datetime updated_at "更新日時"
     }

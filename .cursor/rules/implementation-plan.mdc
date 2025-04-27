@@ -141,8 +141,12 @@ alwaysApply: true
     Done
     DjangoモデルとSupabaseの同期管理手順書を作成し、ベストプラクティスをドキュメント化。開発者向けに例や複雑なスキーマ変更の手順、環境別の考慮事項も整理しました。
 - [ ] 既存モデルのSupabase対応
-  - [ ] モデルクラスへのSupabaseModelMixinの適用
-  - [ ] supabase_tableプロパティの設定
+  - [x] モデルクラスへのSupabaseModelMixinの適用
+    Done
+    ER図に基づいて実装した全てのモデルクラスに `SupabaseModelMixin` を継承させ、Supabase連携の準備を行いました。
+  - [x] supabase_tableプロパティの設定
+    Done
+    各モデルクラスに、対応するSupabase上のテーブル名を指定する `supabase_table` プロパティを設定しました。
   - [ ] pre_save/post_saveシグナルでのSupabase同期実装
 - [ ] テスト環境のSupabase設定
   - [ ] テスト用.env.testファイルの作成
