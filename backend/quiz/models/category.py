@@ -41,5 +41,7 @@ class Category(models.Model, SupabaseModelMixin):
             while Category.objects.filter(slug=self.slug).exists():
                 self.slug = f"{original_slug}-{counter}"
                 counter += 1
-                
+        
+        # オリジナルのsaveメソッドを呼び出し、Djangoモデルを保存
+        # post_saveシグナルがトリガーされ、Supabaseテーブルに同期される
         super().save(*args, **kwargs) 

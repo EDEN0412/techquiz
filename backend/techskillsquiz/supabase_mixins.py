@@ -11,7 +11,7 @@ import traceback
 from functools import wraps
 
 from django.db import models
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 
@@ -497,6 +497,45 @@ class SupabaseModelMixin:
             raise SupabaseDataError(f"{error_context}: {str(e)}")
 
 # シグナルハンドラ
+@receiver(pre_save)
+def handle_supabase_pre_save(sender, instance, **kwargs):
+    """
+    Djangoモデル保存前のイベントハンドラ
+    
+    このハンドラでは、モデルが保存される前に必要な処理を行います。
+    例えば、保存前の状態を記録したり、特定の条件でのみ保存を許可するなどの処理が可能です。
+    """
+    # SupabaseModelMixinを継承しているか確認
+    if not isinstance(instance, SupabaseModelMixin):
+        return
+        
+    # 自動同期が有効か確認
+    if not getattr(instance.__class__, 'supabase_auto_sync', True):
+        return
+        
+    # supabase_tableが設定されているか確認
+    if not getattr(instance.__class__, 'supabase_table', None):
+        return
+    
+    # 設定で自動同期が無効になっているか確認
+    auto_sync = getattr(settings, 'SUPABASE_AUTO_SYNC', True)
+    if not auto_sync:
+        return
+        
+    try:
+        # 保存前に行いたい処理があればここに記述
+        # 例: モデルの検証、前処理など
+        
+        # インスタンスに_pre_save_calledフラグをセットして、post_saveで使用
+        setattr(instance, '_pre_save_called', True)
+        
+        logger.debug(f"pre_save: {instance.__class__.__name__} ID:{getattr(instance, 'pk', 'new')} の保存前処理を実行")
+        
+    except Exception as e:
+        error_details = traceback.format_exc()
+        logger.exception(f"pre_save処理中に例外が発生しました: {str(e)}")
+        logger.debug(f"スタックトレース:\n{error_details}")
+
 @receiver(post_save)
 def handle_supabase_sync_on_save(sender, instance, created, **kwargs):
     """
@@ -518,15 +557,23 @@ def handle_supabase_sync_on_save(sender, instance, created, **kwargs):
     auto_sync = getattr(settings, 'SUPABASE_AUTO_SYNC', True)
     if not auto_sync:
         return
-        
+    
+    # pre_save処理が実行されたか確認
+    pre_save_called = getattr(instance, '_pre_save_called', False)
+    operation_type = "作成" if created else "更新"
+    
     try:
         # Supabaseと同期
         success = instance.sync_to_supabase()
         
         if success:
-            logger.debug(f"{instance.__class__.__name__} ID:{instance.pk} をSupabaseと同期しました")
+            logger.debug(f"{instance.__class__.__name__} ID:{instance.pk} を{operation_type}し、Supabaseと同期しました")
+            
+            # pre_saveフラグをクリア
+            if hasattr(instance, '_pre_save_called'):
+                delattr(instance, '_pre_save_called')
         else:
-            logger.error(f"{instance.__class__.__name__} ID:{instance.pk} のSupabase同期に失敗しました")
+            logger.error(f"{instance.__class__.__name__} ID:{instance.pk} の{operation_type}後、Supabase同期に失敗しました")
             
     except Exception as e:
         error_details = traceback.format_exc()

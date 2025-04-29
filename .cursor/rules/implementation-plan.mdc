@@ -22,7 +22,7 @@ alwaysApply: true
 - [x] 環境変数の設定
   Done
   .env.exampleファイルを作成し、Supabase接続用の環境変数を定義しました。
-- [x] Docker環境の構築 
+- [x] Docker環境の構築 ｗ
   Done
   Dockerfile、docker-compose.yml、.dockerignoreを作成し、Docker開発環境を整備しました。
 - [x] Docker CI/CDワークフローの設定
@@ -147,7 +147,9 @@ alwaysApply: true
   - [x] supabase_tableプロパティの設定
     Done
     各モデルクラスに、対応するSupabase上のテーブル名を指定する `supabase_table` プロパティを設定しました。
-  - [ ] pre_save/post_saveシグナルでのSupabase同期実装
+  - [x] pre_save/post_saveシグナルでのSupabase同期実装
+    Done
+    pre_saveシグナルとpost_saveシグナルを実装し、モデルの保存時にSupabaseとの同期が自動的に行われる仕組みを実装しました。また、モデルのsaveメソッドを拡張して統計情報などの関連データも適切に更新されるようにしました。
 - [ ] テスト環境のSupabase設定
   - [ ] テスト用.env.testファイルの作成
   - [ ] テスト実行時のデータベース設定
