@@ -22,7 +22,7 @@ alwaysApply: true
 - [x] 環境変数の設定
   Done
   .env.exampleファイルを作成し、Supabase接続用の環境変数を定義しました。
-- [x] Docker環境の構築 ｗ
+- [x] Docker環境の構築 
   Done
   Dockerfile、docker-compose.yml、.dockerignoreを作成し、Docker開発環境を整備しました。
 - [x] Docker CI/CDワークフローの設定
@@ -140,7 +140,9 @@ alwaysApply: true
   - [x] DBマイグレーションの管理手順の整備
     Done
     DjangoモデルとSupabaseの同期管理手順書を作成し、ベストプラクティスをドキュメント化。開発者向けに例や複雑なスキーマ変更の手順、環境別の考慮事項も整理しました。
-- [ ] 既存モデルのSupabase対応
+- [x] 既存モデルのSupabase対応
+  Done
+  既存の全モデルクラスに `SupabaseModelMixin` を適用し、`supabase_table` プロパティを設定。pre_save/post_saveシグナルによる自動同期機能も実装しました。
   - [x] モデルクラスへのSupabaseModelMixinの適用
     Done
     ER図に基づいて実装した全てのモデルクラスに `SupabaseModelMixin` を継承させ、Supabase連携の準備を行いました。
