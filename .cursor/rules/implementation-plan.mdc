@@ -152,10 +152,15 @@ alwaysApply: true
   - [x] pre_save/post_saveシグナルでのSupabase同期実装
     Done
     pre_saveシグナルとpost_saveシグナルを実装し、モデルの保存時にSupabaseとの同期が自動的に行われる仕組みを実装しました。また、モデルのsaveメソッドを拡張して統計情報などの関連データも適切に更新されるようにしました。
-- [ ] テスト環境のSupabase設定
-  - [ ] テスト用.env.testファイルの作成
-  - [ ] テスト実行時のデータベース設定
-  - [ ] pytest.iniの設定
+- [x] テスト用.env.testファイルの作成
+  Done
+  テスト環境用の `.env.test` ファイルを作成しました。また、テスト実行時にこの設定が読み込まれるように、`pytest.ini` の作成とDjangoの `settings.py` の環境別（base, development, test, production）への分割を行いました。テスト用依存関係ファイル `requirements-test.txt` も作成しました。
+- [x] テスト実行時のデータベース設定
+  Done
+  テスト環境設定の一環として `backend/techskillsquiz/settings/test.py` 内でテスト用データベース設定を行い、`.env.test` から読み込むようにしました。
+- [x] pytest.iniの設定
+  Done
+  テストランナー `pytest` の設定ファイル `pytest.ini` を作成し、テスト対象パス、Django設定モジュール、`.env.test` の読み込み、カバレッジ設定などを定義しました。
 - [ ] CI/CD設定のSupabase対応
   - [ ] GitHub ActionsでのSupabaseマイグレーション実行
   - [ ] デプロイ時のSupabaseスキーマ更新自動化
