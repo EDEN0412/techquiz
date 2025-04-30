@@ -126,7 +126,11 @@ alwaysApply: true
     Done
     接続エラー発生時のリトライ機能および最大試行回数到達時のエラーハンドリングをテスト。全16テストが正常に完了し、エラー時の適切な処理が確認できました。
     - [x] 様々なモデル構造での同期テスト
-    DoneyField, OneToOneField, 継承モデルなど、ForeignKey, ManyToMan様々な関連を持つテストモデルを定義し、これらのモデルに対する同期処理（呼び出し）をテストするケースを追加しました。テスト実行時のエラー（ImportError, TypeError, AttributeError, InvalidBasesError, NameError, 設定のモック適用問題）を段階的に修正し、最終的に全テストがパスすることを確認しました。
+    Done
+    ForeignKey, ManyToManyField, OneToOneField, 継承モデルなど、ForeignKey, ManyToMan様々な関連を持つテストモデルを定義し、これらのモデルに対する同期処理（呼び出し）をテストするケースを追加しました。テスト実行時のエラー（ImportError, TypeError, AttributeError, InvalidBasesError, NameError, 設定のモック適用問題）を段階的に修正し、最終的に全テストがパスすることを確認しました。
+    - [x] テストモデル名の衝突解消と全テスト実行の有効化
+    Done
+    複数のテストファイルに存在する同名のテストモデル（TestModel）の名前とapp_labelを変更し、衝突を解消しました。これにより、`backend` ディレクトリで `pytest` コマンドを実行するだけで全テスト（32個）が正常に実行できるようになりました。
 
 - [x] Supabase CLI導入と設定
   Done
@@ -161,6 +165,7 @@ alwaysApply: true
 - [x] pytest.iniの設定
   Done
   テストランナー `pytest` の設定ファイル `pytest.ini` を作成し、テスト対象パス、Django設定モジュール、`.env.test` の読み込み、カバレッジ設定などを定義しました。
+
 - [ ] CI/CD設定のSupabase対応
   - [ ] GitHub ActionsでのSupabaseマイグレーション実行
   - [ ] デプロイ時のSupabaseスキーマ更新自動化

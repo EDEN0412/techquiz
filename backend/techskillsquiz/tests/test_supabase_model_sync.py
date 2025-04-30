@@ -24,7 +24,8 @@ from techskillsquiz.supabase_mixins import (
     SupabaseQueryError,
     SupabaseConnectionError,
     SupabaseMixinError,
-    SupabaseDataError
+    SupabaseDataError,
+    get_supabase_client
 )
 from techskillsquiz.supabase_sync import (
     check_table_exists_with_fallback,
@@ -34,7 +35,7 @@ from techskillsquiz.supabase_sync import (
 )
 
 # テスト用のモデルクラス
-class TestModel(models.Model, SupabaseModelMixin):
+class ModelSyncTest(models.Model, SupabaseModelMixin):
     """テスト用のモデルクラス"""
     
     name = models.CharField(max_length=100)
@@ -46,7 +47,7 @@ class TestModel(models.Model, SupabaseModelMixin):
     
     # このモデルは実際にはデータベースに保存されない
     class Meta:
-        app_label = 'test_app'
+        app_label = 'test_app_sync'
         managed = False
     
     def __str__(self):
@@ -60,11 +61,11 @@ class SupabaseModelSyncTestCase(TestCase):
     def setUp(self):
         """テスト環境のセットアップ"""
         # データベースモデルの保存による自動シグナル発火を無効化
-        post_save.disconnect(sender=TestModel, dispatch_uid="test_disable_post_save")
-        pre_delete.disconnect(sender=TestModel, dispatch_uid="test_disable_pre_delete")
+        post_save.disconnect(sender=ModelSyncTest, dispatch_uid="test_disable_post_save")
+        pre_delete.disconnect(sender=ModelSyncTest, dispatch_uid="test_disable_pre_delete")
         
         # テスト用のモデルインスタンスを作成
-        self.test_model = TestModel(
+        self.test_model = ModelSyncTest(
             id=1,
             name="テスト名前",
             description="テスト説明",
@@ -168,7 +169,7 @@ class SupabaseModelSyncTestCase(TestCase):
         mock_client.table.return_value.delete.return_value.eq.return_value = mock_delete
         
         # Supabaseからの削除を実行
-        result = TestModel.supabase_delete(1)
+        result = ModelSyncTest.supabase_delete(1)
         
         # アサーション
         self.assertEqual(len(result), 1)
@@ -228,7 +229,7 @@ class SupabaseModelSyncTestCase(TestCase):
             mock_instance2 = MagicMock(id=2, name="名前2")
             
             # Djangoモデルインスタンスを準備
-            with patch.object(TestModel, 'objects') as mock_objects:
+            with patch.object(ModelSyncTest, 'objects') as mock_objects:
                 mock_objects.all.return_value = [mock_instance1, mock_instance2]
                 
                 # Supabaseデータをモック
@@ -243,7 +244,7 @@ class SupabaseModelSyncTestCase(TestCase):
                 mock_client.table.return_value.select.return_value = mock_select
                 
                 # 一貫性検証を実行
-                matched, mismatched, mismatched_ids = TestModel.verify_supabase_consistency()
+                matched, mismatched, mismatched_ids = ModelSyncTest.verify_supabase_consistency()
                 
                 # アサーション
                 self.assertEqual(matched, 1)     # 一致するレコード数
@@ -254,7 +255,7 @@ class SupabaseModelSyncTestCase(TestCase):
                 mock_check_table.assert_called_once()
     
     @patch('techskillsquiz.supabase_mixins.get_supabase_client')
-    @patch.object(TestModel, 'verify_supabase_consistency')
+    @patch.object(ModelSyncTest, 'verify_supabase_consistency')
     def test_fix_supabase_consistency(self, mock_verify, mock_get_client):
         """不整合のあるデータを修正する機能のテスト"""
         # モックのセットアップ
@@ -283,7 +284,7 @@ class SupabaseModelSyncTestCase(TestCase):
         mock_instance2 = MagicMock(id=2, sync_to_supabase=MagicMock(side_effect=mock_sync_to_supabase))
         
         # get()の結果をモック
-        with patch.object(TestModel, 'objects') as mock_objects:
+        with patch.object(ModelSyncTest, 'objects') as mock_objects:
             mock_objects.get.side_effect = lambda pk: (
                 mock_instance1 if pk == 1 else mock_instance2 if pk == 2 else None
             )
@@ -297,7 +298,7 @@ class SupabaseModelSyncTestCase(TestCase):
             mock_verify.return_value = (matched_count, mismatched_count, mismatched_ids)
             
             # 一貫性修正を実行
-            fixed_matched, fixed_added, fixed_error = TestModel.fix_supabase_consistency()
+            fixed_matched, fixed_added, fixed_error = ModelSyncTest.fix_supabase_consistency()
             
             # アサーション
             self.assertEqual(fixed_matched, matched_count)  # 一致していたレコード数
@@ -310,8 +311,8 @@ class SupabaseModelSyncTestCase(TestCase):
             mock_instance1.sync_to_supabase.assert_called_once()
             mock_instance2.sync_to_supabase.assert_called_once()
     
-    @patch.object(TestModel, 'objects')
-    @patch.object(TestModel, 'get_supabase_client')
+    @patch.object(ModelSyncTest, 'objects')
+    @patch.object(ModelSyncTest, 'get_supabase_client')
     def test_table_check_error(self, mock_get_client, mock_objects):
         """テーブル存在確認でのエラーが適切に処理されるかテスト"""
         # Djangoデータベースクエリ結果をモック
@@ -342,10 +343,10 @@ class SupabaseModelSyncTestCase(TestCase):
             
             # SupabaseDataErrorが発生することを確認
             with self.assertRaises(SupabaseDataError):
-                TestModel.verify_supabase_consistency()
+                ModelSyncTest.verify_supabase_consistency()
     
-    @patch.object(TestModel, 'objects')
-    @patch.object(TestModel, 'get_supabase_client')
+    @patch.object(ModelSyncTest, 'objects')
+    @patch.object(ModelSyncTest, 'get_supabase_client')
     def test_table_creation_error(self, mock_get_client, mock_objects):
         """テーブル作成エラーが適切に処理されるかテスト"""
         # Djangoデータベースクエリ結果をモック
@@ -378,7 +379,7 @@ class SupabaseModelSyncTestCase(TestCase):
             
             # SupabaseDataErrorが発生することを確認
             with self.assertRaises(SupabaseDataError):
-                TestModel.verify_supabase_consistency()
+                ModelSyncTest.verify_supabase_consistency()
     
     @patch('techskillsquiz.supabase_mixins.get_supabase_client')
     def test_connection_error(self, mock_get_client):
@@ -388,7 +389,7 @@ class SupabaseModelSyncTestCase(TestCase):
         
         # 接続エラーが発生した場合、SupabaseConnectionErrorが発生することを確認
         with self.assertRaises(SupabaseConnectionError):
-            TestModel.get_supabase_client()
+            ModelSyncTest.get_supabase_client()
     
     @patch('techskillsquiz.supabase_mixins.get_supabase_client')
     def test_query_error_select(self, mock_get_client):
@@ -404,7 +405,7 @@ class SupabaseModelSyncTestCase(TestCase):
         
         # クエリエラーが発生した場合、SupabaseQueryErrorが発生することを確認
         with self.assertRaises(SupabaseQueryError):
-            TestModel.supabase_select()
+            ModelSyncTest.supabase_select()
     
     @patch('techskillsquiz.supabase_mixins.get_supabase_client')
     def test_query_error_insert(self, mock_get_client):
@@ -461,7 +462,7 @@ class SupabaseModelSyncTestCase(TestCase):
         # 削除エラーが発生した場合、SupabaseDataErrorが発生することを確認
         with patch('techskillsquiz.supabase_mixins.time.sleep', return_value=None):  # リトライのsleepをスキップ
             with self.assertRaises(SupabaseDataError):
-                TestModel.supabase_delete(1)
+                ModelSyncTest.supabase_delete(1)
     
     @patch('techskillsquiz.supabase_mixins.get_supabase_client')
     def test_network_timeout_error(self, mock_get_client):
@@ -478,7 +479,7 @@ class SupabaseModelSyncTestCase(TestCase):
         # タイムアウトエラーが発生した場合、SupabaseQueryErrorが発生し、リトライが行われることを確認
         with patch('techskillsquiz.supabase_mixins.time.sleep') as mock_sleep:
             with self.assertRaises(SupabaseQueryError):
-                TestModel.supabase_select()
+                ModelSyncTest.supabase_select()
             
             # リトライが行われたことを確認
             self.assertGreaterEqual(mock_sleep.call_count, 1)
@@ -497,7 +498,7 @@ class SupabaseModelSyncTestCase(TestCase):
         
         # 認証エラーが発生した場合、SupabaseQueryErrorが発生することを確認
         with self.assertRaises(SupabaseQueryError):
-            TestModel.supabase_select()
+            ModelSyncTest.supabase_select()
     
     @patch('techskillsquiz.supabase_mixins.get_supabase_client')
     def test_rate_limit_error(self, mock_get_client):
@@ -514,7 +515,7 @@ class SupabaseModelSyncTestCase(TestCase):
         # レート制限エラーが発生した場合、SupabaseQueryErrorが発生し、リトライが行われることを確認
         with patch('techskillsquiz.supabase_mixins.time.sleep') as mock_sleep:
             with self.assertRaises(SupabaseQueryError):
-                TestModel.supabase_select()
+                ModelSyncTest.supabase_select()
             
             # リトライが行われたことを確認
             self.assertGreaterEqual(mock_sleep.call_count, 1)

@@ -27,7 +27,7 @@ from techskillsquiz.supabase_mixins import SupabaseModelMixin
 from django.db import models
 
 # テスト用のモデルクラスを定義
-class TestModel(models.Model, SupabaseModelMixin):
+class SyncTestModel(models.Model, SupabaseModelMixin):
     """テスト用のモデルクラス"""
     
     # Supabaseのテーブル名を指定
@@ -35,7 +35,7 @@ class TestModel(models.Model, SupabaseModelMixin):
     
     # このモデルは実際にはデータベースに保存されない
     class Meta:
-        app_label = 'test_app'
+        app_label = 'test_app_base'
         managed = False
 
 def test_supabase_model():
@@ -44,7 +44,7 @@ def test_supabase_model():
     
     # 接続テスト
     try:
-        client = TestModel.get_supabase_client()
+        client = SyncTestModel.get_supabase_client()
         print("Supabaseクライアントの取得: 成功")
         
         # 現在のテーブル一覧を取得してみる
@@ -89,11 +89,11 @@ def test_supabase_model():
             print("\n既存テーブルへのデータ操作をテストします...")
             
             # テスト用モデルのテーブル名を変更
-            TestModel.supabase_table = "todos"  # 一般的に存在しそうなテーブル名
+            SyncTestModel.supabase_table = "todos"  # 一般的に存在しそうなテーブル名
             
             # データの取得テスト
             try:
-                data = TestModel.supabase_select(limit=5)
+                data = SyncTestModel.supabase_select(limit=5)
                 print(f"データ取得テスト: {len(data)} 件のデータを取得しました")
                 if data:
                     print(f"最初のレコード: {json.dumps(data[0], indent=2)}")
