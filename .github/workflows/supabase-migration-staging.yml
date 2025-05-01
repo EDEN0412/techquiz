@@ -24,7 +24,7 @@ jobs:
           node-version: '18'
       
       - name: Install Supabase CLI
-        run: npm install -g @supabase/cli
+        run: npm install -g supabase
       
       - name: Verify Supabase CLI Installation
         run: supabase --version
