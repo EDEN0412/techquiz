@@ -18,13 +18,20 @@ jobs:
         with:
           fetch-depth: 0  # 全てのコミット履歴を取得
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      # Node.jsのセットアップは不要になったためコメントアウトまたは削除してもOK
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '18'
       
       - name: Install Supabase CLI
-        run: npm install -g supabase
+        run: |
+          # 最新の安定版.debパッケージをダウンロード
+          curl -L -o supabase.deb https://github.com/supabase/cli/releases/download/v1.180.0/supabase_1.180.0_linux_amd64.deb
+          # .debパッケージをインストール
+          sudo dpkg -i supabase.deb
+          # 不要になったファイルを削除
+          rm supabase.deb
       
       - name: Verify Supabase CLI Installation
         run: supabase --version
