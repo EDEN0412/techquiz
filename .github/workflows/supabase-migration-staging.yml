@@ -24,9 +24,7 @@ jobs:
           node-version: '18'
       
       - name: Install Supabase CLI
-        run: brew install supabase/tap/supabase # Homebrewを使用してインストール
-        env:
-          HOMEBREW_NO_INSTALL_FROM_API: 1 # GitHub API制限を回避
+        run: npm install -g @supabase/cli
       
       - name: Verify Supabase CLI Installation
         run: supabase --version
