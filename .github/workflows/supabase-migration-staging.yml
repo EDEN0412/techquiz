@@ -3,9 +3,7 @@ name: Supabase Migration (Staging)
 on:
   push:
     branches:
-      - develop  # 開発ブランチにプッシュされた時に実行
-    paths:
-      - 'supabase/migrations/**'  # マイグレーションファイルが変更された場合のみ実行
+      - develop # 開発ブランチにプッシュされた時に実行
   workflow_dispatch:  # 手動実行も可能
 
 jobs:
