@@ -3,9 +3,7 @@ name: Supabase Migration (Staging)
 on:
   push:
     branches:
-      - develop  # 開発ブランチにプッシュされた時に実行
-    paths:
-      - 'supabase/migrations/**'  # マイグレーションファイルが変更された場合のみ実行
+      - develop # 開発ブランチにプッシュされた時に実行
   workflow_dispatch:  # 手動実行も可能
 
 jobs:
@@ -26,7 +24,9 @@ jobs:
           node-version: '18'
       
       - name: Install Supabase CLI
-        run: npm install -g supabase
+        run: |
+          # 公式の推奨インストール方法を使用
+          curl -s https://raw.githubusercontent.com/supabase/cli/main/install.sh | bash
       
       - name: Verify Supabase CLI Installation
         run: supabase --version
