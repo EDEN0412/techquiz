@@ -24,9 +24,9 @@ jobs:
           node-version: '18'
       
       - name: Install Supabase CLI
-        run: |
-          # 公式の推奨インストール方法を使用
-          curl -s https://raw.githubusercontent.com/supabase/cli/main/install.sh | bash
+        run: brew install supabase/tap/supabase # Homebrewを使用してインストール
+        env:
+          HOMEBREW_NO_INSTALL_FROM_API: 1 # GitHub API制限を回避
       
       - name: Verify Supabase CLI Installation
         run: supabase --version
