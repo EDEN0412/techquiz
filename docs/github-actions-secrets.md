@@ -43,7 +43,7 @@ Supabaseマイグレーションワークフローを使用するには、以下
 
 1. [Supabaseダッシュボード](https://app.supabase.io/)で対象の環境のプロジェクトを選択します。
 2. 「Project Settings」→「General」を選択します。
-3. 「Reference ID」の値をコピーします。
+3. 「Project ID」の値をコピーします。
 
 ### データベースパスワード（SUPABASE_DB_PASSWORD, SUPABASE_STAGING_DB_PASSWORD）
 
