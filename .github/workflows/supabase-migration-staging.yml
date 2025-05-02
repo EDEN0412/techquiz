@@ -75,7 +75,7 @@ jobs:
           echo "Setting up supabase link..."
           supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
           echo "Running supabase db push..."
-          supabase db push
+          supabase db push -p ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
       
       - name: Check migration status
         run: |
