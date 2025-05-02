@@ -24,6 +24,12 @@ jobs:
       #   with:
       #     node-version: '18'
       
+      # --- 追加: DNSユーティリティをインストール ---
+      - name: Install dnsutils
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dnsutils
+      
       - name: Install Supabase CLI
         run: |
           # 最新の安定版.debパッケージをダウンロード
@@ -41,15 +47,23 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       
+      # --- 追加: DBホストのIPv4アドレスを取得 ---
+      - name: Get Supabase DB IPv4 Address
+        id: db_ip
+        run: echo "IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)" >> $GITHUB_OUTPUT
+      
       - name: Set Supabase Project
         run: |
           supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
       
+      # --- 修正: --db-url を使ってIPv4で接続 ---
       - name: Run database migrations
         run: |
-          supabase db push
-        env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+          DB_URL="postgresql://postgres:${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}@${{ steps.db_ip.outputs.IP }}:5432/postgres"
+          supabase db push --db-url "$DB_URL"
+        # DB_PASSWORD は --db-url に含めたので不要
+        # env:
+        #   SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
       
       - name: Check migration status
         run: |
