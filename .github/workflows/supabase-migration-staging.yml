@@ -55,9 +55,12 @@ jobs:
       # --- 追加: DBホストのIPv4アドレスを取得 ---
       - name: Get Supabase DB IPv4 Address
         id: db_ip
-        run: echo "IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)" >> $GITHUB_OUTPUT
+        run: |
+          DB_IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)
+          echo "IP=${DB_IP}" >> $GITHUB_OUTPUT
+          echo "Found DB IP: ${DB_IP}"
       
-      # --- 修正: PostgreSQL 環境変数を設定して push ---
+      # --- 修正: PostgreSQL 環境変数と project-ref を設定して push ---
       - name: Run database migrations
         env:
           # 標準のPostgreSQL環境変数を設定
@@ -67,7 +70,11 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
         run: |
-          # 接続フラグは削除し、環境変数に依存
+          # 環境変数に加えて、プロジェクト参照も明示的に設定
+          # まずリンクを行い、その後プッシュを実行
+          echo "Setting up supabase link..."
+          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+          echo "Running supabase db push..."
           supabase db push
       
       - name: Check migration status
