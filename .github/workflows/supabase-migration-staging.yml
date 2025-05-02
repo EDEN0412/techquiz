@@ -57,14 +57,14 @@ jobs:
         id: db_ip
         run: echo "IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)" >> $GITHUB_OUTPUT
       
-      # --- 修正: 環境変数 SUPABASE_REMOTE_DB_URL を設定して push ---
+      # --- 修正: 環境変数と --project-ref を使って push ---
       - name: Run database migrations
         env:
           # 環境変数でリモートDB URLを設定
           SUPABASE_REMOTE_DB_URL: postgresql://postgres:${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}@${{ steps.db_ip.outputs.IP }}:5432/postgres
         run: |
-          # --db-url フラグは削除 (環境変数で設定)
-          supabase db push
+          # プロジェクト参照を明示的に指定
+          supabase db push --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
       
       - name: Check migration status
         run: |
