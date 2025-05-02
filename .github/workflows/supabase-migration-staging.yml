@@ -81,7 +81,7 @@ jobs:
         run: |
           # プロジェクトは既にリンクされているのでフラグは不要
           echo "Listing applied migrations..."
-          supabase migration list
+          supabase migration list -p ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
       
       - name: Notify on Success
         if: success()
