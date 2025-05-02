@@ -1,4 +1,0 @@
--- Correct test migration for staging workflow trigger
--- This is a test to verify GitHub Actions workflow integration
--- This migration runs on the staging environment
--- No actual database changes in this migration 
