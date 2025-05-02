@@ -3,30 +3,34 @@ name: Supabase Migration (Staging)
 on:
   push:
     branches:
-      - develop # 開発ブランチにプッシュされた時に実行
-  workflow_dispatch:  # 手動実行も可能
+      - develop
+  workflow_dispatch:
 
 jobs:
   migrate:
     name: Supabase Migration (Staging)
     runs-on: ubuntu-latest
-    environment: staging  # GitHub Environmentsを使用
+    environment: staging
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 全てのコミット履歴を取得
+          fetch-depth: 0
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dnsutils jq
       
       - name: Install Supabase CLI
         run: |
-          # 公式の推奨インストール方法を使用
-          curl -s https://raw.githubusercontent.com/supabase/cli/main/install.sh | bash
+          LATEST_VERSION=$(curl -sL https://api.github.com/repos/supabase/cli/releases/latest | jq -r '.tag_name')
+          DEB_URL="https://github.com/supabase/cli/releases/download/${LATEST_VERSION}/supabase_${LATEST_VERSION#v}_linux_amd64.deb"
+          echo "Downloading Supabase CLI version ${LATEST_VERSION} from ${DEB_URL}"
+          curl -L -o supabase.deb "$DEB_URL"
+          sudo dpkg -i supabase.deb
+          rm supabase.deb
       
       - name: Verify Supabase CLI Installation
         run: supabase --version
@@ -36,28 +40,37 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       
-      - name: Set Supabase Project
+      - name: Get Supabase DB IPv4 Address
+        id: db_ip
         run: |
-          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+          DB_IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)
+          echo "IP=${DB_IP}" >> $GITHUB_OUTPUT
+          echo "Found DB IP: ${DB_IP}"
       
       - name: Run database migrations
-        run: |
-          supabase db push
         env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+          PGHOST: ${{ steps.db_ip.outputs.IP }}
+          PGPORT: 5432
+          PGDATABASE: postgres
+          PGUSER: postgres
+          PGPASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+        run: |
+          echo "Setting up supabase link..."
+          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+          echo "Running supabase db push..."
+          supabase db push -p ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
       
       - name: Check migration status
         run: |
-          supabase migration list
-        
+          echo "Listing applied migrations..."
+          supabase migration list -p ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+      
       - name: Notify on Success
         if: success()
         run: |
           echo "ステージング環境へのマイグレーションが正常に完了しました"
-          # 成功時に通知を送る処理をここに追加（例：Slackへの通知など）
       
       - name: Notify on Failure
         if: failure()
         run: |
           echo "ステージング環境へのマイグレーションに失敗しました"
-          # 失敗時に通知を送る処理をここに追加（例：Slackへの通知など） 
