@@ -1,16 +1,16 @@
-name: Supabase Migration (Staging)
+name: Supabase Migration
 
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:
 
 jobs:
   migrate:
-    name: Supabase Migration (Staging)
+    name: Supabase Migration
     runs-on: ubuntu-latest
-    environment: staging
+    environment: production
     
     steps:
       - name: Checkout code
@@ -43,7 +43,7 @@ jobs:
       - name: Get Supabase DB IPv4 Address
         id: db_ip
         run: |
-          DB_IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)
+          DB_IP=$(dig +short A db.${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co)
           echo "IP=${DB_IP}" >> $GITHUB_OUTPUT
           echo "Found DB IP: ${DB_IP}"
       
@@ -53,24 +53,24 @@ jobs:
           PGPORT: 5432
           PGDATABASE: postgres
           PGUSER: postgres
-          PGPASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           echo "Setting up supabase link..."
-          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           echo "Running supabase db push..."
-          supabase db push -p ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+          supabase db push -p ${{ secrets.SUPABASE_DB_PASSWORD }}
       
       - name: Check migration status
         run: |
           echo "Listing applied migrations..."
-          supabase migration list -p ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+          supabase migration list -p ${{ secrets.SUPABASE_DB_PASSWORD }}
       
       - name: Notify on Success
         if: success()
         run: |
-          echo "ステージング環境へのマイグレーションが正常に完了しました"
+          echo "本番環境へのマイグレーションが正常に完了しました"
       
       - name: Notify on Failure
         if: failure()
         run: |
-          echo "ステージング環境へのマイグレーションに失敗しました"
+          echo "本番環境へのマイグレーションに失敗しました"
