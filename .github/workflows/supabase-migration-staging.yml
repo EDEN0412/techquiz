@@ -79,8 +79,9 @@ jobs:
       
       - name: Check migration status
         run: |
-          # migration list はプロジェクト参照が必要なので変更なし
-          supabase migration list --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+          # プロジェクトは既にリンクされているのでフラグは不要
+          echo "Listing applied migrations..."
+          supabase migration list
       
       - name: Notify on Success
         if: success()
