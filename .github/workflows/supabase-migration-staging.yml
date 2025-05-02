@@ -57,13 +57,13 @@ jobs:
         id: db_ip
         run: echo "IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)" >> $GITHUB_OUTPUT
       
-      # --- 修正: --db-url と --linked false を使って push ---
+      # --- 修正: --db-url のみを使用して push ---
       - name: Run database migrations
         run: |
           # DB_URLを定義
           DB_URL="postgresql://postgres:${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}@${{ steps.db_ip.outputs.IP }}:5432/postgres"
-          # --db-urlで接続先を指定し、--linked falseでリンクを無効にする
-          supabase db push --db-url "$DB_URL" --linked false
+          # --db-urlで接続先を指定 (implied --linked false?)
+          supabase db push --db-url "$DB_URL"
       
       - name: Check migration status
         run: |
