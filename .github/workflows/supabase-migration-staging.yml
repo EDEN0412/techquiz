@@ -24,17 +24,22 @@ jobs:
       #   with:
       #     node-version: '18'
       
-      # --- 追加: DNSユーティリティをインストール ---
-      - name: Install dnsutils
+      # --- 追加: DNSユーティリティとjqをインストール ---
+      - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dnsutils
+          sudo apt-get install -y dnsutils jq
       
+      # --- 修正: Supabase CLIの最新安定版をインストール ---
       - name: Install Supabase CLI
         run: |
-          # 最新の安定版.debパッケージをダウンロード
-          curl -L -o supabase.deb https://github.com/supabase/cli/releases/download/v1.180.0/supabase_1.180.0_linux_amd64.deb
-          # .debパッケージをインストール
+          # GitHub APIから最新の安定版リリースバージョンを取得
+          LATEST_VERSION=$(curl -sL https://api.github.com/repos/supabase/cli/releases/latest | jq -r '.tag_name')
+          # ダウンロードURLを構築 (ファイル名用に 'v' プレフィックスを削除)
+          DEB_URL="https://github.com/supabase/cli/releases/download/${LATEST_VERSION}/supabase_${LATEST_VERSION#v}_linux_amd64.deb"
+          echo "Downloading Supabase CLI version ${LATEST_VERSION} from ${DEB_URL}"
+          # .debパッケージをダウンロードしてインストール
+          curl -L -o supabase.deb "$DEB_URL"
           sudo dpkg -i supabase.deb
           # 不要になったファイルを削除
           rm supabase.deb
@@ -52,31 +57,27 @@ jobs:
         id: db_ip
         run: echo "IP=$(dig +short A db.${{ secrets.SUPABASE_STAGING_PROJECT_ID }}.supabase.co)" >> $GITHUB_OUTPUT
       
-      - name: Set Supabase Project
-        run: |
-          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
-      
       # --- 修正: --db-url を使ってIPv4で接続 ---
       - name: Run database migrations
         run: |
+          # DB_URL環境変数を定義
           DB_URL="postgresql://postgres:${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}@${{ steps.db_ip.outputs.IP }}:5432/postgres"
+          # --db-url を指定してマイグレーションを実行
           supabase db push --db-url "$DB_URL"
-        # DB_PASSWORD は --db-url に含めたので不要
-        # env:
-        #   SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
       
       - name: Check migration status
         run: |
-          supabase migration list
-        
+          # リンクされていないため、プロジェクト参照を指定する必要がある
+          supabase migration list --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+      
       - name: Notify on Success
         if: success()
         run: |
           echo "ステージング環境へのマイグレーションが正常に完了しました"
-          # 成功時に通知を送る処理をここに追加（例：Slackへの通知など）
+          # 成功時に通知を送る処理をここに追加
       
       - name: Notify on Failure
         if: failure()
         run: |
           echo "ステージング環境へのマイグレーションに失敗しました"
-          # 失敗時に通知を送る処理をここに追加（例：Slackへの通知など） 
+          # 失敗時に通知を送る処理をここに追加 
