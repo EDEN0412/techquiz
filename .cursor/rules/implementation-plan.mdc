@@ -166,12 +166,16 @@ alwaysApply: true
   Done
   テストランナー `pytest` の設定ファイル `pytest.ini` を作成し、テスト対象パス、Django設定モジュール、`.env.test` の読み込み、カバレッジ設定などを定義しました。
 
-- [ ] CI/CD設定のSupabase対応
+- [x] CI/CD設定のSupabase対応
   - [x] GitHub ActionsでのSupabaseマイグレーション実行
     Done
     GitHub ActionsワークフローファイルとSupabaseマイグレーション自動化を実装。本番環境とステージング環境用のワークフローを作成し、環境ごとにデプロイできる仕組みを整備しました。
-  - [ ] デプロイ時のSupabaseスキーマ更新自動化
-  - [ ] 本番/ステージング環境のSupabase設定分離
+  - [x] デプロイ時のSupabaseスキーマ更新自動化
+    Done
+    GitHub Actionsワークフローが、指定ブランチへのプッシュをトリガーに`supabase db push`を実行することで、デプロイと連動したスキーマ更新を自動化しました。
+  - [x] 本番/ステージング環境のSupabase設定分離
+    Done
+    GitHub SecretsとEnvironmentsを活用し、本番環境とステージング環境で使用するSupabaseプロジェクトIDやDBパスワードなどの機密情報を安全に分離・管理する仕組みを構築しました。
 - [x] Row Level Securityの設定
   Done
   Supabase管理画面からテーブルごとにRLSを設定。認証プロバイダー設定（メールアドレス認証、GitHub連携、Google連携）を実装しました。
