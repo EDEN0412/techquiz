@@ -93,9 +93,9 @@ SUPABASE_PID=$!
 echo -e "${YELLOW}バックエンドサーバーを起動中...${NC}"
 cd backend || exit
 if [ "$HAS_POETRY" = true ]; then
-  poetry run python manage.py runserver 0.0.0.0:8000 &
+  DJANGO_ENV=development poetry run python manage.py runserver 0.0.0.0:8000 &
 else
-  python manage.py runserver 0.0.0.0:8000 &
+  DJANGO_ENV=development python manage.py runserver 0.0.0.0:8000 &
 fi
 BACKEND_PID=$!
 cd ..

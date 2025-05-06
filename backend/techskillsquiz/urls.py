@@ -52,10 +52,8 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     
-    # API ドキュメント (DRF ドキュメント)
-    path('docs/', include_docs_urls(title='TechSkillsQuiz API')),
-    
-    # Swagger API ドキュメント
+    # APIドキュメント
+    # path('docs/', include_docs_urls(title='TechSkillsQuiz API')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     
