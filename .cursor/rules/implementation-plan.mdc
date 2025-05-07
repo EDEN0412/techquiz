@@ -187,7 +187,9 @@ alwaysApply: true
 - [x] Django REST Frameworkの設定
   Done
   djangorestframework-simplejwtパッケージを追加し、JWT認証用のエンドポイントとSwagger/Redocドキュメント設定を実装。DRFの詳細設定も追加しました。
-- [ ] シリアライザーの作成
+- [x] シリアライザーの作成
+  Done
+  全モデル（Category, DifficultyLevel, Quiz, Question, Answer, QuizResult, UserStatistics, ActivityHistory）に対応するシリアライザーを実装。関連フィールドの表示や読み取り専用設定を適切に設定し、ネストしたデータ構造にも対応しました。
 - [ ] ビューの実装
 - [ ] URLパターンの設定
 - [ ] APIエンドポイントの実装
@@ -244,6 +246,9 @@ alwaysApply: true
 ## テストとデプロイ
 
 ### 10. テスト
+- [x] シリアライザーのテスト実装
+  Done
+  全シリアライザー（Category, DifficultyLevel, Quiz, Question, Answer, QuizResult, UserStatistics, ActivityHistory）に対するユニットテストを実装。シリアライズ/デシリアライズの検証、フィールドの検証、エラー処理などを網羅的にテストし、全31テストが正常に実行されることを確認しました。
 - [ ] Django単体テストの実装
 - [ ] API統合テストの実装
 - [ ] ユーザーフロー検証テストの実装
