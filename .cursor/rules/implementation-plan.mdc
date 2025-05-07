@@ -187,8 +187,10 @@ alwaysApply: true
 - [x] Django REST Frameworkの設定
   Done
   djangorestframework-simplejwtパッケージを追加し、JWT認証用のエンドポイントとSwagger/Redocドキュメント設定を実装。DRFの詳細設定も追加しました。
-- [ ] APIエンドポイントの実装
 - [ ] シリアライザーの作成
+- [ ] ビューの実装
+- [ ] URLパターンの設定
+- [ ] APIエンドポイントの実装
 - [ ] 認証・認可の実装（JWT）
 
 ## フロントエンド開発（続き）
