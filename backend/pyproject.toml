@@ -30,6 +30,7 @@ black = "^24.2.0"
 isort = "^5.13.2"
 flake8 = "^7.0.0"
 python-dotenv = "*"
+psycopg2-binary = "*"
 
 [build-system]
 requires = ["poetry-core"]
