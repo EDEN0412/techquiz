@@ -1,4 +1,4 @@
-name: Supabase Migration
+name: Supabase Migration and Tests
 
 on:
   push:
@@ -7,8 +7,46 @@ on:
   workflow_dispatch:
 
 jobs:
+  test:
+    name: Run Django Tests
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: techskillsquiz.settings.test
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          cd backend
+          poetry config virtualenvs.create false
+          poetry install --with test
+      
+      - name: Run tests
+        run: |
+          cd backend
+          python manage.py test quiz.tests.test_serializers -v 2
+      
+      - name: Notify test success
+        if: success()
+        run: echo "シリアライザーのテストが正常に完了しました"
+      
+      - name: Notify test failure
+        if: failure()
+        run: echo "シリアライザーのテストに失敗しました"
+  
   migrate:
     name: Supabase Migration
+    needs: test  # テストが成功した場合のみこのジョブを実行
     runs-on: ubuntu-latest
     environment: production
     
