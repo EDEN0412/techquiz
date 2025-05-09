@@ -80,22 +80,30 @@ class QuizResult(models.Model, SupabaseModelMixin):
                 user=self.user,
                 category=self.quiz.category,
                 defaults={
-                    'completed_quizzes': 1,
-                    'total_score': self.score,
-                    'total_possible': self.total_possible,
-                    'total_time': self.time_taken,
-                    'passed_quizzes': 1 if self.passed else 0,
+                    'quizzes_completed': 1,
+                    'total_points': self.score,
+                    'avg_score': self.percentage,
+                    'highest_score': self.score if self.passed else 0,
+                    'last_quiz_date': self.completed_at,
                 }
             )
             
             # 既存の統計を更新
             if not created:
-                stats.completed_quizzes += 1
-                stats.total_score += self.score
-                stats.total_possible += self.total_possible
-                stats.total_time += self.time_taken
-                if self.passed:
-                    stats.passed_quizzes += 1
+                stats.quizzes_completed += 1
+                stats.total_points += self.score
+                
+                # 平均スコアを更新（累積平均の計算）
+                total_quizzes = stats.quizzes_completed
+                stats.avg_score = ((stats.avg_score * (total_quizzes - 1)) + self.percentage) / total_quizzes
+                
+                # 最高スコアを更新（より高いスコアの場合のみ）
+                if self.score > stats.highest_score and self.passed:
+                    stats.highest_score = self.score
+                
+                # 最新のクイズ日時を更新
+                stats.last_quiz_date = self.completed_at
+                
                 stats.save()  # 統計情報を保存（これによりSupabase同期も行われる）
         
         except Exception as e:
