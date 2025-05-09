@@ -190,8 +190,12 @@ alwaysApply: true
 - [x] シリアライザーの作成
   Done
   全モデル（Category, DifficultyLevel, Quiz, Question, Answer, QuizResult, UserStatistics, ActivityHistory）に対応するシリアライザーを実装。関連フィールドの表示や読み取り専用設定を適切に設定し、ネストしたデータ構造にも対応しました。
-- [ ] ビューの実装
-- [ ] URLパターンの設定
+- [x] ビューの実装
+  Done
+  Django REST Frameworkを使用して8つのViewSetを実装。各モデルのCRUD操作と検索/フィルタリング/ソート機能を実装し、特殊なエンドポイントも追加しました。
+- [x] URLパターンの設定
+  Done
+  REST Frameworkのルーターを使ってViewSetとURLパターンを接続。APIエンドポイントの命名規則を整えてパス定義を完了しました。
 - [ ] APIエンドポイントの実装
 - [ ] 認証・認可の実装（JWT）
 

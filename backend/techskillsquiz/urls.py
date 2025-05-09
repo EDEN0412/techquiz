@@ -61,6 +61,6 @@ urlpatterns = [
     path('api/v1/', include([
         # 今後、以下のようにアプリごとのURLsを追加していく
         # path('users/', include('users.urls')),
-        # path('quiz/', include('quiz.urls')),
+        path('quiz/', include('quiz.urls')),
     ])),
 ]
