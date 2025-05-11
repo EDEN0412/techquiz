@@ -55,6 +55,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     filterset_fields = ['is_active']
     ordering_fields = ['name', 'display_order', 'created_at']
+    permission_classes = [permissions.AllowAny]  # 誰でもアクセス可能に設定
     
     @action(detail=True, methods=['get'])
     def quizzes(self, request, pk=None):
@@ -76,6 +77,7 @@ class DifficultyLevelViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['level', 'name', 'created_at']
+    permission_classes = [permissions.AllowAny]  # 誰でもアクセス可能に設定
     
     @action(detail=True, methods=['get'])
     def quizzes(self, request, pk=None):
@@ -187,6 +189,7 @@ class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ユーザー統計情報の取得のためのエンドポイント（読み取り専用）
     """
+    queryset = UserStatistics.objects.all()
     serializer_class = UserStatisticsSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['user', 'category', 'difficulty']
@@ -243,6 +246,7 @@ class ActivityHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     活動履歴の取得のためのエンドポイント（読み取り専用）
     """
+    queryset = ActivityHistory.objects.all()
     serializer_class = ActivityHistorySerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['user', 'quiz', 'category', 'difficulty', 'activity_type']
