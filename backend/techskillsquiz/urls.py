@@ -79,6 +79,6 @@ urlpatterns = [
         path('quiz/', include('quiz.urls')),
     ])),
     
-    # 直接アクセスできるようにするショートカット
-    path('api/quiz/', include('quiz.urls')),
+    # 直接アクセスできるようにするショートカット（異なる名前空間を使用）
+    path('api/quiz/', include('quiz.urls', namespace='quiz_direct')),
 ]

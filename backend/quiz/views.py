@@ -2,11 +2,11 @@
 クイズアプリのビュー定義
 """
 
-from rest_framework import viewsets, permissions, filters, status
+from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Avg, Count, Sum
+from django.db.models import Avg, Sum
 from django.shortcuts import get_object_or_404
 
 from .models import (
@@ -200,6 +200,13 @@ class QuizResultViewSet(viewsets.ModelViewSet):
             return QuizResult.objects.all()
         return QuizResult.objects.filter(user=user)
     
+    def get_serializer_context(self):
+        """
+        シリアライザーにリクエストコンテキストを提供
+        """
+        context = super().get_serializer_context()
+        return context
+    
     def perform_create(self, serializer):
         """
         クイズ結果を保存する際に、ユーザーとpassedフラグを自動的に設定する
@@ -210,11 +217,13 @@ class QuizResultViewSet(viewsets.ModelViewSet):
         
         # パスしたかどうかを計算
         passed = False
+        percentage = 0
         if total_possible > 0:
             percentage = (score / total_possible) * 100
             passed = percentage >= quiz.pass_score
         
-        serializer.save(user=self.request.user, passed=passed)
+        # パーセンテージを明示的に設定（テストのために必要）
+        serializer.save(user=self.request.user, passed=passed, percentage=percentage)
 
 
 class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):

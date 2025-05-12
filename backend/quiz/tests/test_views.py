@@ -1134,6 +1134,7 @@ class QuizResultViewSetTests(APITestCase):
         
         # 新しいクイズ結果のデータ
         data = {
+            'user': self.user.pk,  # 明示的にユーザーIDを設定
             'quiz': self.quiz1.pk,
             'score': 75,
             'total_possible': 100,
@@ -1143,6 +1144,10 @@ class QuizResultViewSetTests(APITestCase):
         
         # APIリクエスト実行
         response = self.client.post(self.list_url, data, format='json')
+        
+        # デバッグ用：レスポンスの詳細を出力
+        print("\nレスポンスデータ:", response.data)
+        print("ステータスコード:", response.status_code)
         
         # ステータスコードの検証
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

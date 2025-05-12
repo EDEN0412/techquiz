@@ -111,6 +111,9 @@ class QuizResultSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'passed']
+        extra_kwargs = {
+            'user': {'required': False}
+        }
 
 
 class UserStatisticsSerializer(serializers.ModelSerializer):
