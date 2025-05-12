@@ -100,7 +100,6 @@ class QuizResultSerializer(serializers.ModelSerializer):
     quiz_title = serializers.CharField(source='quiz.title', read_only=True)
     category_name = serializers.CharField(source='quiz.category.name', read_only=True)
     difficulty_name = serializers.CharField(source='quiz.difficulty.name', read_only=True)
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = QuizResult
