@@ -258,6 +258,9 @@ alwaysApply: true
 - [x] APIビューのテスト実装
   Done
   全8種類のViewSet（Category, DifficultyLevel, Quiz, Question, Answer, QuizResult, UserStatistics, ActivityHistory）に対する機能テストを実装。認証、CRUD操作、フィルタリング、検索、並び替え、アクション実行などを検証し、全46テストが正常に実行されることを確認しました。
+- [x] フロントエンドとの結合テスト実装
+  Done
+  バックエンドとフロントエンドの結合テストを2種類実装しました。1つ目はバックエンドから見た統合テスト（FrontendBackendIntegrationTest）で、フロントエンドのAPIクライアントと同等の操作でバックエンドAPIをテスト。2つ目はモックを使用したAPIクライアントテスト（ApiClientMockTest）で、フロントエンドコードの振る舞いをテストします。合計19のテストケースですべてのAPIエンドポイントと主要なデータフローをカバーしています。
 - [ ] Django単体テストの実装
 - [ ] API統合テストの実装
 - [ ] ユーザーフロー検証テストの実装
@@ -315,5 +318,3 @@ alwaysApply: true
 
 - 他のタスクも完了したら、同様に「Done」と要約を記載していきましょう。
 - 実際の運用で設定を変更した場合も、必ずタスク管理ファイルを更新する習慣をつけると良いです。
-
----
