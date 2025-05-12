@@ -2,46 +2,57 @@
  * ユーザー関連のAPIサービス
  */
 import api from '../client';
-import { ENDPOINTS } from '../config';
 import { UserProfile, QuizResult, PaginatedResponse } from '../types';
 
-/**
- * ユーザープロファイルの取得
- */
-export const getUserProfile = async (): Promise<UserProfile> => {
-  try {
-    const response = await api.get<UserProfile>(ENDPOINTS.USER.PROFILE);
+export class UserService {
+  private baseUrl = '/api/v1';
+  
+  /**
+   * ユーザープロファイルの取得
+   */
+  async getUserProfile(): Promise<UserProfile> {
+    const response = await api.get<UserProfile>(`${this.baseUrl}/users/profile/`);
     return response.data;
-  } catch (error) {
-    throw error;
   }
-};
-
-/**
- * ユーザープロファイルの更新
- */
-export const updateUserProfile = async (profileData: Partial<UserProfile>): Promise<UserProfile> => {
-  try {
-    const response = await api.patch<UserProfile>(ENDPOINTS.USER.PROFILE, profileData);
+  
+  /**
+   * ユーザープロファイルの更新
+   */
+  async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
+    const response = await api.patch<UserProfile>(`${this.baseUrl}/users/profile/`, profileData);
     return response.data;
-  } catch (error) {
-    throw error;
   }
-};
-
-/**
- * ユーザーのクイズ履歴取得
- */
-export const getUserHistory = async (page = 1, limit = 10): Promise<PaginatedResponse<QuizResult>> => {
-  try {
-    const response = await api.get<PaginatedResponse<QuizResult>>(ENDPOINTS.USER.HISTORY, {
+  
+  /**
+   * ユーザーのクイズ履歴取得
+   */
+  async getUserHistory(page = 1, limit = 10): Promise<PaginatedResponse<QuizResult>> {
+    const response = await api.get<PaginatedResponse<QuizResult>>(`${this.baseUrl}/quiz/quiz-results/`, {
       params: {
         page,
         limit
       }
     });
     return response.data;
-  } catch (error) {
-    throw error;
   }
-}; 
+  
+  /**
+   * ユーザーの統計情報取得
+   */
+  async getUserStats(): Promise<any> {
+    const response = await api.get<any>(`${this.baseUrl}/quiz/user-stats-summary/`);
+    return response.data;
+  }
+  
+  /**
+   * ユーザーのカテゴリー別統計取得
+   */
+  async getUserStatsByCategory(categoryId: number): Promise<any> {
+    const response = await api.get<any>(`${this.baseUrl}/quiz/user-statistics/`, {
+      params: {
+        category: categoryId
+      }
+    });
+    return response.data;
+  }
+} 

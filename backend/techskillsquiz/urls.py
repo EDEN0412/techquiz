@@ -26,6 +26,7 @@ from rest_framework_simplejwt.views import (
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
+from django.http import JsonResponse
 
 # Swagger APIドキュメント設定
 schema_view = get_schema_view(
@@ -41,8 +42,22 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+# APIヘルスチェック用ビュー関数
+def health_check(request):
+    """
+    APIヘルスチェック用のエンドポイント。
+    サーバーが正常に動作していることを確認するために使用。
+    """
+    return JsonResponse({
+        'status': 'healthy', 
+        'message': 'API server is running'
+    })
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
+    # ヘルスチェックエンドポイント
+    path('health/', health_check, name='health_check'),
     
     # REST Framework API ブラウザUI
     path('api-auth/', include('rest_framework.urls')),
@@ -63,4 +78,7 @@ urlpatterns = [
         # path('users/', include('users.urls')),
         path('quiz/', include('quiz.urls')),
     ])),
+    
+    # 直接アクセスできるようにするショートカット
+    path('api/quiz/', include('quiz.urls')),
 ]

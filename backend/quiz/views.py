@@ -115,6 +115,34 @@ class QuizViewSet(viewsets.ModelViewSet):
         questions = Question.objects.filter(quiz=quiz).order_by('display_order')
         serializer = QuestionSerializer(questions, many=True)
         return Response(serializer.data)
+        
+    @action(detail=False, methods=['get'])
+    def filter_by_category_and_difficulty(self, request, category_id=None, difficulty_id=None):
+        """
+        カテゴリーと難易度でフィルタリングされたクイズのリストを取得する
+        
+        URL: /api/v1/quiz/filter/quizzes/{category_id}/{difficulty_id}/
+        """
+        # カテゴリと難易度が存在するか確認
+        category = get_object_or_404(Category, pk=category_id)
+        difficulty = get_object_or_404(DifficultyLevel, pk=difficulty_id)
+        
+        # クイズをフィルタリング
+        quizzes = Quiz.objects.filter(
+            category=category,
+            difficulty=difficulty,
+            is_active=True
+        ).order_by('title')
+        
+        # ページネーション適用（設定されている場合）
+        page = self.paginate_queryset(quizzes)
+        if page is not None:
+            serializer = QuizSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        # ページネーションなしの場合
+        serializer = QuizSerializer(quizzes, many=True)
+        return Response(serializer.data)
 
 
 class QuestionViewSet(viewsets.ModelViewSet):

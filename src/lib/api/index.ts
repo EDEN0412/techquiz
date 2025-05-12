@@ -3,7 +3,7 @@
  */
 
 // APIクライアント
-export { default as api } from './client';
+import api from './client';
 
 // 設定
 export * from './config';
@@ -15,10 +15,19 @@ export * from './token';
 export * from './types';
 
 // サービス
-import * as authService from './services/auth.service';
-import * as quizService from './services/quiz.service';
-import * as userService from './services/user.service';
+import { QuizService } from './services/quiz.service';
+import { AuthService } from './services/auth.service';
+import { UserService } from './services/user.service';
 
-export const auth = authService;
-export const quiz = quizService;
-export const user = userService; 
+// APIサービスのインスタンス化
+const quizService = new QuizService();
+const authService = new AuthService();
+const userService = new UserService();
+
+// APIクライアントとサービスをエクスポート
+export {
+  api,
+  quizService,
+  authService,
+  userService
+}; 

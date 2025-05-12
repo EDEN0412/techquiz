@@ -2,7 +2,6 @@
  * 認証関連のAPIサービス
  */
 import api from '../client';
-import { ENDPOINTS } from '../config';
 import { saveTokens, removeTokens } from '../token';
 import { 
   LoginRequest, 
@@ -14,86 +13,82 @@ import {
   TokenRefreshResponse
 } from '../types';
 
-/**
- * ログイン処理
- */
-export const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
-  try {
-    const response = await api.post<AuthResponse>(ENDPOINTS.AUTH.LOGIN, credentials);
+export class AuthService {
+  private baseUrl = '/api/v1';
+
+  /**
+   * ログイン処理
+   */
+  async login(credentials: LoginRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(`${this.baseUrl}/token/`, credentials);
     
     // トークンを保存
     const { access, refresh } = response.data;
     saveTokens(access, refresh);
     
     return response.data;
-  } catch (error) {
-    throw error;
   }
-};
 
-/**
- * 新規登録処理
- */
-export const register = async (userData: RegisterRequest): Promise<AuthResponse> => {
-  try {
-    const response = await api.post<AuthResponse>(ENDPOINTS.AUTH.REGISTER, userData);
+  /**
+   * 新規登録処理
+   */
+  async register(userData: RegisterRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(`${this.baseUrl}/users/register/`, userData);
     
     // トークンを保存
     const { access, refresh } = response.data;
     saveTokens(access, refresh);
     
     return response.data;
-  } catch (error) {
-    throw error;
   }
-};
 
-/**
- * トークン更新処理
- */
-export const refreshToken = async (refreshToken: string): Promise<TokenRefreshResponse> => {
-  try {
+  /**
+   * トークン更新処理
+   */
+  async refreshToken(refreshToken: string): Promise<TokenRefreshResponse> {
     const data: TokenRefreshRequest = {
       refresh: refreshToken
     };
-    const response = await api.post<TokenRefreshResponse>(ENDPOINTS.AUTH.REFRESH, data);
+    const response = await api.post<TokenRefreshResponse>(`${this.baseUrl}/token/refresh/`, data);
     
     // 新しいトークンを保存
     const { access, refresh } = response.data;
     saveTokens(access, refresh);
     
     return response.data;
-  } catch (error) {
-    throw error;
   }
-};
 
-/**
- * ログアウト処理
- */
-export const logout = (): void => {
-  removeTokens();
-};
+  /**
+   * トークン検証
+   */
+  async verifyToken(token: string): Promise<boolean> {
+    try {
+      await api.post(`${this.baseUrl}/token/verify/`, { token });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 
-/**
- * パスワードリセット要求
- */
-export const requestPasswordReset = async (email: string): Promise<void> => {
-  try {
+  /**
+   * ログアウト処理
+   */
+  logout(): void {
+    removeTokens();
+  }
+
+  /**
+   * パスワードリセット要求
+   */
+  async requestPasswordReset(email: string): Promise<void> {
     const data: PasswordResetRequest = { email };
-    await api.post(ENDPOINTS.AUTH.PASSWORD_RESET, data);
-  } catch (error) {
-    throw error;
+    await api.post(`${this.baseUrl}/users/reset-password/`, data);
   }
-};
 
-/**
- * パスワードリセット確認
- */
-export const confirmPasswordReset = async (data: PasswordResetConfirmRequest): Promise<void> => {
-  try {
-    await api.post(ENDPOINTS.AUTH.PASSWORD_RESET_CONFIRM, data);
-  } catch (error) {
-    throw error;
+  /**
+   * パスワードリセット確認
+   */
+  async confirmPasswordReset(data: PasswordResetConfirmRequest): Promise<void> {
+    await api.post(`${this.baseUrl}/users/reset-password-confirm/`, data);
   }
-}; 
+} 

@@ -33,6 +33,21 @@ router.register(r'activity-history', ActivityHistoryViewSet)
 urlpatterns = [
     # ルーターで生成されたURLを含める
     path('', include(router.urls)),
+    
+    # カスタムエンドポイント（例: カテゴリーとレベルでフィルタリングされたクイズを取得）
+    path('filter/quizzes/<int:category_id>/<int:difficulty_id>/', 
+         QuizViewSet.as_view({'get': 'filter_by_category_and_difficulty'}), 
+         name='quiz-filter-by-category-and-difficulty'),
+    
+    # 最近の活動を取得する簡易エンドポイント
+    path('recent-activities/', 
+         ActivityHistoryViewSet.as_view({'get': 'recent'}), 
+         name='recent-activities'),
+    
+    # ユーザー統計情報のサマリーを取得するエンドポイント
+    path('user-stats-summary/', 
+         UserStatisticsViewSet.as_view({'get': 'summary'}), 
+         name='user-stats-summary'),
 ]
 
 # エクスポートするURLパターン名
