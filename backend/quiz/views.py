@@ -99,6 +99,7 @@ class QuizViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description']
     filterset_fields = ['category', 'difficulty', 'is_active']
     ordering_fields = ['title', 'created_at', 'category', 'difficulty']
+    permission_classes = [permissions.AllowAny]  # 誰でもアクセス可能に設定
     
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -126,6 +127,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     search_fields = ['question_text']
     filterset_fields = ['quiz', 'question_type']
     ordering_fields = ['display_order', 'created_at']
+    permission_classes = [permissions.AllowAny]  # 誰でもアクセス可能に設定
     
     @action(detail=True, methods=['get'])
     def answers(self, request, pk=None):
@@ -147,6 +149,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['question', 'is_correct']
     ordering_fields = ['display_order', 'created_at']
+    permission_classes = [permissions.AllowAny]  # 誰でもアクセス可能に設定
 
 
 class QuizResultViewSet(viewsets.ModelViewSet):
@@ -158,6 +161,7 @@ class QuizResultViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['user', 'quiz', 'passed']
     ordering_fields = ['score', 'percentage', 'completed_at', 'created_at']
+    permission_classes = [permissions.IsAuthenticated]  # 認証済みユーザーのみアクセス可能
     
     def get_queryset(self):
         """
@@ -194,6 +198,7 @@ class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['user', 'category', 'difficulty']
     ordering_fields = ['quizzes_completed', 'total_points', 'avg_score', 'highest_score', 'last_quiz_date']
+    permission_classes = [permissions.IsAuthenticated]  # 認証済みユーザーのみアクセス可能
     
     def get_queryset(self):
         """
@@ -251,6 +256,7 @@ class ActivityHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['user', 'quiz', 'category', 'difficulty', 'activity_type']
     ordering_fields = ['activity_date', 'score', 'percentage']
+    permission_classes = [permissions.IsAuthenticated]  # 認証済みユーザーのみアクセス可能
     
     def get_queryset(self):
         """

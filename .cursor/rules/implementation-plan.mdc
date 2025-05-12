@@ -253,6 +253,9 @@ alwaysApply: true
 - [x] シリアライザーのテスト実装
   Done
   全シリアライザー（Category, DifficultyLevel, Quiz, Question, Answer, QuizResult, UserStatistics, ActivityHistory）に対するユニットテストを実装。シリアライズ/デシリアライズの検証、フィールドの検証、エラー処理などを網羅的にテストし、全31テストが正常に実行されることを確認しました。
+- [x] APIビューのテスト実装
+  Done
+  全8種類のViewSet（Category, DifficultyLevel, Quiz, Question, Answer, QuizResult, UserStatistics, ActivityHistory）に対する機能テストを実装。認証、CRUD操作、フィルタリング、検索、並び替え、アクション実行などを検証し、全46テストが正常に実行されることを確認しました。
 - [ ] Django単体テストの実装
 - [ ] API統合テストの実装
 - [ ] ユーザーフロー検証テストの実装
