@@ -79,7 +79,7 @@ jobs:
           python -m pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
       
       - name: Upload backend coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-report
           path: backend/coverage.xml
@@ -103,13 +103,33 @@ jobs:
         run: npm ci
       
       - name: Run frontend integration tests
-        run: npm test -- src/components/tests/QuizApiIntegration.test.tsx
+        run: |
+          # テスト実行前に一時的なモックファイルを作成
+          mkdir -p src/test/mocks
+          echo "export const mockAxios = {
+            create: () => ({
+              get: jest.fn(),
+              post: jest.fn(),
+              put: jest.fn(),
+              delete: jest.fn(),
+              patch: jest.fn(),
+              interceptors: {
+                request: { use: jest.fn() },
+                response: { use: jest.fn() }
+              }
+            }),
+            get: jest.fn(),
+            post: jest.fn()
+          };" > src/test/mocks/axios.js
+          
+          # テスト実行
+          npm test -- src/components/tests/QuizApiIntegration.test.tsx
       
       - name: Generate Frontend Coverage Report
         run: npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverageReporters=lcov
       
       - name: Upload frontend coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-report
           path: coverage/

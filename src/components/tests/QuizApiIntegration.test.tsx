@@ -50,7 +50,32 @@ const mockQuizzes = [
 ];
 
 // axiosのモック設定
-vi.mock('axios');
+vi.mock('axios', () => {
+  const mockAxios = {
+    create: vi.fn(() => ({
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+      patch: vi.fn(),
+      interceptors: {
+        request: { use: vi.fn() },
+        response: { use: vi.fn() }
+      }
+    })),
+    get: vi.fn(),
+    post: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() }
+    }
+  };
+  return {
+    __esModule: true,
+    default: mockAxios
+  };
+});
+
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('QuizService Integration Tests', () => {
