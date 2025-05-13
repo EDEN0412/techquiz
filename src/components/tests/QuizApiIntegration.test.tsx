@@ -1,7 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { QuizService } from '../../lib/api/services/quiz.service';
-import axios from 'axios';
+
+// APIクライアントをモック
+vi.mock('../../lib/api/client', () => {
+  return {
+    default: {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+      patch: vi.fn()
+    }
+  };
+});
+
+// モックAPIをインポート
+import api from '../../lib/api/client';
+const mockApi = api as jest.Mocked<typeof api>;
 
 // モックAPIデータ
 const mockCategories = [
@@ -49,35 +65,6 @@ const mockQuizzes = [
   },
 ];
 
-// axiosのモック設定
-vi.mock('axios', () => {
-  const mockAxios = {
-    create: vi.fn(() => ({
-      get: vi.fn(),
-      post: vi.fn(),
-      put: vi.fn(),
-      delete: vi.fn(),
-      patch: vi.fn(),
-      interceptors: {
-        request: { use: vi.fn() },
-        response: { use: vi.fn() }
-      }
-    })),
-    get: vi.fn(),
-    post: vi.fn(),
-    interceptors: {
-      request: { use: vi.fn() },
-      response: { use: vi.fn() }
-    }
-  };
-  return {
-    __esModule: true,
-    default: mockAxios
-  };
-});
-
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
 describe('QuizService Integration Tests', () => {
   let quizService: QuizService;
 
@@ -89,13 +76,13 @@ describe('QuizService Integration Tests', () => {
   // カテゴリ一覧取得のテスト
   test('getCategories should fetch categories from the API', async () => {
     // モックレスポンスを設定
-    mockedAxios.get.mockResolvedValueOnce({ data: mockCategories });
+    mockApi.get.mockResolvedValueOnce({ data: mockCategories });
 
     // APIの呼び出し
     const result = await quizService.getCategories();
 
     // 期待される結果の検証
-    expect(mockedAxios.get).toHaveBeenCalledWith('/api/v1/quiz/categories/');
+    expect(mockApi.get).toHaveBeenCalledWith('/api/v1/quiz/categories/');
     expect(result).toEqual(mockCategories);
     expect(result.length).toBe(2);
     expect(result[0].name).toBe('Python');
@@ -104,13 +91,13 @@ describe('QuizService Integration Tests', () => {
   // 難易度一覧取得のテスト
   test('getDifficultyLevels should fetch difficulty levels from the API', async () => {
     // モックレスポンスを設定
-    mockedAxios.get.mockResolvedValueOnce({ data: mockDifficulties });
+    mockApi.get.mockResolvedValueOnce({ data: mockDifficulties });
 
     // APIの呼び出し
     const result = await quizService.getDifficultyLevels();
 
     // 期待される結果の検証
-    expect(mockedAxios.get).toHaveBeenCalledWith('/api/v1/quiz/difficulty-levels/');
+    expect(mockApi.get).toHaveBeenCalledWith('/api/v1/quiz/difficulty-levels/');
     expect(result).toEqual(mockDifficulties);
     expect(result.length).toBe(2);
     expect(result[0].name).toBe('Beginner');
@@ -119,13 +106,13 @@ describe('QuizService Integration Tests', () => {
   // カテゴリと難易度でフィルタリングされたクイズ取得のテスト
   test('getQuizzesByCategoryAndDifficulty should fetch filtered quizzes', async () => {
     // モックレスポンスを設定
-    mockedAxios.get.mockResolvedValueOnce({ data: mockQuizzes });
+    mockApi.get.mockResolvedValueOnce({ data: mockQuizzes });
 
     // APIの呼び出し
     const result = await quizService.getQuizzesByCategoryAndDifficulty(1, 1);
 
     // 期待される結果の検証
-    expect(mockedAxios.get).toHaveBeenCalledWith('/api/v1/quiz/filter/quizzes/1/1/');
+    expect(mockApi.get).toHaveBeenCalledWith('/api/v1/quiz/filter/quizzes/1/1/');
     expect(result).toEqual(mockQuizzes);
     expect(result.length).toBe(1);
     expect(result[0].title).toBe('Python Basics');
@@ -144,7 +131,7 @@ describe('QuizService Integration Tests', () => {
       passed: true,
       time_taken: 25,
     };
-    mockedAxios.post.mockResolvedValueOnce({ data: mockResultResponse });
+    mockApi.post.mockResolvedValueOnce({ data: mockResultResponse });
 
     // APIの呼び出し
     const result = await quizService.saveQuizResult({
@@ -155,7 +142,7 @@ describe('QuizService Integration Tests', () => {
     });
 
     // 期待される結果の検証
-    expect(mockedAxios.post).toHaveBeenCalledWith('/api/v1/quiz/quiz-results/', {
+    expect(mockApi.post).toHaveBeenCalledWith('/api/v1/quiz/quiz-results/', {
       quiz: 1,
       score: 8,
       total_possible: 10,
@@ -170,10 +157,10 @@ describe('QuizService Integration Tests', () => {
   test('API error should be handled properly', async () => {
     // モックエラーを設定
     const mockError = new Error('Network Error');
-    mockedAxios.get.mockRejectedValueOnce(mockError);
+    mockApi.get.mockRejectedValueOnce(mockError);
 
     // エラーのテスト
     await expect(quizService.getCategories()).rejects.toThrow('Network Error');
-    expect(mockedAxios.get).toHaveBeenCalledWith('/api/v1/quiz/categories/');
+    expect(mockApi.get).toHaveBeenCalledWith('/api/v1/quiz/categories/');
   });
 }); 

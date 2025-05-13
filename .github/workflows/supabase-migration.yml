@@ -17,6 +17,8 @@ jobs:
       DATABASE_PASSWORD: test_password
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
+      SUPABASE_URL: "http://localhost:54321"
+      SUPABASE_ANON_KEY: "dummy-key-for-testing"
 
     services:
       postgres:
@@ -86,6 +88,8 @@ jobs:
       DATABASE_PASSWORD: test_password
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
+      SUPABASE_URL: "http://localhost:54321"
+      SUPABASE_ANON_KEY: "dummy-key-for-testing"
 
     services:
       postgres:
@@ -125,6 +129,8 @@ jobs:
           cd backend
           poetry config virtualenvs.create false
           poetry install --with dev
+          # 確実にpytestとカバレッジプラグインをインストール
+          pip install pytest pytest-cov pytest-django
       
       - name: Install Node.js dependencies
         run: npm ci
@@ -146,25 +152,28 @@ jobs:
           python -m pytest quiz/tests/test_integration.py -v
           python -m pytest quiz/tests/test_api_client_mock.py -v
       
+      - name: Generate backend coverage report
+        run: |
+          cd backend
+          # カレントディレクトリをbackendに設定してからカバレッジレポートを生成
+          pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
+      
       - name: Run frontend integration tests
         run: |
-          # テスト実行前に一時的なモックファイルを作成
+          # テスト実行前にモックファイルディレクトリを作成
           mkdir -p src/test/mocks
-          echo "export const mockAxios = {
-            create: () => ({
-              get: jest.fn(),
-              post: jest.fn(),
-              put: jest.fn(),
-              delete: jest.fn(),
-              patch: jest.fn(),
-              interceptors: {
-                request: { use: jest.fn() },
-                response: { use: jest.fn() }
-              }
-            }),
-            get: jest.fn(),
-            post: jest.fn()
-          };" > src/test/mocks/axios.js
+          
+          # API clientをモックするファイルを作成
+          mkdir -p src/test/__mocks__
+          echo "module.exports = {
+            default: {
+              get: jest.fn(() => Promise.resolve({ data: {} })),
+              post: jest.fn(() => Promise.resolve({ data: {} })),
+              put: jest.fn(() => Promise.resolve({ data: {} })),
+              delete: jest.fn(() => Promise.resolve({ data: {} })),
+              patch: jest.fn(() => Promise.resolve({ data: {} }))
+            }
+          };" > src/test/__mocks__/api.js
           
           # テスト実行
           npm test -- src/components/tests/QuizApiIntegration.test.tsx
@@ -172,7 +181,7 @@ jobs:
       - name: Generate coverage reports
         run: |
           cd backend
-          python -m pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
+          pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
           cd ..
           npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverageReporters=lcov
       
