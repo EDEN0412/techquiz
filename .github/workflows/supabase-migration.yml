@@ -18,7 +18,7 @@ jobs:
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
       SUPABASE_URL: "http://localhost:54321"
-      SUPABASE_ANON_KEY: "dummy-key-for-testing"
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 
     services:
       postgres:
@@ -89,7 +89,7 @@ jobs:
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
       SUPABASE_URL: "http://localhost:54321"
-      SUPABASE_ANON_KEY: "dummy-key-for-testing"
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 
     services:
       postgres:
@@ -183,7 +183,7 @@ jobs:
           cd backend
           pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
           cd ..
-          npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverageReporters=lcov
+          npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverage.reporter=lcov
       
       - name: Notify integration test success
         if: success()

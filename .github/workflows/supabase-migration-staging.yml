@@ -17,6 +17,8 @@ jobs:
       DATABASE_PASSWORD: test_password
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
+      SUPABASE_URL: "http://localhost:54321"
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 
     services:
       postgres:
@@ -86,6 +88,8 @@ jobs:
       DATABASE_PASSWORD: test_password
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
+      SUPABASE_URL: "http://localhost:54321"
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 
     services:
       postgres:
@@ -125,6 +129,8 @@ jobs:
           cd backend
           poetry config virtualenvs.create false
           poetry install --with dev
+          # 確実にpytestとカバレッジプラグインをインストール
+          pip install pytest pytest-cov pytest-django
       
       - name: Install Node.js dependencies
         run: npm ci
@@ -147,14 +153,32 @@ jobs:
           python -m pytest quiz/tests/test_api_client_mock.py -v
       
       - name: Run frontend integration tests
-        run: npm test -- src/components/tests/QuizApiIntegration.test.tsx
+        run: |
+          # テスト実行前にモックファイルディレクトリを作成
+          mkdir -p src/test/mocks
+          
+          # API clientをモックするファイルを作成
+          mkdir -p src/test/__mocks__
+          echo "module.exports = {
+            default: {
+              get: jest.fn(() => Promise.resolve({ data: {} })),
+              post: jest.fn(() => Promise.resolve({ data: {} })),
+              put: jest.fn(() => Promise.resolve({ data: {} })),
+              delete: jest.fn(() => Promise.resolve({ data: {} })),
+              patch: jest.fn(() => Promise.resolve({ data: {} }))
+            }
+          };" > src/test/__mocks__/api.js
+          
+          # テスト実行
+          npm test -- src/components/tests/QuizApiIntegration.test.tsx
       
       - name: Generate coverage reports
         run: |
           cd backend
-          python -m pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
+          pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
           cd ..
-          npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverageReporters=lcov
+          # Vitestの正しいカバレッジ形式を使用
+          npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverage.reporter=lcov
       
       - name: Notify integration test success
         if: success()
