@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -52,6 +52,8 @@ jobs:
           cd backend
           poetry config virtualenvs.create false
           poetry install --with dev
+          # 確実にpytestとカバレッジプラグインをインストール
+          pip install pytest pytest-cov pytest-django
       
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -108,7 +110,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -117,7 +119,7 @@ jobs:
           cache: 'pip'
       
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
@@ -133,7 +135,10 @@ jobs:
           pip install pytest pytest-cov pytest-django
       
       - name: Install Node.js dependencies
-        run: npm ci
+        run: |
+          npm ci
+          # カバレッジレポート生成に必要な依存関係を明示的にインストール
+          npm install -D @vitest/coverage-v8
       
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -165,15 +170,17 @@ jobs:
           
           # API clientをモックするファイルを作成
           mkdir -p src/test/__mocks__
-          echo "module.exports = {
-            default: {
-              get: jest.fn(() => Promise.resolve({ data: {} })),
-              post: jest.fn(() => Promise.resolve({ data: {} })),
-              put: jest.fn(() => Promise.resolve({ data: {} })),
-              delete: jest.fn(() => Promise.resolve({ data: {} })),
-              patch: jest.fn(() => Promise.resolve({ data: {} }))
-            }
-          };" > src/test/__mocks__/api.js
+          echo "import { vi } from 'vitest';
+
+          const api = {
+            get: vi.fn(() => Promise.resolve({ data: {} })),
+            post: vi.fn(() => Promise.resolve({ data: {} })),
+            put: vi.fn(() => Promise.resolve({ data: {} })),
+            delete: vi.fn(() => Promise.resolve({ data: {} })),
+            patch: vi.fn(() => Promise.resolve({ data: {} }))
+          };
+          
+          export default api;" > src/test/__mocks__/api.js
           
           # テスト実行
           npm test -- src/components/tests/QuizApiIntegration.test.tsx
@@ -183,6 +190,11 @@ jobs:
           cd backend
           pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py --cov=quiz --cov-report=xml
           cd ..
+          # 確認のためカバレッジレポート生成前に依存関係の確認
+          echo "列挙された依存関係:"
+          npm list @vitest/coverage-v8 || true
+          
+          # Vitestの正しいカバレッジ形式を使用
           npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverage.reporter=lcov
       
       - name: Notify integration test success
@@ -201,7 +213,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       

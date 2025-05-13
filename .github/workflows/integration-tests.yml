@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -96,16 +96,19 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          # カバレッジレポート生成に必要な依存関係を明示的にインストール
+          npm install -D @vitest/coverage-v8
       
       - name: Run frontend integration tests
         run: |
@@ -114,21 +117,28 @@ jobs:
           
           # API clientをモックするファイルを作成
           mkdir -p src/test/__mocks__
-          echo "module.exports = {
-            default: {
-              get: jest.fn(() => Promise.resolve({ data: {} })),
-              post: jest.fn(() => Promise.resolve({ data: {} })),
-              put: jest.fn(() => Promise.resolve({ data: {} })),
-              delete: jest.fn(() => Promise.resolve({ data: {} })),
-              patch: jest.fn(() => Promise.resolve({ data: {} }))
-            }
-          };" > src/test/__mocks__/api.js
+          echo "import { vi } from 'vitest';
+
+          const api = {
+            get: vi.fn(() => Promise.resolve({ data: {} })),
+            post: vi.fn(() => Promise.resolve({ data: {} })),
+            put: vi.fn(() => Promise.resolve({ data: {} })),
+            delete: vi.fn(() => Promise.resolve({ data: {} })),
+            patch: vi.fn(() => Promise.resolve({ data: {} }))
+          };
+          
+          export default api;" > src/test/__mocks__/api.js
           
           # テスト実行
           npm test -- src/components/tests/QuizApiIntegration.test.tsx
       
       - name: Generate Frontend Coverage Report
         run: |
+          # 確認のためカバレッジレポート生成前に依存関係の確認
+          echo "列挙された依存関係:"
+          npm list @vitest/coverage-v8 || true
+
+          # カバレッジレポート生成
           npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverage.reporter=lcov
       
       - name: Upload frontend coverage report
@@ -169,7 +179,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -177,7 +187,7 @@ jobs:
           python-version: '3.11'
       
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
       
@@ -192,7 +202,10 @@ jobs:
           pip install pytest pytest-cov pytest-django
       
       - name: Install frontend dependencies
-        run: npm ci
+        run: |
+          npm ci
+          # カバレッジレポート生成に必要な依存関係を明示的にインストール
+          npm install -D @vitest/coverage-v8
       
       - name: Start backend server
         run: |
