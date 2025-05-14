@@ -20,10 +20,20 @@ IS_TESTING = True
 # テスト環境ではデバッグを無効化
 DEBUG = False
 
+# テスト環境での許可ホスト設定
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '[::1]',  # IPv6 localhost
+    '*',      # テスト環境では全てのホストを許可（CI/CD環境用）
+]
+
 # テスト環境ではCORSをより制限的に
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:3000",  # フロントエンドプレビュー用ポート
 ]
 
 # テスト環境でのSupabase同期は無効化
