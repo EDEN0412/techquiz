@@ -136,7 +136,8 @@ jobs:
       
       - name: Install Node.js dependencies
         run: |
-          npm ci
+          # npm ci の代わりに npm install を使用して依存関係を更新
+          npm install
           # カバレッジレポート生成に必要な依存関係を明示的にインストール
           npm install -D @vitest/coverage-v8
       
