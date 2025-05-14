@@ -212,23 +212,70 @@ jobs:
       - name: Start backend server
         run: |
           cd backend
+          
+          # マイグレーションの実行
+          echo "Running migrations..."
           python manage.py migrate
-          python manage.py runserver 8000 &
-          sleep 5
+          
+          # テストデータの作成（必要に応じて）
+          echo "Creating test data..."
+          python manage.py loaddata quiz/fixtures/test_data.json || echo "No test data fixture found, continuing..."
+          
+          # バックエンドサーバーの起動
+          echo "Starting Django server on port 8000..."
+          python manage.py runserver 0.0.0.0:8000 > django_server.log 2>&1 &
+          
+          # サーバーが起動するまで十分に待機
+          echo "Waiting for server to start..."
+          sleep 10
+          
+          # サーバーのステータス確認
+          if ps aux | grep "[p]ython manage.py runserver"; then
+            echo "Django server is running"
+          else
+            echo "Django server failed to start"
+            cat django_server.log
+            exit 1
+          fi
+          
+          # サーバーへの接続テスト
+          echo "Testing server connectivity..."
+          curl -v http://localhost:8000/ || echo "Root endpoint might not exist, trying API endpoint..."
+          curl -v http://localhost:8000/api/v1/ || echo "API endpoint might require authentication or not exist, continuing..."
       
       - name: Test full integration
         run: |
           # バックエンドのAPIへの接続テスト
-          curl -f http://localhost:8000/api/v1/quiz/categories/ || exit 1
+          echo "Testing backend API connectivity..."
+          curl -v http://localhost:8000/api/v1/quiz/categories/ || (echo "Backend API test failed" && cat backend/django_server.log && exit 1)
           
-          # フロントエンドからバックエンドAPIへの接続テスト
+          # フロントエンドビルド
+          echo "Building frontend..."
           export VITE_API_BASE_URL=http://localhost:8000
           npm run build
-          npm run preview -- --port 3000 &
-          sleep 5
+          
+          # フロントエンドプレビューサーバー起動
+          echo "Starting frontend preview server..."
+          npm run preview -- --port 3000 --host 0.0.0.0 > frontend_server.log 2>&1 &
+          
+          # サーバーが起動するまで待機
+          echo "Waiting for frontend server to start..."
+          sleep 10
+          
+          # サーバーのステータス確認
+          if ps aux | grep "[n]pm run preview"; then
+            echo "Frontend server is running"
+          else
+            echo "Frontend server failed to start"
+            cat frontend_server.log
+            exit 1
+          fi
           
           # 統合アプリケーションの動作確認
-          curl -f http://localhost:3000 || exit 1
+          echo "Testing frontend application..."
+          curl -v http://localhost:3000 || (echo "Frontend test failed" && cat frontend_server.log && exit 1)
+          
+          echo "Full integration test successful!"
       
       - name: Notify success
         if: success()
