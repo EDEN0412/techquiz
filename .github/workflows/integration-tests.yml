@@ -70,6 +70,13 @@ jobs:
             sleep 1
           done
           echo "PostgreSQL started."
+          
+      - name: Apply migrations explicitly before tests
+        run: |
+          cd backend
+          # 明示的にマイグレーションを適用（テストで必要なテーブルを作成）
+          python manage.py migrate auth --noinput
+          python manage.py migrate --noinput
       
       - name: Run backend integration tests
         run: |
