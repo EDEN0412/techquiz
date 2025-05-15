@@ -199,7 +199,9 @@ alwaysApply: true
 - [x] APIエンドポイントの実装
   Done
   カテゴリーと難易度でクイズをフィルタリングする機能や、最近の活動履歴、ユーザー統計情報を取得するカスタムエンドポイントを実装。フロントエンドとの連携用にAPIクライアントも更新しました。
-- [ ] 認証・認可の実装（JWT）
+- [x] 認証・認可の実装（JWT）
+  Done
+  DjangoバックエンドにJWT認証・認可機能を追加。UserProfileモデル、関連シリアライザー、認証ビュー、URLルーティングを実装しました。フロントエンド側でも認証サービス、AuthContext、APIクライアントのトークン連携を実装しました。
 
 ## フロントエンド開発（続き）
 
@@ -207,7 +209,9 @@ alwaysApply: true
 -  [x] Django API Clientの設定と初期化
   Done
   Axiosを使用したAPIクライアントを実装し、認証・クイズ・ユーザー関連の各APIサービスを作成しました。
-- [ ] Django認証フローの実装（JWT）
+- [x] Django認証フローの実装（JWT）
+  Done
+  フロントエンドに認証サービス(authService.ts)と認証状態を管理するAuthContext(AuthContext.tsx)を実装。APIクライアント(client.ts)もトークンリフレッシュ機能を含むように更新し、App.tsxでAuthProviderを適用しました。
 - [ ] サインアップ機能の実装
 - [ ] ログイン機能の実装
 - [ ] パスワードリセット機能の実装

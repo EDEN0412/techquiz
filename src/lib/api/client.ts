@@ -46,13 +46,13 @@ apiClient.interceptors.response.use(
           return Promise.reject(error);
         }
         
-        const response = await axios.post(`${API_BASE_URL}/${API_VERSION}/auth/refresh/`, {
+        const response = await axios.post(`${API_BASE_URL}/${API_VERSION}/users/token/refresh/`, {
           refresh: refreshToken,
         });
         
         // 新しいトークンを保存
-        const { access, refresh } = response.data;
-        saveTokens(access, refresh);
+        const { access } = response.data;
+        saveTokens(access, refreshToken);
         
         // 元のリクエストを再実行
         originalRequest.headers = {

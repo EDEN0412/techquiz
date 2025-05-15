@@ -74,11 +74,12 @@ urlpatterns = [
     
     # アプリケーション別API
     path('api/v1/', include([
-        # 今後、以下のようにアプリごとのURLsを追加していく
-        # path('users/', include('users.urls')),
+        # 各アプリごとのURLを追加
+        path('users/', include('users.urls')),
         path('quiz/', include('quiz.urls')),
     ])),
     
     # 直接アクセスできるようにするショートカット（異なる名前空間を使用）
     path('api/quiz/', include('quiz.urls', namespace='quiz_direct')),
+    path('api/users/', include('users.urls', namespace='users_direct')),
 ]
