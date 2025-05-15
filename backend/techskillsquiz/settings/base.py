@@ -34,10 +34,11 @@ INSTALLED_APPS = [
     # サードパーティアプリ
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_yasg",
     "corsheaders",
     # プロジェクトアプリ
-    "techskillsquiz",  # プロジェクトのメインアプリ
+    "techskillsquiz",
     "users",
     "quiz",
 ]
