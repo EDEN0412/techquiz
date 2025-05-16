@@ -157,6 +157,7 @@ jobs:
           cd backend
           python -m pytest quiz/tests/test_integration.py -v
           python -m pytest quiz/tests/test_api_client_mock.py -v
+          python -m pytest users/ -v  # ユーザー認証関連のテストを追加
       
       - name: Generate backend coverage report
         run: |
