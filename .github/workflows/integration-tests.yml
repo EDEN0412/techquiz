@@ -83,13 +83,13 @@ jobs:
           cd backend
           python -m pytest quiz/tests/test_integration.py -v
           python -m pytest quiz/tests/test_api_client_mock.py -v
-          python -m pytest users/ -v  # ユーザー認証関連のテストを追加
+          python -m pytest users/tests.py -v  # ユーザー認証関連のテストを追加
       
       - name: Generate Backend Coverage Report
         run: |
           cd backend
           # カレントディレクトリをbackendに設定してからカバレッジレポートを生成
-          pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py users/ --cov=quiz --cov=users --cov-report=xml
+          pytest quiz/tests/test_integration.py quiz/tests/test_api_client_mock.py users/tests.py --cov=quiz --cov=users --cov-report=xml
       
       - name: Upload backend coverage report
         uses: actions/upload-artifact@v4
