@@ -38,22 +38,72 @@ export interface User {
  * ユーザー登録
  */
 export const register = async (data: RegisterData): Promise<User> => {
-  const response = await apiClient.post<User>('/users/register/', data);
-  return response.data;
+  try {
+    const response = await apiClient.post<User>('/users/register/', data);
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<{[key: string]: string[]}>;
+    if (axiosError.response?.data) {
+      // バックエンドから返されたエラーメッセージを整形
+      const errors = axiosError.response.data;
+      const errorMessages: string[] = [];
+      
+      Object.keys(errors).forEach(key => {
+        const fieldErrors = errors[key];
+        if (Array.isArray(fieldErrors)) {
+          fieldErrors.forEach(err => {
+            errorMessages.push(`${key}: ${err}`);
+          });
+        }
+      });
+      
+      if (errorMessages.length > 0) {
+        throw new Error(errorMessages.join('\n'));
+      }
+    }
+    
+    throw new Error('アカウント作成に失敗しました');
+  }
 };
 
 /**
  * ログイン
  */
 export const login = async (credentials: LoginCredentials): Promise<TokenResponse> => {
-  const response = await apiClient.post<TokenResponse>('/users/token/', credentials);
-  
-  // トークンを保存
-  if (response.data.access && response.data.refresh) {
-    saveTokens(response.data.access, response.data.refresh);
+  try {
+    const response = await apiClient.post<TokenResponse>('/users/token/', credentials);
+    
+    // トークンを保存
+    if (response.data.access && response.data.refresh) {
+      saveTokens(response.data.access, response.data.refresh);
+    }
+    
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<{[key: string]: string[]}>;
+    if (axiosError.response?.data) {
+      // バックエンドから返されたエラーメッセージを整形
+      const errors = axiosError.response.data;
+      const errorMessages: string[] = [];
+      
+      Object.keys(errors).forEach(key => {
+        const fieldErrors = errors[key];
+        if (Array.isArray(fieldErrors)) {
+          fieldErrors.forEach(err => {
+            errorMessages.push(`${key}: ${err}`);
+          });
+        } else if (typeof fieldErrors === 'string') {
+          errorMessages.push(fieldErrors);
+        }
+      });
+      
+      if (errorMessages.length > 0) {
+        throw new Error(errorMessages.join('\n'));
+      }
+    }
+    
+    throw new Error('ログインに失敗しました');
   }
-  
-  return response.data;
 };
 
 /**

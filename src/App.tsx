@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { Dashboard } from './pages/Dashboard';
+import { SignUp } from './pages/SignUp';
 import { AuthProvider } from './lib/contexts/AuthContext';
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/login" element={<div>ログイン画面</div>} />
-            <Route path="/signup" element={<div>サインアップ画面</div>} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/quiz" element={<div>クイズ画面</div>} />
             <Route path="/quiz/:categoryId" element={<div>カテゴリー別クイズ画面</div>} />
             <Route path="/quiz/:categoryId/difficulty" element={<div>難易度選択画面</div>} />
