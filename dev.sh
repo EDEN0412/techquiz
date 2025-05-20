@@ -126,7 +126,7 @@ trap cleanup SIGINT SIGTERM
 echo -e "${GREEN}開発環境が起動しました！${NC}"
 echo -e "${CYAN}フロントエンド: ${NC}http://localhost:5173"
 echo -e "${CYAN}バックエンド: ${NC}http://localhost:8000"
-echo -e "${CYAN}Supabase Studio: ${NC}http://localhost:54322"
+echo -e "${CYAN}Supabase Studio: ${NC}http://localhost:54323"
 echo -e "${BLUE}----------------------------------------${NC}"
 echo -e "${YELLOW}終了するには Ctrl+C を押してください${NC}"
 
