@@ -1,32 +1,9 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import UserProfile
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import RefreshToken
-
-
-class UserProfileModelTest(TestCase):
-    """UserProfileモデルのテスト"""
-    
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser', 
-            email='test@example.com',
-            password='testpassword123'
-        )
-    
-    def test_profile_creation(self):
-        """ユーザー作成時にプロフィールが自動的に作成されることを確認"""
-        self.assertIsNotNone(self.user.profile)
-        self.assertTrue(isinstance(self.user.profile, UserProfile))
-        self.assertEqual(self.user.profile.user, self.user)
-    
-    def test_profile_str_representation(self):
-        """プロフィールの文字列表現が期待通りであることを確認"""
-        expected_string = f"{self.user.username}'s profile"
-        self.assertEqual(str(self.user.profile), expected_string)
 
 
 class UserAPITest(APITestCase):

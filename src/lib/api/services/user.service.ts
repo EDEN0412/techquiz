@@ -8,18 +8,18 @@ export class UserService {
   private baseUrl = '/api/v1';
   
   /**
-   * ユーザープロファイルの取得
+   * ユーザー情報の取得
    */
   async getUserProfile(): Promise<UserProfile> {
-    const response = await api.get<UserProfile>(`${this.baseUrl}/users/profile/`);
+    const response = await api.get<UserProfile>(`${this.baseUrl}/users/me/`);
     return response.data;
   }
   
   /**
-   * ユーザープロファイルの更新
+   * ユーザー情報の更新
    */
   async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
-    const response = await api.patch<UserProfile>(`${this.baseUrl}/users/profile/`, profileData);
+    const response = await api.patch<UserProfile>(`${this.baseUrl}/users/me/`, profileData);
     return response.data;
   }
   

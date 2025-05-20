@@ -3,10 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
-from .models import UserProfile
 from .serializers import (
     UserSerializer, 
-    UserProfileSerializer, 
     RegisterSerializer, 
     ChangePasswordSerializer
 )
@@ -52,19 +50,6 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class UserProfileViewSet(viewsets.ModelViewSet):
-    """ユーザープロファイル管理用ビュー"""
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
-    def get_queryset(self):
-        """現在のユーザーか管理者のみがプロファイル情報を取得できます"""
-        user = self.request.user
-        if user.is_staff:
-            return UserProfile.objects.all()
-        return UserProfile.objects.filter(user=user)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

@@ -1,26 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from .models import UserProfile
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    """ユーザープロファイル用シリアライザー"""
-    
-    class Meta:
-        model = UserProfile
-        fields = ('bio', 'date_of_birth', 'avatar_url', 'created_at', 'updated_at')
-        read_only_fields = ('created_at', 'updated_at')
 
 
 class UserSerializer(serializers.ModelSerializer):
     """ユーザー情報用シリアライザー"""
     
-    profile = UserProfileSerializer(required=False)
-    
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'profile', 'date_joined')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'date_joined')
         read_only_fields = ('id', 'date_joined')
 
 
@@ -39,8 +27,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'password', 'password2', 'email', 'first_name', 'last_name')
         extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True}
+            'first_name': {'required': False},
+            'last_name': {'required': False}
         }
     
     def validate(self, attrs):
@@ -54,8 +42,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', '')
         )
         
         user.set_password(validated_data['password'])
