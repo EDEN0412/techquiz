@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { Dashboard } from './pages/Dashboard';
 import { SignUp } from './pages/SignUp';
+import { Login } from './pages/Login';
 import { AuthProvider } from './lib/contexts/AuthContext';
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/login" element={<div>ログイン画面</div>} />
+            <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/quiz" element={<div>クイズ画面</div>} />
             <Route path="/quiz/:categoryId" element={<div>カテゴリー別クイズ画面</div>} />
