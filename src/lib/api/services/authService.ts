@@ -1,6 +1,16 @@
 import { AxiosError } from 'axios';
-import apiClient from '../client';
+import axios from 'axios';
 import { saveTokens, removeTokens, getRefreshToken, getAccessToken } from '../token';
+import { API_BASE_URL } from '../config';
+
+// 認証用のカスタムAPIクライアント
+const authApi = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 export interface LoginCredentials {
   username: string;
@@ -39,7 +49,7 @@ export interface User {
  */
 export const register = async (data: RegisterData): Promise<User> => {
   try {
-    const response = await apiClient.post<User>('/users/register/', data);
+    const response = await authApi.post<User>('/v1/users/register/', data);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<{[key: string]: string[]}>;
@@ -71,7 +81,7 @@ export const register = async (data: RegisterData): Promise<User> => {
  */
 export const login = async (credentials: LoginCredentials): Promise<TokenResponse> => {
   try {
-    const response = await apiClient.post<TokenResponse>('/users/token/', credentials);
+    const response = await authApi.post<TokenResponse>('/v1/users/token/', credentials);
     
     // トークンを保存
     if (response.data.access && response.data.refresh) {
@@ -121,7 +131,7 @@ export const refreshToken = async (): Promise<string | null> => {
   if (!refresh) return null;
   
   try {
-    const response = await apiClient.post<{ access: string }>('/users/token/refresh/', { refresh });
+    const response = await authApi.post<{ access: string }>('/v1/users/token/refresh/', { refresh });
     saveTokens(response.data.access, refresh);
     return response.data.access;
   } catch (error) {
@@ -139,7 +149,11 @@ export const refreshToken = async (): Promise<string | null> => {
  */
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    const response = await apiClient.get<User>('/users/users/me/');
+    const token = getAccessToken();
+    if (token) {
+      authApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+    const response = await authApi.get<User>('/v1/users/users/me/');
     return response.data;
   } catch (error) {
     return null;
@@ -154,7 +168,7 @@ export const verifyToken = async (): Promise<boolean> => {
   if (!token) return false;
   
   try {
-    await apiClient.post('/users/token/verify/', { token });
+    await authApi.post('/v1/users/token/verify/', { token });
     return true;
   } catch {
     return false;

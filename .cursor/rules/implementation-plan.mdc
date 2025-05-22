@@ -221,7 +221,9 @@ alwaysApply: true
 - [x] Django認証フローの実装（JWT）
   Done
   フロントエンドに認証サービス(authService.ts)と認証状態を管理するAuthContext(AuthContext.tsx)を実装。APIクライアント(client.ts)もトークンリフレッシュ機能を含むように更新し、App.tsxでAuthProviderを適用しました。
-- [ ] サインアップ機能の実装
+- [x] サインアップ機能の実装
+  Done
+  サインアップフォームを作成し、フロントエンドからDjango APIを呼び出してユーザー登録ができるようにしました。APIクライアントのURL設定やDjangoサーバーの起動に関する問題を解決し、正常に動作することを確認しました。
 - [ ] ログイン機能の実装
 - [ ] パスワードリセット機能の実装
 - [ ] 認証状態のグローバルな管理と更新（`AuthContext` の活用）
