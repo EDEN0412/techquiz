@@ -242,9 +242,18 @@ class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         現在のユーザーの統計情報のみを返す、もしくは管理者の場合は全てのユーザーの統計情報を返す
         """
         user = self.request.user
-        if user.is_staff:
-            return UserStatistics.objects.all()
-        return UserStatistics.objects.filter(user=user)
+        queryset = UserStatistics.objects.all() if user.is_staff else UserStatistics.objects.filter(user=user)
+        
+        # 期間によるフィルタリング（last_quiz_dateに基づく）
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        
+        if start_date:
+            queryset = queryset.filter(last_quiz_date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(last_quiz_date__lte=end_date)
+            
+        return queryset
     
     @action(detail=False, methods=['get'])
     def summary(self, request):
@@ -252,24 +261,47 @@ class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         ユーザーの全体的な統計情報のサマリーを取得する
         """
         user = request.user
-        stats = UserStatistics.objects.filter(user=user)
+        
+        # クエリパラメーターから期間フィルターを取得
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        # 基本クエリセット
+        stats_query = UserStatistics.objects.filter(user=user)
+        
+        # 期間フィルタリングの適用
+        if start_date:
+            stats_query = stats_query.filter(last_quiz_date__gte=start_date)
+        if end_date:
+            stats_query = stats_query.filter(last_quiz_date__lte=end_date)
         
         # 全体の統計情報を計算
-        total_quizzes = stats.aggregate(total=Sum('quizzes_completed'))['total'] or 0
-        total_points = stats.aggregate(total=Sum('total_points'))['total'] or 0
-        avg_score = stats.aggregate(avg=Avg('avg_score'))['avg'] or 0
+        total_quizzes = stats_query.aggregate(total=Sum('quizzes_completed'))['total'] or 0
+        total_points = stats_query.aggregate(total=Sum('total_points'))['total'] or 0
+        avg_score = stats_query.aggregate(avg=Avg('avg_score'))['avg'] or 0
         
-        # カテゴリごとの統計
-        categories = UserStatistics.objects.filter(
-            user=user, 
-            difficulty=None
-        ).order_by('-quizzes_completed')
+        # カテゴリごとの統計（難易度=Noneのレコードで集計）
+        categories_query = stats_query.filter(difficulty=None)
         
-        # 難易度ごとの統計
-        difficulties = UserStatistics.objects.filter(
-            user=user, 
-            category=None
-        ).order_by('-quizzes_completed')
+        # ソートオプション（デフォルトは完了クイズ数の降順）
+        sort_by = request.query_params.get('sort_by', 'quizzes_completed')
+        sort_dir = '-' if request.query_params.get('sort_dir', 'desc') == 'desc' else ''
+        categories = categories_query.order_by(f'{sort_dir}{sort_by}')
+        
+        # 難易度ごとの統計（カテゴリ=Noneのレコードで集計）
+        difficulties_query = stats_query.filter(category=None)
+        difficulties = difficulties_query.order_by(f'{sort_dir}{sort_by}')
+        
+        # 最近の進捗情報
+        recent_progress = None
+        last_stat = stats_query.order_by('-last_quiz_date').first()
+        if last_stat:
+            recent_progress = {
+                'last_quiz_date': last_stat.last_quiz_date,
+                'category': last_stat.category.name if last_stat.category else None,
+                'difficulty': last_stat.difficulty.name if last_stat.difficulty else None,
+                'score': last_stat.avg_score
+            }
         
         # 結果をシリアライズ
         category_serializer = UserStatisticsSerializer(categories, many=True)
@@ -280,7 +312,8 @@ class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
             'total_points': total_points,
             'overall_avg_score': avg_score,
             'categories': category_serializer.data,
-            'difficulties': difficulty_serializer.data
+            'difficulties': difficulty_serializer.data,
+            'recent_progress': recent_progress
         })
 
 

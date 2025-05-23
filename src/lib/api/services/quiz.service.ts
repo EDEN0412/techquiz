@@ -8,7 +8,8 @@ import {
   QuizQuestion, 
   QuizSubmission, 
   QuizResult,
-  PaginatedResponse 
+  PaginatedResponse,
+  UserStatsSummary
 } from '../types';
 
 /**
@@ -101,9 +102,17 @@ export class QuizService {
 
   /**
    * ユーザー統計情報のサマリーを取得
+   * @param params フィルタリングパラメータ（start_date, end_date, sort_by, sort_dir）
    */
-  async getUserStatsSummary(): Promise<any> {
-    const response = await api.get<any>(`${this.baseUrl}/user-stats-summary/`);
+  async getUserStatsSummary(params?: {
+    start_date?: string;
+    end_date?: string;
+    sort_by?: string;
+    sort_dir?: 'asc' | 'desc';
+  }): Promise<UserStatsSummary> {
+    const response = await api.get<UserStatsSummary>(`${this.baseUrl}/user-stats-summary/`, {
+      params
+    });
     return response.data;
   }
 

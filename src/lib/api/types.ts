@@ -105,6 +105,39 @@ export interface QuizQuestionResult {
   explanation?: string;
 }
 
+// ユーザー統計情報
+export interface UserStatistics {
+  id: number;
+  user: number;
+  username: string;
+  category?: number;
+  category_name?: string;
+  difficulty?: number;
+  difficulty_name?: string;
+  quizzes_completed: number;
+  total_points: number;
+  avg_score: number;
+  highest_score: number;
+  last_quiz_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ユーザー統計情報のサマリー
+export interface UserStatsSummary {
+  total_quizzes_completed: number;
+  total_points: number;
+  overall_avg_score: number;
+  categories: UserStatistics[];
+  difficulties: UserStatistics[];
+  recent_progress?: {
+    last_quiz_date: string;
+    category: string | null;
+    difficulty: string | null;
+    score: number;
+  };
+}
+
 // API共通レスポンス
 export interface ApiResponse<T> {
   data?: T;

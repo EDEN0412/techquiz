@@ -2,7 +2,7 @@
  * ユーザー関連のAPIサービス
  */
 import api from '../client';
-import { UserProfile, QuizResult, PaginatedResponse } from '../types';
+import { UserProfile, QuizResult, PaginatedResponse, UserStatistics, UserStatsSummary } from '../types';
 
 export class UserService {
   private baseUrl = '/api/v1';
@@ -39,16 +39,16 @@ export class UserService {
   /**
    * ユーザーの統計情報取得
    */
-  async getUserStats(): Promise<any> {
-    const response = await api.get<any>(`${this.baseUrl}/quiz/user-stats-summary/`);
+  async getUserStats(): Promise<UserStatsSummary> {
+    const response = await api.get<UserStatsSummary>(`${this.baseUrl}/quiz/user-stats-summary/`);
     return response.data;
   }
   
   /**
    * ユーザーのカテゴリー別統計取得
    */
-  async getUserStatsByCategory(categoryId: number): Promise<any> {
-    const response = await api.get<any>(`${this.baseUrl}/quiz/user-statistics/`, {
+  async getUserStatsByCategory(categoryId: number): Promise<PaginatedResponse<UserStatistics>> {
+    const response = await api.get<PaginatedResponse<UserStatistics>>(`${this.baseUrl}/quiz/user-statistics/`, {
       params: {
         category: categoryId
       }
