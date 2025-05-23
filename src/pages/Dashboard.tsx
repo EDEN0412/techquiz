@@ -3,6 +3,7 @@ import { SiHtml5, SiCss3, SiRuby, SiRubyonrails, SiJavascript, SiPython, SiLinux
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { useUserStats } from '../hooks/useUserStats';
 
 const categories = [
   {
@@ -106,10 +107,15 @@ const recentActivity = [
 
 export function Dashboard() {
   const navigate = useNavigate();
+  const { stats, loading: statsLoading, error: statsError } = useUserStats();
 
   const handleStartQuiz = (categoryId: string) => {
     navigate(`/quiz/${categoryId}/difficulty`);
   };
+
+  // 統計情報の表示値（ローディング中やエラー時はデフォルト値）
+  const totalQuizzes = stats?.total_quizzes_completed ?? 0;
+  const averageScore = stats?.overall_avg_score ? Math.round(stats.overall_avg_score) : 0;
 
   return (
     <div className="space-y-8">
@@ -122,12 +128,16 @@ export function Dashboard() {
         <div className="flex items-center space-x-4 rounded-lg bg-white p-4 shadow-sm">
           <div className="text-center">
             <p className="text-sm text-gray-500">完了したクイズ</p>
-            <p className="text-2xl font-bold text-gray-900">12</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {statsLoading ? '...' : totalQuizzes}
+            </p>
           </div>
           <div className="h-12 w-px bg-gray-200"></div>
           <div className="text-center">
             <p className="text-sm text-gray-500">平均スコア</p>
-            <p className="text-2xl font-bold text-gray-900">85%</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {statsLoading ? '...' : `${averageScore}%`}
+            </p>
           </div>
         </div>
       </div>

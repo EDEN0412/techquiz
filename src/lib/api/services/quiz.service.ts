@@ -9,7 +9,8 @@ import {
   QuizSubmission, 
   QuizResult,
   PaginatedResponse,
-  UserStatsSummary
+  UserStatsSummary,
+  ActivityHistory
 } from '../types';
 
 /**
@@ -93,8 +94,8 @@ export class QuizService {
   /**
    * 最近の活動履歴を取得
    */
-  async getRecentActivities(limit: number = 10): Promise<any[]> {
-    const response = await api.get<any[]>(`${this.baseUrl}/recent-activities/`, {
+  async getRecentActivities(limit: number = 10): Promise<ActivityHistory[]> {
+    const response = await api.get<ActivityHistory[]>(`${this.baseUrl}/recent-activities/`, {
       params: { limit }
     });
     return response.data;
