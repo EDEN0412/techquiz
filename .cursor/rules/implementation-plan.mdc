@@ -232,10 +232,12 @@ alwaysApply: true
 - [x] ユーザー統計情報の取得APIの実装
   Done
   バックエンドでUserStatisticsViewSetの期間フィルタリング、ソート機能、最新進捗情報を含むsummaryエンドポイントを強化。フロントエンドでUserStatistics、UserStatsSummary型定義を追加し、型安全なAPIクライアントサービスを実装しました。
-- [ ] 最近の活動履歴取得APIの実装
+- [x] 最近の活動履歴取得APIの実装
+  Done
+  ActivityHistoryViewSetのrecentアクションを活用し、useRecentActivitiesフックを実装。ダッシュボードの最近の活動セクションを実際のAPIから取得したデータで表示するように更新し、ローディング・エラー・空状態の適切なハンドリングも実装しました。
 - [x] ダッシュボード統計表示機能の実装
   Done
-  APIから取得した実際のユーザー統計データを表示するダッシュボードを実装。StatsCard、CategoryStats、RecentProgressコンポーネントを作成し、useUserStatsフックでデータ取得、認証チェック、エラーハンドリング、ローディング状態の表示機能を追加しました。
+  useUserStatsとuseRecentActivitiesフックを作成し、ダッシュボード画面のデザインを保持しながら、実際のAPIから取得した統計データ（完了クイズ数、平均スコア）と最近の活動履歴を表示する機能を実装しました。
 - [ ] クイズ完了時の統計情報即時更新APIの実装
 - [ ] 統計情報バッチ更新処理の実装
 

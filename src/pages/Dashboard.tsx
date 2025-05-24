@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '../hooks/useUserStats';
+import { useRecentActivities } from '../hooks/useRecentActivities';
 
 const categories = [
   {
@@ -81,33 +82,10 @@ const categories = [
   },
 ];
 
-const recentActivity = [
-  {
-    id: 1,
-    category: 'Python',
-    score: 85,
-    date: '2024-03-10',
-    difficulty: '中級',
-  },
-  {
-    id: 2,
-    category: 'Git',
-    score: 92,
-    date: '2024-03-09',
-    difficulty: '初級',
-  },
-  {
-    id: 3,
-    category: 'HTML & CSS',
-    score: 78,
-    date: '2024-03-08',
-    difficulty: '上級',
-  },
-];
-
 export function Dashboard() {
   const navigate = useNavigate();
   const { stats, loading: statsLoading, error: statsError } = useUserStats();
+  const { activities, loading: activitiesLoading, error: activitiesError } = useRecentActivities(3);
 
   const handleStartQuiz = (categoryId: string) => {
     navigate(`/quiz/${categoryId}/difficulty`);
@@ -174,27 +152,50 @@ export function Dashboard() {
       {/* Recent Activity */}
       <div>
         <h2 className="mb-4 text-xl font-semibold text-gray-900">最近の活動</h2>
+        
         <Card>
           <CardContent className="divide-y divide-gray-200">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                <div>
-                  <p className="font-medium text-gray-900">{activity.category}</p>
-                  <p className="text-sm text-gray-500">
-                    {activity.difficulty} • {new Date(activity.date).toLocaleDateString('ja-JP')}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="text-lg font-semibold text-gray-900">{activity.score}%</p>
-                    <p className="text-sm text-gray-500">スコア</p>
-                  </div>
-                  <Button variant="secondary" size="sm">
-                    復習する
-                  </Button>
-                </div>
+            {activitiesLoading ? (
+              <div className="py-8 text-center text-gray-500">
+                読み込み中...
               </div>
-            ))}
+            ) : activitiesError ? (
+              <div className="py-8 text-center">
+                <p className="text-red-500 mb-4">{activitiesError}</p>
+                {activitiesError.includes('ログイン') && (
+                  <Button 
+                    onClick={() => navigate('/login')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    ログインページへ
+                  </Button>
+                )}
+              </div>
+            ) : activities.length === 0 ? (
+              <div className="py-8 text-center text-gray-500">
+                まだ活動履歴がありません。クイズを始めてみましょう！
+              </div>
+            ) : (
+              activities.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                  <div>
+                    <p className="font-medium text-gray-900">{activity.category_name || 'カテゴリ不明'}</p>
+                    <p className="text-sm text-gray-500">
+                      {activity.difficulty_name || '難易度不明'} • {new Date(activity.activity_date).toLocaleDateString('ja-JP')}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-gray-900">{Math.round(activity.percentage)}%</p>
+                      <p className="text-sm text-gray-500">スコア</p>
+                    </div>
+                    <Button variant="secondary" size="sm">
+                      復習する
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
       </div>
