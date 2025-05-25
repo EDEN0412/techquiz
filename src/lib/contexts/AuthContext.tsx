@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { 
   login as loginApi, 
   logout as logoutApi, 
@@ -16,6 +16,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  onAuthChange: (callback: (isAuthenticated: boolean) => void) => () => void;
 }
 
 // コンテキストの作成
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => false,
   logout: () => {},
   isAuthenticated: false,
+  onAuthChange: () => () => {},
 });
 
 // カスタムフック
@@ -40,6 +42,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChangeCallbacks, setAuthChangeCallbacks] = useState<((isAuthenticated: boolean) => void)[]>([]);
+
+  // 認証状態変更時のコールバック登録
+  const onAuthChange = useCallback((callback: (isAuthenticated: boolean) => void) => {
+    setAuthChangeCallbacks(prev => [...prev, callback]);
+    
+    // クリーンアップ関数を返す
+    return () => {
+      setAuthChangeCallbacks(prev => prev.filter(cb => cb !== callback));
+    };
+  }, []);
+
+  // 認証状態が変更されたときにコールバックを実行
+  useEffect(() => {
+    authChangeCallbacks.forEach(callback => callback(isAuthenticated));
+  }, [isAuthenticated, authChangeCallbacks]);
 
   // 初期化時にトークンの検証とユーザー情報の取得
   useEffect(() => {
@@ -122,6 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     isAuthenticated,
+    onAuthChange,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

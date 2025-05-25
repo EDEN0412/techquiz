@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ActivityHistory } from '../lib/api/types';
 import { QuizService } from '../lib/api/services/quiz.service';
 import { getAccessToken } from '../lib/api/token';
+import { useAuth } from '../lib/contexts/AuthContext';
 
 export interface UseRecentActivitiesReturn {
   activities: ActivityHistory[];
@@ -14,6 +15,7 @@ export function useRecentActivities(limit: number = 5): UseRecentActivitiesRetur
   const [activities, setActivities] = useState<ActivityHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, onAuthChange } = useAuth();
 
   const quizService = new QuizService();
 
@@ -25,7 +27,7 @@ export function useRecentActivities(limit: number = 5): UseRecentActivitiesRetur
       // 認証状態を事前にチェック
       const token = getAccessToken();
       
-      if (!token) {
+      if (!token || !isAuthenticated) {
         setError('活動履歴を表示するにはログインしてください');
         setActivities([]);
         setLoading(false);
@@ -56,9 +58,27 @@ export function useRecentActivities(limit: number = 5): UseRecentActivitiesRetur
     }
   };
 
+  // 初回ロード
   useEffect(() => {
     fetchActivities();
   }, [limit]);
+
+  // 認証状態の変化を監視
+  useEffect(() => {
+    const unsubscribe = onAuthChange((authenticated) => {
+      if (!authenticated) {
+        // ログアウト時は即座にエラーメッセージを表示
+        setError('活動履歴を表示するにはログインしてください');
+        setActivities([]);
+        setLoading(false);
+      } else {
+        // ログイン時は活動履歴を再取得
+        fetchActivities();
+      }
+    });
+
+    return unsubscribe;
+  }, [onAuthChange]);
 
   return {
     activities,
