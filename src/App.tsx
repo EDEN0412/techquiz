@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard';
 import { SignUp } from './pages/SignUp';
 import { Login } from './pages/Login';
 import { AuthProvider } from './lib/contexts/AuthContext';
+import QuizQuestionDemo from './components/quiz/QuizQuestionDemo';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/quiz" element={<div>クイズ画面</div>} />
+            <Route path="/quiz/demo" element={<QuizQuestionDemo />} />
             <Route path="/quiz/:categoryId" element={<div>カテゴリー別クイズ画面</div>} />
             <Route path="/quiz/:categoryId/difficulty" element={<div>難易度選択画面</div>} />
             <Route path="/results" element={<div>結果画面</div>} />
