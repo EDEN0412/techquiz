@@ -5,6 +5,7 @@ import { SignUp } from './pages/SignUp';
 import { Login } from './pages/Login';
 import { AuthProvider } from './lib/contexts/AuthContext';
 import QuizQuestionDemo from './components/quiz/QuizQuestionDemo';
+import QuizResult from './components/quiz/QuizResult';
 
 function App() {
   return (

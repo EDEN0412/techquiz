@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import QuizQuestion from './QuizQuestion';
+import QuizResult from './QuizResult';
 import { QuizQuestion as QuizQuestionType } from '../../lib/api/types';
 
 // サンプルクイズデータ
@@ -124,10 +126,13 @@ const sampleQuestions: QuizQuestionType[] = [
 ];
 
 const QuizQuestionDemo: React.FC = () => {
+  const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({});
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
   const [hasStarted, setHasStarted] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [quizStartTime] = useState<Date>(new Date());
 
   const currentQuestion = sampleQuestions[currentQuestionIndex];
   const totalQuestions = sampleQuestions.length;
@@ -154,10 +159,64 @@ const QuizQuestionDemo: React.FC = () => {
     if (currentQuestionIndex < totalQuestions - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
-      // 最後の問題の場合は結果画面へ（今回はアラート表示）
-      alert('クイズ完了！結果画面へ移動します。');
+      // クイズ完了時
+      setIsCompleted(true);
     }
   };
+
+  // 結果データを計算する関数
+  const calculateResults = () => {
+    const questionResults = sampleQuestions.map(question => {
+      const selectedAnswerId = selectedAnswers[question.id];
+      const selectedAnswer = question.answers.find(a => a.id === selectedAnswerId);
+      const isCorrect = selectedAnswer?.is_correct || false;
+      
+      return {
+        question,
+        selectedAnswerId: selectedAnswerId || 0,
+        isCorrect,
+        timeSpent: 0 // 今回は時間計測は実装しない
+      };
+    });
+
+    const correctAnswers = questionResults.filter(result => result.isCorrect).length;
+    const score = Math.round((correctAnswers / totalQuestions) * 100);
+    const timeSpent = Math.round((new Date().getTime() - quizStartTime.getTime()) / 1000);
+
+    return {
+      totalQuestions,
+      correctAnswers,
+      score,
+      timeSpent,
+      questions: questionResults
+    };
+  };
+
+  // 結果画面でのアクション
+  const handleRestartQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswers({});
+    setAnsweredQuestions(new Set());
+    setHasStarted(false);
+    setIsCompleted(false);
+  };
+
+  const handleGoHome = () => {
+    navigate('/');
+  };
+
+  // 結果画面の表示
+  if (isCompleted) {
+    const resultData = calculateResults();
+    return (
+      <QuizResult
+        resultData={resultData}
+        onRestartQuiz={handleRestartQuiz}
+        onGoHome={handleGoHome}
+        quizTitle="HTML/CSS/JavaScript クイズ"
+      />
+    );
+  }
 
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
