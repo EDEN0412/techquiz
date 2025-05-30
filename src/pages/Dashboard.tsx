@@ -1,99 +1,27 @@
-import { Book, Code, Database, Github as Git, Terminal, Cpu, LayoutTemplate, Globe, FileCode } from 'lucide-react';
-import { SiHtml5, SiCss3, SiRuby, SiRubyonrails, SiJavascript, SiPython, SiLinux } from 'react-icons/si';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { useNavigate } from 'react-router-dom';
 import { useUserStats } from '../hooks/useUserStats';
 import { useRecentActivities } from '../hooks/useRecentActivities';
-
-const categories = [
-  {
-    id: 'html-css',
-    title: 'HTML & CSS',
-    description: 'Webの基礎とスタイリングを習得',
-    icon: SiHtml5,
-    color: 'text-orange-500',
-    bgColor: 'bg-orange-50',
-  },
-  {
-    id: 'ruby',
-    title: 'Ruby',
-    description: 'オブジェクト指向スクリプト言語の基礎',
-    icon: SiRuby,
-    color: 'text-red-700',
-    bgColor: 'bg-red-100',
-  },
-  {
-    id: 'ruby-rails',
-    title: 'Ruby on Rails',
-    description: 'Rubyベースの高速Webアプリケーション開発',
-    icon: SiRubyonrails,
-    color: 'text-rose-600',
-    bgColor: 'bg-rose-100',
-  },
-  
-  {
-    id: 'javascript',
-    title: 'JavaScript',
-    description: 'Web開発に不可欠なプログラミング言語',
-    icon: SiJavascript,
-    color: 'text-amber-500',
-    bgColor: 'bg-amber-50',
-  },
-  {
-    id: 'web-app-basic',
-    title: 'Webアプリケーション基礎',
-    description: 'Webアプリ開発の基礎知識とアーキテクチャ',
-    icon: Globe,
-    color: 'text-indigo-500',
-    bgColor: 'bg-indigo-50',
-  },
-  {
-    id: 'python',
-    title: 'Python',
-    description: '汎用性の高い読みやすいプログラミング言語',
-    icon: SiPython,
-    color: 'text-[#4584b6]',
-    bgColor: 'bg-[#ffde57]/20',
-  },
-  {
-    id: 'git',
-    title: 'Git',
-    description: 'バージョン管理とチーム開発',
-    icon: Git,
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-50',
-  },
-  {
-    id: 'linux',
-    title: 'Linux コマンド',
-    description: '基本的なターミナル操作',
-    icon: SiLinux,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-100',
-  },
-  {
-    id: 'database',
-    title: 'データベース',
-    description: 'SQLとデータベース管理',
-    icon: Database,
-    color: 'text-green-500',
-    bgColor: 'bg-green-50',
-  },
-];
+import { useCategories } from '../hooks/useCategories';
+import { enrichCategoriesWithIcons } from '../lib/utils/categoryIcons';
 
 export function Dashboard() {
   const navigate = useNavigate();
   const { stats, loading: statsLoading, error: statsError } = useUserStats();
   const { activities, loading: activitiesLoading, error: activitiesError } = useRecentActivities(3);
+  const { categories: rawCategories, loading: categoriesLoading, error: categoriesError, retry: retryCategories } = useCategories();
 
-  const handleStartQuiz = (categoryId: string) => {
-    navigate(`/quiz/${categoryId}/difficulty`);
+  // カテゴリーにアイコン情報を追加
+  const categories = enrichCategoriesWithIcons(rawCategories);
+
+  const handleStartQuiz = (categorySlug: string) => {
+    navigate(`/quiz/${categorySlug}/difficulty`);
   };
 
-  // 統計情報の表示値（ローディング中やエラー時はデフォルト値）
-  const totalQuizzes = stats?.total_quizzes_completed ?? 0;
-  const averageScore = stats?.overall_avg_score ? Math.round(stats.overall_avg_score) : 0;
+  // 統計情報の表示値（未認証時は '-' を表示）
+  const totalQuizzes = stats?.total_quizzes_completed ?? '-';
+  const averageScore = stats?.overall_avg_score ? Math.round(stats.overall_avg_score) : '-';
 
   return (
     <div className="space-y-8">
@@ -114,7 +42,7 @@ export function Dashboard() {
           <div className="text-center">
             <p className="text-sm text-gray-500">平均スコア</p>
             <p className="text-2xl font-bold text-gray-900">
-              {statsLoading ? '...' : `${averageScore}%`}
+              {statsLoading ? '...' : (typeof averageScore === 'number' ? `${averageScore}%` : averageScore)}
             </p>
           </div>
         </div>
@@ -123,30 +51,63 @@ export function Dashboard() {
       {/* Categories Grid */}
       <div>
         <h2 className="mb-4 text-xl font-semibold text-gray-900">クイズカテゴリー</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <Card key={category.id} interactive className="group cursor-pointer">
+        
+        {categoriesLoading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, index) => (
+              <Card key={index} className="animate-pulse">
                 <CardHeader>
-                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg group-hover:scale-110 transition-transform">
-                    <Icon className={`h-8 w-8 ${category.color}`} />
-                  </div>
-                  <CardTitle>{category.title}</CardTitle>
-                  <CardDescription>{category.description}</CardDescription>
+                  <div className="mb-2 h-12 w-12 rounded-lg bg-gray-200"></div>
+                  <div className="h-6 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    className="w-full" 
-                    onClick={() => handleStartQuiz(category.id)}
-                  >
-                    クイズを開始
-                  </Button>
+                  <div className="h-10 bg-gray-200 rounded"></div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : categoriesError ? (
+          <Card>
+            <CardContent className="py-8 text-center">
+              <p className="text-red-500 mb-4">{categoriesError}</p>
+              <Button onClick={retryCategories} variant="secondary">
+                再試行
+              </Button>
+            </CardContent>
+          </Card>
+        ) : categories.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center text-gray-500">
+              利用可能なカテゴリーがありません。
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category) => {
+              const Icon = category.iconConfig.icon;
+              return (
+                <Card key={category.id} interactive className="group cursor-pointer">
+                  <CardHeader>
+                    <div className={`mb-2 flex h-12 w-12 items-center justify-center rounded-lg ${category.iconConfig.bgColor} group-hover:scale-110 transition-transform`}>
+                      <Icon className={`h-8 w-8 ${category.iconConfig.color}`} />
+                    </div>
+                    <CardTitle>{category.name}</CardTitle>
+                    <CardDescription>{category.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleStartQuiz(category.slug)}
+                    >
+                      クイズを開始
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Recent Activity */}
