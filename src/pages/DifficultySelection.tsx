@@ -142,8 +142,8 @@ const mockDifficulties: Difficulty[] = [
   },
 ];
 
-// 設定フラグ - 本番では true に設定してAPIを使用
-const USE_MOCK_DATA = true;
+// 設定フラグ - APIを使用するように変更
+const USE_MOCK_DATA = false;
 
 export function DifficultySelection() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -186,12 +186,11 @@ export function DifficultySelection() {
           
           setDifficulties(activeDifficulties);
         } else {
-          // 実際のAPIを使用（後で実装）
-          const { QuizService } = await import('../lib/api/services/quiz.service');
-          const quizService = new QuizService();
+          // Supabaseから直接データを取得
+          const { fetchDifficultyLevelsFromSupabase, fetchCategoriesFromSupabase } = await import('../lib/api/supabase-direct');
 
           // カテゴリー一覧を取得してslugから該当するカテゴリーを見つける
-          const categories = await quizService.getCategories();
+          const categories = await fetchCategoriesFromSupabase();
           const foundCategory = categories.find(cat => cat.slug === categoryId);
           
           if (!foundCategory) {
@@ -203,9 +202,8 @@ export function DifficultySelection() {
           setCategory(foundCategory);
 
           // 難易度一覧を取得
-          const difficultyLevels = await quizService.getDifficultyLevels();
+          const difficultyLevels = await fetchDifficultyLevelsFromSupabase();
           const activeDifficulties = difficultyLevels
-            .filter(diff => diff.is_active)
             .sort((a, b) => a.level - b.level);
           
           setDifficulties(activeDifficulties);
@@ -389,7 +387,7 @@ export function DifficultySelection() {
                     <div className="flex items-center justify-between text-sm text-gray-600">
                       <div className="flex items-center space-x-1">
                         <Clock className="h-4 w-4" />
-                        <span>{difficulty.time_limit}分</span>
+                        <span>{Math.floor(difficulty.time_limit / 60)}分</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Trophy className="h-4 w-4" />

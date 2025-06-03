@@ -28,9 +28,7 @@ export interface Difficulty {
   level: number;
   description: string;
   point_multiplier: number;
-  time_limit: number;
-  is_active: boolean;
-  display_order: number;
+  time_limit: number;  // 秒単位
   created_at: string;
   updated_at: string;
 }
