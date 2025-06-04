@@ -95,8 +95,8 @@ const mockCategories: Category[] = [
   },
 ];
 
-// 設定フラグ - 本番では true に設定してAPIを使用
-const USE_MOCK_DATA = true;
+// 設定フラグ - Supabaseから実際のデータを取得するように変更
+const USE_MOCK_DATA = false;
 
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -116,10 +116,9 @@ export function useCategories() {
           .sort((a, b) => a.display_order - b.display_order);
         setCategories(sortedCategories);
       } else {
-        // 実際のAPIを使用（後で実装）
-        const { QuizService } = await import('../lib/api/services/quiz.service');
-        const quizService = new QuizService();
-        const categoriesData = await quizService.getCategories();
+        // Supabaseから直接データを取得
+        const { fetchCategoriesFromSupabase } = await import('../lib/api/supabase-direct');
+        const categoriesData = await fetchCategoriesFromSupabase();
         
         const sortedCategories = categoriesData
           .filter(category => category.is_active)
@@ -133,7 +132,7 @@ export function useCategories() {
       
       // API失敗時はモックデータにフォールバック
       if (!USE_MOCK_DATA) {
-        console.log('APIが失敗したため、モックデータを使用します');
+        console.log('Supabase APIが失敗したため、モックデータを使用します');
         const sortedCategories = mockCategories
           .filter(category => category.is_active)
           .sort((a, b) => a.display_order - b.display_order);

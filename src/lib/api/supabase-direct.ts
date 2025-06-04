@@ -1,7 +1,7 @@
 /**
  * Supabase直接接続クライアント（開発・テスト用）
  */
-import { Difficulty } from './types';
+import { Difficulty, Category } from './types';
 
 // Supabaseローカル環境の設定
 const SUPABASE_URL = 'http://127.0.0.1:54321';
@@ -47,7 +47,7 @@ export async function fetchDifficultyLevelsFromSupabase(): Promise<Difficulty[]>
 /**
  * Supabase REST APIからカテゴリデータを取得
  */
-export async function fetchCategoriesFromSupabase(): Promise<any[]> {
+export async function fetchCategoriesFromSupabase(): Promise<Category[]> {
   try {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/category?select=*&order=display_order.asc`, {
       headers: {
@@ -61,7 +61,19 @@ export async function fetchCategoriesFromSupabase(): Promise<any[]> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    
+    // Supabaseのデータ形式をフロントエンドの型に変換
+    return data.map((item: any): Category => ({
+      id: item.id,
+      name: item.name,
+      slug: item.slug,
+      description: item.description || '',
+      is_active: item.is_active,
+      display_order: item.display_order,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+    }));
   } catch (error) {
     console.error('Supabaseからのカテゴリデータ取得に失敗しました:', error);
     throw error;
