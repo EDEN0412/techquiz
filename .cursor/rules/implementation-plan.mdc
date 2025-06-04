@@ -267,6 +267,9 @@ alwaysApply: true
 - [x] クイズデータモデルの設計（Djangoモデルに合わせる）
   Done
   フロントエンドの `src/lib/api/types.ts` に、Djangoモデルに対応するクイズ関連の型定義（Quiz, QuizQuestion, Answerなど）が既に存在することを確認しました。
+- [x] 実際のDBクイズ表示機能の実装
+  Done
+  Supabaseデータベースから実際のクイズデータを取得してフロントエンドで表示する機能を実装。QuizPageコンポーネント、supabase-direct.ts拡張、URL パラメータ対応、適切なエラーハンドリングとローディング状態を含む完全なDBクイズシステムを完了しました。
 - [x] クイズ問題表示コンポーネントの実装
   Done
   QuizQuestionコンポーネントとQuizQuestionDemoコンポーネントを実装。選択肢表示、回答ボタン確定フロー、真偽判定フィードバック、進捗バー、前後ナビゲーション、状態保持機能を含む完全なクイズ体験を提供。/quiz/demoルートでHTML/CSS/JavaScriptの基礎クイズがアクセス可能です。

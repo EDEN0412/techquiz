@@ -141,14 +141,47 @@ export class QuizService {
       }
     });
     
+    let questionsData = [];
+    
     // レスポンスの形式によって適切な処理を行う
     if (response.data.results) {
       // ページネーション形式の場合
-      return response.data.results;
+      questionsData = response.data.results;
     } else {
       // 配列形式の場合
-      return response.data;
+      questionsData = response.data;
     }
+    
+    // 各問題に対して答えを取得し、統合する
+    const questionsWithAnswers = await Promise.all(
+      questionsData.map(async (question: any) => {
+        try {
+          const answersResponse = await api.get<any>(`${this.baseUrl}/answers/`, {
+            params: { question: question.id }
+          });
+          
+          let answers = [];
+          if (answersResponse.data.results) {
+            answers = answersResponse.data.results;
+          } else {
+            answers = answersResponse.data;
+          }
+          
+          return {
+            ...question,
+            answers: answers.sort((a: any, b: any) => a.order - b.order)
+          };
+        } catch (error) {
+          console.error(`問題ID ${question.id} の答えの取得に失敗:`, error);
+          return {
+            ...question,
+            answers: []
+          };
+        }
+      })
+    );
+    
+    return questionsWithAnswers;
   }
 
   /**

@@ -100,7 +100,12 @@ const mockCategories: Category[] = [
   },
 ];
 
-const mockDifficulties: Difficulty[] = [
+interface MockDifficulty extends Difficulty {
+  is_active: boolean;
+  display_order: number;
+}
+
+const mockDifficulties: MockDifficulty[] = [
   {
     id: 1,
     name: '初級',
@@ -150,7 +155,7 @@ export function DifficultySelection() {
   const navigate = useNavigate();
   
   const [category, setCategory] = useState<Category | null>(null);
-  const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
+  const [difficulties, setDifficulties] = useState<MockDifficulty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -203,10 +208,16 @@ export function DifficultySelection() {
 
           // 難易度一覧を取得
           const difficultyLevels = await fetchDifficultyLevelsFromSupabase();
-          const activeDifficulties = difficultyLevels
+          // Supabaseの難易度データをMockDifficulty型に変換
+          const extendedDifficulties: MockDifficulty[] = difficultyLevels
+            .map(diff => ({
+              ...diff,
+              is_active: true, // Supabaseデータでは全て有効とみなす
+              display_order: diff.level // levelをdisplay_orderとして使用
+            }))
             .sort((a, b) => a.level - b.level);
           
-          setDifficulties(activeDifficulties);
+          setDifficulties(extendedDifficulties);
         }
       } catch (err) {
         console.error('データの取得に失敗しました:', err);
@@ -237,7 +248,7 @@ export function DifficultySelection() {
 
   const handleStartQuiz = (difficultyId: number) => {
     if (category) {
-      navigate(`/quiz/${category.slug}/${difficultyId}/start`);
+      navigate(`/quiz/${category.id}/${difficultyId}/start`);
     }
   };
 
