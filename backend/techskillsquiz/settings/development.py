@@ -29,8 +29,8 @@ DATABASES = {
         "NAME": os.environ.get("DATABASE_NAME", "postgres"),
         "USER": os.environ.get("DATABASE_USER", "postgres"),
         "PASSWORD": os.environ.get("DATABASE_PASSWORD", "postgres"),
-        "HOST": os.environ.get("DATABASE_HOST", "localhost"), # ローカルのPostgreSQLサーバーホスト
-        "PORT": os.environ.get("DATABASE_PORT", "5432"),   # ローカルのPostgreSQLサーバーポート
+        "HOST": os.environ.get("DATABASE_HOST", "127.0.0.1"), # Supabaseローカル用ホスト
+        "PORT": os.environ.get("DATABASE_PORT", "54322"),   # Supabaseローカル用ポート
         "OPTIONS": {
             "sslmode": "disable", # SSLモードを無効化 (ローカル開発用)
         },
