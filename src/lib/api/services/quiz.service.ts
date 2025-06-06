@@ -23,7 +23,11 @@ export class QuizService {
    * カテゴリ一覧を取得
    */
   async getCategories(): Promise<Category[]> {
-    const response = await api.get<Category[]>(`${this.baseUrl}/categories/`);
+    const response = await api.get<any>(`${this.baseUrl}/categories/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
@@ -31,7 +35,11 @@ export class QuizService {
    * 難易度一覧を取得
    */
   async getDifficultyLevels(): Promise<Difficulty[]> {
-    const response = await api.get<Difficulty[]>(`${this.baseUrl}/difficulty-levels/`);
+    const response = await api.get<any>(`${this.baseUrl}/difficulty-levels/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
@@ -39,7 +47,11 @@ export class QuizService {
    * クイズ一覧を取得
    */
   async getQuizzes(): Promise<any[]> {
-    const response = await api.get<any[]>(`${this.baseUrl}/quizzes/`);
+    const response = await api.get<any>(`${this.baseUrl}/quizzes/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
@@ -47,7 +59,11 @@ export class QuizService {
    * 特定のカテゴリに属するクイズ一覧を取得
    */
   async getQuizzesByCategory(categoryId: number): Promise<any[]> {
-    const response = await api.get<any[]>(`${this.baseUrl}/categories/${categoryId}/quizzes/`);
+    const response = await api.get<any>(`${this.baseUrl}/categories/${categoryId}/quizzes/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
@@ -55,7 +71,11 @@ export class QuizService {
    * 特定の難易度に属するクイズ一覧を取得
    */
   async getQuizzesByDifficulty(difficultyId: number): Promise<any[]> {
-    const response = await api.get<any[]>(`${this.baseUrl}/difficulty-levels/${difficultyId}/quizzes/`);
+    const response = await api.get<any>(`${this.baseUrl}/difficulty-levels/${difficultyId}/quizzes/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
@@ -63,7 +83,11 @@ export class QuizService {
    * カテゴリーと難易度で絞り込んだクイズ一覧を取得
    */
   async getQuizzesByCategoryAndDifficulty(categoryId: number, difficultyId: number): Promise<any[]> {
-    const response = await api.get<any[]>(`${this.baseUrl}/filter/quizzes/${categoryId}/${difficultyId}/`);
+    const response = await api.get<any>(`${this.baseUrl}/filter/quizzes/${categoryId}/${difficultyId}/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
@@ -79,7 +103,11 @@ export class QuizService {
    * 特定のクイズに属する問題一覧を取得
    */
   async getQuestions(quizId: number): Promise<QuizQuestion[]> {
-    const response = await api.get<QuizQuestion[]>(`${this.baseUrl}/quizzes/${quizId}/questions/`);
+    const response = await api.get<any>(`${this.baseUrl}/quizzes/${quizId}/questions/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
@@ -95,9 +123,13 @@ export class QuizService {
    * 最近の活動履歴を取得
    */
   async getRecentActivities(limit: number = 10): Promise<ActivityHistory[]> {
-    const response = await api.get<ActivityHistory[]>(`${this.baseUrl}/recent-activities/`, {
+    const response = await api.get<any>(`${this.baseUrl}/recent-activities/`, {
       params: { limit }
     });
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
 
