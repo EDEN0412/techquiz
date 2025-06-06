@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { ArrowLeft, Star, Clock, Trophy } from 'lucide-react';
-import { Category, Difficulty } from '../lib/api/types';
+import { ArrowLeft, Star, Trophy } from 'lucide-react';
+import { Category, Difficulty, Quiz } from '../lib/api/types';
 import { getCategoryIcon } from '../lib/utils/categoryIcons';
+import { QuizService } from '../lib/api/services/quiz.service';
 
 // モックデータ（一時的に使用）
 const mockCategories: Category[] = [
@@ -150,12 +151,21 @@ const mockDifficulties: MockDifficulty[] = [
 // 設定フラグ - APIを使用するように変更
 const USE_MOCK_DATA = false;
 
+// Django APIサービスのインスタンス
+const quizService = new QuizService();
+
+interface DifficultyWithQuiz extends Difficulty {
+  quiz?: Quiz;
+  is_active: boolean;
+  display_order: number;
+}
+
 export function DifficultySelection() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   
   const [category, setCategory] = useState<Category | null>(null);
-  const [difficulties, setDifficulties] = useState<MockDifficulty[]>([]);
+  const [difficulties, setDifficulties] = useState<DifficultyWithQuiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -191,11 +201,10 @@ export function DifficultySelection() {
           
           setDifficulties(activeDifficulties);
         } else {
-          // Supabaseから直接データを取得
-          const { fetchDifficultyLevelsFromSupabase, fetchCategoriesFromSupabase } = await import('../lib/api/supabase-direct');
-
-          // カテゴリー一覧を取得してslugから該当するカテゴリーを見つける
-          const categories = await fetchCategoriesFromSupabase();
+          // Django APIからデータを取得
+          
+          // 1. カテゴリー一覧を取得してslugから該当するカテゴリーを見つける
+          const categories = await quizService.getCategories();
           const foundCategory = categories.find(cat => cat.slug === categoryId);
           
           if (!foundCategory) {
@@ -206,18 +215,30 @@ export function DifficultySelection() {
 
           setCategory(foundCategory);
 
-          // 難易度一覧を取得
-          const difficultyLevels = await fetchDifficultyLevelsFromSupabase();
-          // Supabaseの難易度データをMockDifficulty型に変換
-          const extendedDifficulties: MockDifficulty[] = difficultyLevels
-            .map(diff => ({
-              ...diff,
-              is_active: true, // Supabaseデータでは全て有効とみなす
-              display_order: diff.level // levelをdisplay_orderとして使用
-            }))
+          // 2. 難易度一覧を取得
+          const difficultyLevels = await quizService.getDifficultyLevels();
+          
+          // 3. このカテゴリーのクイズを取得
+          const quizzes = await quizService.getQuizzes();
+          const categoryQuizzes = quizzes.filter(quiz => quiz.category === foundCategory.id);
+          
+          // 4. 難易度とクイズを組み合わせる
+          const difficultiesWithQuizzes: DifficultyWithQuiz[] = difficultyLevels
+            .map(diff => {
+              // この難易度でこのカテゴリーのクイズを探す
+              const quiz = categoryQuizzes.find(q => q.difficulty === diff.id);
+              
+              return {
+                ...diff,
+                quiz: quiz,
+                is_active: !!quiz, // クイズが存在する場合のみアクティブ
+                display_order: diff.level // levelをdisplay_orderとして使用
+              };
+            })
+            .filter(diff => diff.is_active) // クイズが存在する難易度のみ表示
             .sort((a, b) => a.level - b.level);
           
-          setDifficulties(extendedDifficulties);
+          setDifficulties(difficultiesWithQuizzes);
         }
       } catch (err) {
         console.error('データの取得に失敗しました:', err);
@@ -375,6 +396,7 @@ export function DifficultySelection() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {difficulties.map((difficulty) => {
               const colorConfig = getDifficultyColor(difficulty.level);
+              
               return (
                 <Card 
                   key={difficulty.id} 
@@ -395,11 +417,7 @@ export function DifficultySelection() {
                     <CardDescription>{difficulty.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{Math.floor(difficulty.time_limit / 60)}分</span>
-                      </div>
+                    <div className="flex items-center justify-center text-sm text-gray-600">
                       <div className="flex items-center space-x-1">
                         <Trophy className="h-4 w-4" />
                         <span>{difficulty.point_multiplier}x ポイント</span>

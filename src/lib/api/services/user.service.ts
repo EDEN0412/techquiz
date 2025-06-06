@@ -5,7 +5,7 @@ import api from '../client';
 import { UserProfile, QuizResult, PaginatedResponse, UserStatistics, UserStatsSummary } from '../types';
 
 export class UserService {
-  private baseUrl = '/api/v1';
+  private baseUrl = '';
   
   /**
    * ユーザー情報の取得

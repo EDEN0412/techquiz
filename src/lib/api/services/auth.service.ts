@@ -14,7 +14,7 @@ import {
 } from '../types';
 
 export class AuthService {
-  private baseUrl = '/api/v1';
+  private baseUrl = '';
 
   /**
    * ログイン処理

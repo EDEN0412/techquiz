@@ -17,7 +17,7 @@ import {
  * クイズ関連のAPIサービス
  */
 export class QuizService {
-  private baseUrl = '/api/v1/quiz';
+  private baseUrl = '/quiz';
 
   /**
    * カテゴリ一覧を取得

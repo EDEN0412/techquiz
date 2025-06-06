@@ -266,8 +266,8 @@ const QuizQuestionDemo: React.FC = () => {
                   <div className="text-sm text-gray-600">難易度</div>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">5分</div>
-                  <div className="text-sm text-gray-600">予想時間</div>
+                  <div className="text-2xl font-bold text-purple-600">制限なし</div>
+                  <div className="text-sm text-gray-600">時間制限</div>
                 </div>
               </div>
               <div className="text-gray-600 mb-6">

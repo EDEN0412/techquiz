@@ -260,9 +260,7 @@ const QuizPage: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">
                 {category?.name} - {difficulty?.name}
               </h1>
-              <p className="text-gray-600 mt-1">
-                制限時間: {difficulty?.time_limit ? `${Math.floor(difficulty.time_limit / 60)}分` : '無制限'}
-              </p>
+
             </div>
             <button
               onClick={handleBackToHome}
