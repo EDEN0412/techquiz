@@ -17,8 +17,62 @@ echo "   ██║   ██╔══╝  ██║     ██╔══██║�
 echo "   ██║   ███████╗╚██████╗██║  ██║╚██████╔╝╚██████╔╝██║███████╗"
 echo "   ╚═╝   ╚══════╝ ╚═════╝╚═╝  ╚═╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝"
 echo -e "${NC}"
-echo -e "${YELLOW}開発サーバー起動スクリプト${NC}"
+echo -e "${YELLOW}開発サーバー起動スクリプト（自動復旧機能付き）${NC}"
 echo -e "${BLUE}----------------------------------------${NC}"
+
+# Supabase状態チェック関数
+check_supabase_status() {
+  local status_output
+  status_output=$(npx supabase status 2>/dev/null)
+  
+  if echo "$status_output" | grep -q "API URL: http://127.0.0.1:54321"; then
+    return 0  # 正常動作中
+  else
+    return 1  # 停止中または問題あり
+  fi
+}
+
+# Supabaseの自動起動・復旧関数
+ensure_supabase_running() {
+  echo -e "${BLUE}Supabaseの状態を確認中...${NC}"
+  
+  if check_supabase_status; then
+    echo -e "${GREEN}✓ Supabaseは既に動作中です${NC}"
+    return 0
+  fi
+  
+  echo -e "${YELLOW}Supabaseが停止しています。起動中...${NC}"
+  
+  # 一度完全に停止してからクリーンに起動
+  npx supabase stop >/dev/null 2>&1
+  sleep 2
+  
+  # 起動試行
+  local retry_count=0
+  local max_retries=3
+  
+  while [ $retry_count -lt $max_retries ]; do
+    echo -e "${YELLOW}Supabase起動試行 ($((retry_count + 1))/$max_retries)...${NC}"
+    
+    if npx supabase start; then
+      sleep 5  # 起動完了を待機
+      
+      if check_supabase_status; then
+        echo -e "${GREEN}✓ Supabaseが正常に起動しました${NC}"
+        return 0
+      fi
+    fi
+    
+    retry_count=$((retry_count + 1))
+    if [ $retry_count -lt $max_retries ]; then
+      echo -e "${YELLOW}再試行します...${NC}"
+      sleep 3
+    fi
+  done
+  
+  echo -e "${RED}エラー: Supabaseの起動に失敗しました${NC}"
+  exit 1
+}
 
 # 環境変数ファイルの存在確認
 if [ ! -f ".env.development" ]; then
@@ -84,10 +138,24 @@ fi
 # ローカルモードでの起動
 echo -e "${GREEN}ローカルモードで開発環境を起動します...${NC}"
 
-# Supabase の起動
-echo -e "${YELLOW}Supabase を起動しています...${NC}"
-npx supabase start &
-SUPABASE_PID=$!
+# Supabaseの状態確認と自動起動
+ensure_supabase_running
+
+# 定期的なSupabase監視機能
+start_supabase_monitor() {
+  while true; do
+    sleep 30  # 30秒ごとにチェック
+    if ! check_supabase_status; then
+      echo -e "${YELLOW}⚠️  Supabaseが停止しました。自動復旧中...${NC}"
+      ensure_supabase_running
+    fi
+  done &
+  MONITOR_PID=$!
+}
+
+# 監視開始
+echo -e "${BLUE}Supabase監視機能を開始しています...${NC}"
+start_supabase_monitor
 
 # バックグラウンドでバックエンドサーバーを起動
 echo -e "${YELLOW}バックエンドサーバーを起動中...${NC}"
@@ -109,11 +177,17 @@ FRONTEND_PID=$!
 cleanup() {
   echo -e "\n${YELLOW}開発サーバーを停止しています...${NC}"
   
+  # 監視プロセスを終了
+  if [ ! -z "$MONITOR_PID" ]; then
+    kill $MONITOR_PID 2>/dev/null
+  fi
+  
   # プロセスを終了
   kill $FRONTEND_PID 2>/dev/null
   kill $BACKEND_PID 2>/dev/null
   
   # Supabaseを停止
+  echo -e "${YELLOW}Supabaseを停止中...${NC}"
   npx supabase stop
   
   echo -e "${GREEN}開発環境を正常に停止しました${NC}"
@@ -124,6 +198,7 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 echo -e "${GREEN}開発環境が起動しました！${NC}"
+echo -e "${GREEN}✓ Supabase監視機能が有効です（30秒間隔で自動復旧）${NC}"
 echo -e "${CYAN}フロントエンド: ${NC}http://localhost:5173"
 echo -e "${CYAN}バックエンド: ${NC}http://localhost:8000"
 echo -e "${CYAN}Supabase Studio: ${NC}http://localhost:54323"
