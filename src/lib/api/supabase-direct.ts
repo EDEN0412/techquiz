@@ -12,7 +12,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
  */
 export async function fetchDifficultyLevelsFromSupabase(): Promise<Difficulty[]> {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/difficulty_level?select=*&order=level.asc`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/quiz_difficultylevel?select=*&order=level.asc`, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -49,7 +49,7 @@ export async function fetchDifficultyLevelsFromSupabase(): Promise<Difficulty[]>
  */
 export async function fetchCategoriesFromSupabase(): Promise<Category[]> {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/category?select=*&order=display_order.asc`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/quiz_category?select=*&order=display_order.asc`, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -85,7 +85,7 @@ export async function fetchCategoriesFromSupabase(): Promise<Category[]> {
  */
 export async function fetchCategoryFromSupabase(categoryId: number): Promise<Category> {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/category?select=*&id=eq.${categoryId}`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/quiz_category?select=*&id=eq.${categoryId}`, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -131,7 +131,7 @@ export async function fetchQuestionsByCategoryAndDifficulty(
   try {
     // 1. クイズを取得（カテゴリーと難易度でフィルタリング）
     const quizResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/quiz?select=id&category_id=eq.${categoryId}&difficulty_id=eq.${difficultyId}&is_active=eq.true`,
+      `${SUPABASE_URL}/rest/v1/quiz_quiz?select=id&category_id=eq.${categoryId}&difficulty_id=eq.${difficultyId}&is_active=eq.true`,
       {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -155,7 +155,7 @@ export async function fetchQuestionsByCategoryAndDifficulty(
 
     // 2. 問題を取得
     const questionsResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/question?select=*&quiz_id=in.(${quizIds.join(',')})&order=display_order.asc&limit=${limit}`,
+      `${SUPABASE_URL}/rest/v1/quiz_question?select=*&quiz_id=in.(${quizIds.join(',')})&order=display_order.asc&limit=${limit}`,
       {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -178,7 +178,7 @@ export async function fetchQuestionsByCategoryAndDifficulty(
     // 3. 各問題の選択肢を取得
     const questionIds = questions.map((q: any) => q.id);
     const answersResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/answer?select=*&question_id=in.(${questionIds.join(',')})`,
+      `${SUPABASE_URL}/rest/v1/quiz_answer?select=*&question_id=in.(${questionIds.join(',')})`,
       {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
