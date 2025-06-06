@@ -54,4 +54,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     """カスタムトークン取得ビュー（必要に応じてカスタマイズ可能）"""
-    pass 
+    
+    def post(self, request, *args, **kwargs):
+        print(f"=== ログインリクエスト受信 ===")
+        print(f"Content-Type: {request.content_type}")
+        print(f"リクエストデータ: {getattr(request, 'data', 'データなし')}")
+        
+        try:
+            response = super().post(request, *args, **kwargs)
+            print(f"レスポンスステータス: {response.status_code}")
+            return response
+        except Exception as e:
+            print(f"エラー発生: {e}")
+            raise 

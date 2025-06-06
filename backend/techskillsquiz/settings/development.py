@@ -79,6 +79,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'users.views': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
         'django': {
             'handlers': ['console'],
             'level': 'INFO',

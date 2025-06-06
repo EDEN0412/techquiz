@@ -15,12 +15,9 @@ app_name = 'users'
 
 # ViewSetをルーターに登録
 router = DefaultRouter()
-router.register(r'users', UserViewSet)
+router.register(r'', UserViewSet)  # 'users'を削除して空文字列に変更
 
 urlpatterns = [
-    # ルーターが生成したURLパターンを含める
-    path('', include(router.urls)),
-    
     # ユーザー登録エンドポイント
     path('register/', RegisterView.as_view(), name='register'),
     
@@ -31,4 +28,7 @@ urlpatterns = [
     
     # ログアウトエンドポイント（リフレッシュトークンを無効化）
     path('logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+    
+    # ルーターが生成したURLパターンを含める（最後に配置）
+    path('', include(router.urls)),
 ] 
