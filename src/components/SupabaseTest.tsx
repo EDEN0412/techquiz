@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase, testSupabaseConnection } from '../lib/supabaseClient'
+import { testSupabaseConnection } from '../lib/supabaseClient'
 
 const SupabaseTest = () => {
   const [testResult, setTestResult] = useState<{

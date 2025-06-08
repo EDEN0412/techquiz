@@ -8,7 +8,7 @@ import {
 } from '../lib/api/supabase-direct';
 import QuizQuestion from '../components/quiz/QuizQuestion';
 import QuizResult from '../components/quiz/QuizResult';
-import { useAuth } from '../lib/contexts/AuthContext';
+// import { useAuth } from '../lib/contexts/AuthContext'; // 将来の機能で使用予定
 
 interface QuizPageParams extends Record<string, string | undefined> {
   categoryId: string;
@@ -23,7 +23,7 @@ interface QuizAnswer {
 const QuizPage: React.FC = () => {
   const { categoryId, difficultyId } = useParams<QuizPageParams>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  // const { user } = useAuth(); // 将来の機能で使用予定
   
   // 状態管理
   const [questions, setQuestions] = useState<QuizQuestionType[]>([]);

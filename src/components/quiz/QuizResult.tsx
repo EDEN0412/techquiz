@@ -29,7 +29,7 @@ const QuizResult: React.FC<QuizResultProps> = ({
   onGoHome,
   quizTitle = "クイズ"
 }) => {
-  const { totalQuestions, correctAnswers, score, questions } = resultData;
+  const { totalQuestions, correctAnswers, questions } = resultData;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
 
   // スコアに基づくメッセージとアイコン

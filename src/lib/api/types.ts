@@ -156,3 +156,41 @@ export interface ApiError {
   data?: any;
 }
 
+// 認証関連
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+export interface AuthResponse {
+  access: string;
+  refresh: string;
+  user: UserProfile;
+}
+
+export interface TokenRefreshRequest {
+  refresh: string;
+}
+
+export interface TokenRefreshResponse {
+  access: string;
+  refresh: string;
+}
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string;
+  password: string;
+}
+

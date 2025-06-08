@@ -8,7 +8,6 @@ import {
   QuizQuestion, 
   QuizSubmission, 
   QuizResult,
-  PaginatedResponse,
   UserStatsSummary,
   ActivityHistory
 } from '../types';

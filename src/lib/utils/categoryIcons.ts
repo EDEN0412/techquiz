@@ -1,6 +1,5 @@
 import { 
   SiHtml5, 
-  SiCss3, 
   SiRuby, 
   SiRubyonrails, 
   SiJavascript, 
@@ -11,11 +10,7 @@ import {
 import { 
   Database, 
   Globe, 
-  Code, 
-  Terminal, 
-  Cpu,
-  Settings,
-  Book
+  Code
 } from 'lucide-react';
 import { Category } from '../api/types';
 

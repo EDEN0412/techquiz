@@ -9,7 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
 export async function testSupabaseConnection() {
   try {
     // サーバー時間を取得してテスト
-    const { data, error } = await supabase.from('_test_connection')
+    const { error } = await supabase.from('_test_connection')
       .select('*')
       .limit(1)
       .maybeSingle()

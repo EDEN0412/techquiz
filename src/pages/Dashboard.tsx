@@ -8,7 +8,7 @@ import { enrichCategoriesWithIcons } from '../lib/utils/categoryIcons';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { stats, loading: statsLoading, error: statsError } = useUserStats();
+  const { stats, loading: statsLoading } = useUserStats();
   const { activities, loading: activitiesLoading, error: activitiesError } = useRecentActivities(3);
   const { categories: rawCategories, loading: categoriesLoading, error: categoriesError, retry: retryCategories } = useCategories();
 

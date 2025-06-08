@@ -7,7 +7,7 @@ import { DifficultySelection } from './pages/DifficultySelection';
 import QuizPage from './pages/QuizPage';
 import { AuthProvider } from './lib/contexts/AuthContext';
 import QuizQuestionDemo from './components/quiz/QuizQuestionDemo';
-import QuizResult from './components/quiz/QuizResult';
+
 
 function App() {
   return (
