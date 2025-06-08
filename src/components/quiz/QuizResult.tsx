@@ -21,13 +21,17 @@ interface QuizResultProps {
   onRestartQuiz: () => void;
   onGoHome: () => void;
   quizTitle?: string;
+  isResultSaving?: boolean;
+  resultSaved?: boolean;
 }
 
 const QuizResult: React.FC<QuizResultProps> = ({
   resultData,
   onRestartQuiz,
   onGoHome,
-  quizTitle = "クイズ"
+  quizTitle = "クイズ",
+  isResultSaving = false,
+  resultSaved = false
 }) => {
   const { totalQuestions, correctAnswers, questions } = resultData;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
@@ -86,6 +90,25 @@ const QuizResult: React.FC<QuizResultProps> = ({
           <p className="text-gray-600">
             お疲れさまでした！結果をご確認ください。
           </p>
+          
+          {/* 保存状況表示 */}
+          {isResultSaving && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span className="text-blue-700 text-sm">結果を保存中...</span>
+              </div>
+            </div>
+          )}
+          
+          {resultSaved && !isResultSaving && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-green-600">✅</span>
+                <span className="text-green-700 text-sm">結果が正常に保存されました</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* スコア表示 */}

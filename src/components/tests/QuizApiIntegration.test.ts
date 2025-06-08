@@ -149,35 +149,46 @@ describe('QuizService Integration Tests', () => {
 
   // クイズ結果保存のテスト
   test('saveQuizResult should save the quiz result to the API', async () => {
-    // モックレスポンスを設定（正しいQuizResult型に適合）
+    // モックレスポンスを設定（QuizResultResponse型に適合）
     const mockResultResponse = {
-      total_questions: 10,
-      correct_answers: 8,
-      score: 80,
-      quiz_id: 1,
+      id: 1,
+      user: 1,
+      username: 'testuser',
+      quiz: 1,
+      quiz_title: 'Python Basics',
+      category_name: 'Python',
+      difficulty_name: 'Beginner',
+      score: 8,
+      total_possible: 10,
+      percentage: 80.0,
+      time_taken: 300,
+      passed: true,
       completed_at: '2024-01-01T00:00:00Z',
-      questions: [],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
     };
     mockApi.post.mockResolvedValueOnce(createMockAxiosResponse(mockResultResponse));
 
-    // APIの呼び出し（正しいQuizResult型のプロパティを使用）
+    // APIの呼び出し（QuizResultRequest型のプロパティを使用）
     const result = await quizService.saveQuizResult({
-      total_questions: 10,
-      correct_answers: 8,
-      score: 80,
-      quiz_id: 1,
+      quiz: 1,
+      score: 8,
+      total_possible: 10,
+      percentage: 80.0,
+      time_taken: 300,
     });
 
     // 期待される結果の検証
     expect(mockApi.post).toHaveBeenCalledWith('/quiz/quiz-results/', {
-      total_questions: 10,
-      correct_answers: 8,
-      score: 80,
-      quiz_id: 1,
+      quiz: 1,
+      score: 8,
+      total_possible: 10,
+      percentage: 80.0,
+      time_taken: 300,
     });
     expect(result).toEqual(mockResultResponse);
-    expect(result.score).toBe(80);
-    expect(result.correct_answers).toBe(8);
+    expect(result.score).toBe(8);
+    expect(result.percentage).toBe(80.0);
   });
 
   // エラーハンドリングのテスト

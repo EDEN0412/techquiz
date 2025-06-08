@@ -110,10 +110,7 @@ class QuizResultSerializer(serializers.ModelSerializer):
             'time_taken', 'passed', 'completed_at', 
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'passed']
-        extra_kwargs = {
-            'user': {'required': False}
-        }
+        read_only_fields = ['id', 'user', 'username', 'quiz_title', 'category_name', 'difficulty_name', 'passed', 'completed_at', 'created_at', 'updated_at']
 
 
 class UserStatisticsSerializer(serializers.ModelSerializer):

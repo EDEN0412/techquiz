@@ -5,9 +5,11 @@ import { useUserStats } from '../hooks/useUserStats';
 import { useRecentActivities } from '../hooks/useRecentActivities';
 import { useCategories } from '../hooks/useCategories';
 import { enrichCategoriesWithIcons } from '../lib/utils/categoryIcons';
+import { useAuth } from '../lib/contexts/AuthContext';
 
 export function Dashboard() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const { stats, loading: statsLoading } = useUserStats();
   const { activities, loading: activitiesLoading, error: activitiesError } = useRecentActivities(3);
   const { categories: rawCategories, loading: categoriesLoading, error: categoriesError, retry: retryCategories } = useCategories();
@@ -28,8 +30,17 @@ export function Dashboard() {
       {/* Welcome Section */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">おかえりなさい！</h1>
-          <p className="mt-1 text-lg text-gray-600">技術力を試してみましょう</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {isAuthenticated && user ? `おかえりなさい、${user.username}さん！` : 'おかえりなさい！'}
+          </h1>
+          <p className="mt-1 text-lg text-gray-600">
+            技術力を試してみましょう
+            {!isAuthenticated && (
+              <span className="ml-2 text-sm text-orange-600">
+                （ログインすると結果が保存されます）
+              </span>
+            )}
+          </p>
         </div>
         <div className="flex items-center space-x-4 rounded-lg bg-white p-4 shadow-sm">
           <div className="text-center">

@@ -8,6 +8,8 @@ import {
   QuizQuestion, 
   QuizSubmission, 
   QuizResult,
+  QuizResultRequest,
+  QuizResultResponse,
   UserStatsSummary,
   ActivityHistory
 } from '../types';
@@ -113,8 +115,13 @@ export class QuizService {
   /**
    * クイズ結果を保存
    */
-  async saveQuizResult(result: Partial<QuizResult>): Promise<QuizResult> {
-    const response = await api.post<QuizResult>(`${this.baseUrl}/quiz-results/`, result);
+  async saveQuizResult(result: QuizResultRequest): Promise<QuizResultResponse> {
+    const url = `${this.baseUrl}/quiz-results/`;
+    console.log('API URL:', url);
+    console.log('APIクライアントのbaseURL:', import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
+    console.log('完全なURL:', `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1${url}`);
+    
+    const response = await api.post<QuizResultResponse>(url, result);
     return response.data;
   }
 

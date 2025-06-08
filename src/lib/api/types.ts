@@ -71,6 +71,7 @@ export interface QuizSubmission {
   answer_id: number;
 }
 
+// フロントエンド用のクイズ結果データ（表示用）
 export interface QuizResult {
   total_questions: number;
   correct_answers: number;
@@ -192,5 +193,33 @@ export interface PasswordResetRequest {
 export interface PasswordResetConfirmRequest {
   token: string;
   password: string;
+}
+
+// バックエンドAPIへのクイズ結果保存リクエスト
+export interface QuizResultRequest {
+  quiz: number;          // quiz ID
+  score: number;         // 獲得スコア
+  total_possible: number; // 満点
+  percentage: number;    // 正答率
+  time_taken: number;    // 所要時間（秒）
+}
+
+// バックエンドAPIからのクイズ結果レスポンス
+export interface QuizResultResponse {
+  id: number;
+  user: number;
+  username: string;
+  quiz: number;
+  quiz_title: string;
+  category_name: string;
+  difficulty_name: string;
+  score: number;
+  total_possible: number;
+  percentage: number;
+  time_taken: number;
+  passed: boolean;
+  completed_at: string;
+  created_at: string;
+  updated_at: string;
 }
 

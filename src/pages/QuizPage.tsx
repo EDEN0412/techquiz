@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { QuizQuestion as QuizQuestionType, Category, Difficulty } from '../lib/api/types';
+import { Category, Difficulty, QuizQuestion as QuizQuestionType, QuizResultRequest } from '../lib/api/types';
 import { 
   fetchCategoryFromSupabase, 
   fetchDifficultyLevelsFromSupabase,
   fetchQuestionsByCategoryAndDifficulty 
 } from '../lib/api/supabase-direct';
+import { QuizService } from '../lib/api/services/quiz.service';
+import { useAuth } from '../lib/contexts/AuthContext';
 import QuizQuestion from '../components/quiz/QuizQuestion';
 import QuizResult from '../components/quiz/QuizResult';
-// import { useAuth } from '../lib/contexts/AuthContext'; // 将来の機能で使用予定
 
 interface QuizPageParams extends Record<string, string | undefined> {
   categoryId: string;
@@ -23,12 +24,10 @@ interface QuizAnswer {
 const QuizPage: React.FC = () => {
   const { categoryId, difficultyId } = useParams<QuizPageParams>();
   const navigate = useNavigate();
-  // const { user } = useAuth(); // 将来の機能で使用予定
-  
-  // 状態管理
+  const { user } = useAuth();
+
+  // State管理
   const [questions, setQuestions] = useState<QuizQuestionType[]>([]);
-  const [category, setCategory] = useState<Category | null>(null);
-  const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>();
@@ -36,6 +35,17 @@ const QuizPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isQuizCompleted, setIsQuizCompleted] = useState(false);
+  const [category, setCategory] = useState<Category | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
+  const [quiz, setQuiz] = useState<any | null>(null);
+  const [isResultSaving, setIsResultSaving] = useState(false);
+  const [resultSaved, setResultSaved] = useState(false);
+  
+  // 時間計測用の状態
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+
+  const quizService = new QuizService();
 
   // クイズデータの取得
   useEffect(() => {
@@ -82,6 +92,26 @@ const QuizPage: React.FC = () => {
         setCategory(categoryData);
         setDifficulty(difficultyData);
         setQuestions(questionsData);
+        
+        // クイズデータを設定（結果保存のため）
+        if (questionsData.length > 0) {
+          const firstQuestion = questionsData[0];
+          const quizData = {
+            id: firstQuestion.quiz,
+            title: `${categoryData.name} - ${difficultyData.name}`,
+            category: categoryData.id,
+            difficulty: difficultyData.id,
+            pass_score: 70, // デフォルト値
+            total_questions: questionsData.length
+          };
+          console.log('クイズデータを設定:', quizData);
+          setQuiz(quizData);
+        } else {
+          console.log('問題データが空のため、クイズデータを設定できません');
+        }
+        
+        // クイズ開始時間を記録
+        setStartTime(new Date());
 
       } catch (err) {
         console.error('クイズデータの取得に失敗しました:', err);
@@ -136,7 +166,78 @@ const QuizPage: React.FC = () => {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       // クイズ完了
-      setIsQuizCompleted(true);
+      handleQuizCompletion();
+    }
+  };
+
+  // クイズ完了処理
+  const handleQuizCompletion = async () => {
+    console.log('=== クイズ完了処理開始 ===');
+    console.log('現在のユーザー:', user);
+    console.log('現在のクイズ:', quiz);
+    console.log('開始時間:', startTime);
+    
+    setIsQuizCompleted(true);
+    setEndTime(new Date());
+    
+    // 認証済みユーザーかつクイズデータが存在する場合のみ結果を保存
+    if (user && quiz && startTime) {
+      console.log('条件を満たしているため、結果を保存します');
+      await saveQuizResult();
+    } else {
+      console.log('結果保存の条件を満たしていません:');
+      console.log('- user:', !!user);
+      console.log('- quiz:', !!quiz);
+      console.log('- startTime:', !!startTime);
+    }
+  };
+
+  // クイズ結果保存
+  const saveQuizResult = async () => {
+    console.log('=== クイズ結果保存開始 ===');
+    console.log('user:', user);
+    console.log('quiz:', quiz);
+    console.log('startTime:', startTime);
+    
+    if (!user || !quiz || !startTime) {
+      console.warn('結果保存に必要なデータが不足しています');
+      console.log('user:', !!user, 'quiz:', !!quiz, 'startTime:', !!startTime);
+      return;
+    }
+
+    try {
+      setIsResultSaving(true);
+      console.log('保存処理開始...');
+      
+      const results = calculateResults();
+      const currentTime = endTime || new Date();
+      const timeTaken = Math.round((currentTime.getTime() - startTime.getTime()) / 1000);
+      
+      console.log('計算結果:', results);
+      console.log('所要時間:', timeTaken, '秒');
+      
+      const resultData: QuizResultRequest = {
+        quiz: quiz.id,
+        score: results.correctAnswers,
+        total_possible: results.totalQuestions,
+        percentage: results.score,
+        time_taken: timeTaken,
+      };
+
+      console.log('送信データ:', resultData);
+      console.log('API呼び出し開始...');
+      
+      const savedResult = await quizService.saveQuizResult(resultData);
+      console.log('API呼び出し成功:', savedResult);
+      console.log('クイズ結果が保存されました:', savedResult);
+      setResultSaved(true);
+      console.log('結果保存完了');
+      
+    } catch (error) {
+      console.error('クイズ結果の保存に失敗しました:', error);
+      // エラーが発生しても結果画面は表示する
+    } finally {
+      setIsResultSaving(false);
     }
   };
 
@@ -159,6 +260,10 @@ const QuizPage: React.FC = () => {
     setSelectedAnswer(undefined);
     setAnsweredQuestions(new Set());
     setIsQuizCompleted(false);
+    setIsResultSaving(false);
+    setResultSaved(false);
+    setStartTime(new Date());
+    setEndTime(null);
   };
 
   // 結果計算
@@ -223,6 +328,8 @@ const QuizPage: React.FC = () => {
         onRestartQuiz={handleRetryQuiz}
         onGoHome={handleBackToHome}
         quizTitle={`${category?.name || ''} - ${difficulty?.name || ''}`}
+        isResultSaving={isResultSaving}
+        resultSaved={resultSaved}
       />
     );
   }

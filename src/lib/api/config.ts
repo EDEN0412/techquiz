@@ -9,4 +9,4 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 export const API_VERSION = 'api/v1';
 
 // リクエストタイムアウト（ミリ秒）
-export const REQUEST_TIMEOUT = 15000;
+export const REQUEST_TIMEOUT = 5000;

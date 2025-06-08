@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# .env.developmentファイルを読み込み
-env_path = Path(__file__).resolve().parent.parent.parent.parent / '.env.development'
+# .envファイルを読み込み（開発環境用）
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # 基本設定を継承

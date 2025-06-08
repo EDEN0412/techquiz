@@ -14,6 +14,11 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
+console.log('APIクライアント初期化:', {
+  baseURL: `${API_BASE_URL}/${API_VERSION}`,
+  timeout: REQUEST_TIMEOUT,
+});
+
 // リクエストインターセプター
 apiClient.interceptors.request.use(
   (config) => {
@@ -21,9 +26,18 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    console.log('APIリクエスト:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      timeout: config.timeout,
+      headers: config.headers
+    });
     return config;
   },
   (error) => {
+    console.error('リクエストエラー:', error);
     return Promise.reject(error);
   }
 );
@@ -67,6 +81,19 @@ apiClient.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+    
+    console.error('APIレスポンスエラー:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      message: error.message,
+      code: error.code,
+      config: {
+        method: error.config?.method,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        timeout: error.config?.timeout
+      }
+    });
     
     return Promise.reject(error);
   }
