@@ -38,7 +38,7 @@ case $TEST_TYPE in
         ;;
     2)
         echo -e "${GREEN}===== API統合テストを実行しています... =====${RESET}"
-        npm test -- src/components/tests/QuizApiIntegration.test.tsx
+        npm test -- src/components/tests/QuizApiIntegration.test.ts
         ;;
     3)
         echo -e "${GREEN}===== すべてのテストを実行しています... =====${RESET}"

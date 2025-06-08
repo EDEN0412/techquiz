@@ -185,7 +185,7 @@ jobs:
           export default api;" > src/test/__mocks__/api.js
           
           # テスト実行
-          npm test -- src/components/tests/QuizApiIntegration.test.tsx
+          npm test -- src/components/tests/QuizApiIntegration.test.ts
       
       - name: Generate coverage reports
         run: |
@@ -197,7 +197,7 @@ jobs:
           npm list @vitest/coverage-v8 || true
           
           # Vitestの正しいカバレッジ形式を使用
-          npm test -- src/components/tests/QuizApiIntegration.test.tsx --coverage --coverage.reporter=lcov
+          npm test -- src/components/tests/QuizApiIntegration.test.ts --coverage --coverage.reporter=lcov
       
       - name: Notify integration test success
         if: success()
