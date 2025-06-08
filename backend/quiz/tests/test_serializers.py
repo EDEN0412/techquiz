@@ -723,20 +723,19 @@ class QuizResultSerializerTest(TestCase):
         """
         有効なデータでデシリアライズできるかテスト
         """
-        # 明示的にユーザーフィールドを含める
+        # userフィールドはread_onlyなので含めない
         valid_serializer_data = {
             'quiz': self.quiz.id,
             'score': 60,
             'total_possible': 100,
             'percentage': 60.0,
-            'time_taken': 400,
-            'user': self.user.id  # 明示的にユーザーIDを設定
+            'time_taken': 400
         }
         serializer = QuizResultSerializer(data=valid_serializer_data)
         self.assertTrue(serializer.is_valid())
         
-        # saveを実行
-        new_result = serializer.save()
+        # saveの際にuserを明示的に設定
+        new_result = serializer.save(user=self.user)
         
         # 保存されたデータを検証
         self.assertEqual(new_result.user.id, self.user.id)
