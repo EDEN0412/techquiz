@@ -40,5 +40,18 @@ export const removeTokens = (): void => {
  * トークンの有効性確認（簡易チェック）
  */
 export const hasValidToken = (): boolean => {
-  return !!getAccessToken();
+  const accessToken = getAccessToken();
+  const refreshToken = getRefreshToken();
+  
+  // アクセストークンとリフレッシュトークンの両方が存在するかチェック
+  if (!accessToken || !refreshToken) {
+    return false;
+  }
+  
+  // トークンが最低限の長さを持っているかチェック（JWTは通常かなり長い）
+  if (accessToken.length < 20 || refreshToken.length < 20) {
+    return false;
+  }
+  
+  return true;
 }; 

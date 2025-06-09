@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { LoginCredentials } from '../lib/api/services/authService';
 import { useAuth } from '../lib/contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 
 export function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, error: authError } = useAuth();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     username: '',
@@ -13,6 +14,9 @@ export function Login() {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // ProtectedRouteから渡された元のページのパスを取得（デフォルトは'/'）
+  const from = location.state?.from?.pathname || '/';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,7 +32,8 @@ export function Login() {
       const success = await login(credentials);
       
       if (success) {
-        navigate('/');
+        // ログイン成功後、元のページにリダイレクト
+        navigate(from, { replace: true });
       } else {
         setError(authError || 'アカウントが見つかりません。新規登録してください。');
       }
@@ -48,6 +53,13 @@ export function Login() {
     <div className="mx-auto max-w-md">
       <div className="rounded-lg border bg-white p-8 shadow-sm">
         <h1 className="text-center text-2xl font-bold text-gray-900 mb-6">ログイン</h1>
+        
+        {/* リダイレクト元のページがある場合の案内メッセージ */}
+        {from !== '/' && (
+          <div className="mb-4 rounded-md bg-blue-50 p-4 text-sm text-blue-700">
+            このページにアクセスするにはログインが必要です。
+          </div>
+        )}
         
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">

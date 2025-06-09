@@ -8,6 +8,7 @@ import {
   LoginCredentials,
   User
 } from '../api/services/authService';
+import { getAccessToken, hasValidToken } from '../api/token';
 
 interface AuthContextType {
   user: User | null;
@@ -38,10 +39,11 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  // 初期状態でlocalStorageからトークンの存在を確認
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(hasValidToken());
   const [authChangeCallbacks, setAuthChangeCallbacks] = useState<((isAuthenticated: boolean) => void)[]>([]);
 
   // 認証状態変更時のコールバック登録
@@ -59,33 +61,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     authChangeCallbacks.forEach(callback => callback(isAuthenticated));
   }, [isAuthenticated, authChangeCallbacks]);
 
+  // 認証状態を更新するヘルパー関数
+  const updateAuthState = useCallback((userData: User | null, authenticated: boolean) => {
+    setUser(userData);
+    setIsAuthenticated(authenticated);
+  }, []);
+
   // 初期化時にトークンの検証とユーザー情報の取得
   useEffect(() => {
     const initAuth = async () => {
       setLoading(true);
+      setError(null);
+      
+      // localStorageにトークンがない場合は早期リターン
+      if (!hasValidToken()) {
+        updateAuthState(null, false);
+        setLoading(false);
+        return;
+      }
+
       try {
+        // トークンの有効性を確認
         const isValid = await verifyToken();
         
         if (isValid) {
+          // トークンが有効な場合、ユーザー情報を取得
           const userData = await getCurrentUser();
           if (userData) {
-            setUser(userData);
-            setIsAuthenticated(true);
+            updateAuthState(userData, true);
           } else {
-            // トークンは有効だがユーザー情報が取得できない場合
-            await refreshToken(); // トークンの更新を試みる
-            const refreshedUserData = await getCurrentUser();
-            if (refreshedUserData) {
-              setUser(refreshedUserData);
-              setIsAuthenticated(true);
+            // ユーザー情報が取得できない場合、トークンリフレッシュを試みる
+            const newToken = await refreshToken();
+            if (newToken) {
+              const refreshedUserData = await getCurrentUser();
+              if (refreshedUserData) {
+                updateAuthState(refreshedUserData, true);
+              } else {
+                // リフレッシュ後もユーザー情報が取得できない場合はログアウト
+                logout();
+              }
             } else {
-              // それでも取得できない場合はログアウト
+              // リフレッシュに失敗した場合はログアウト
               logout();
             }
           }
         } else {
-          // トークンが無効な場合
-          logout();
+          // トークンが無効な場合、リフレッシュを試みる
+          const newToken = await refreshToken();
+          if (newToken) {
+            // リフレッシュ成功後、ユーザー情報を取得
+            const userData = await getCurrentUser();
+            if (userData) {
+              updateAuthState(userData, true);
+            } else {
+              logout();
+            }
+          } else {
+            // リフレッシュに失敗した場合はログアウト
+            logout();
+          }
         }
       } catch (err) {
         setError('認証の初期化中にエラーが発生しました');
@@ -97,7 +131,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initAuth();
-  }, []);
+  }, [updateAuthState]);
 
   // ログイン処理
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -109,8 +143,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData = await getCurrentUser();
       
       if (userData) {
-        setUser(userData);
-        setIsAuthenticated(true);
+        updateAuthState(userData, true);
         return true;
       } else {
         setError('ユーザー情報の取得に失敗しました');
@@ -126,11 +159,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // ログアウト処理
-  const logout = () => {
+  const logout = useCallback(() => {
     logoutApi();
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+    updateAuthState(null, false);
+  }, [updateAuthState]);
 
   // コンテキストの値
   const value = {
