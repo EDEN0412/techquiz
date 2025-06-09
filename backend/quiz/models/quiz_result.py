@@ -48,83 +48,13 @@ class QuizResult(models.Model, SupabaseModelMixin):
         return f"{self.user.username} - {self.quiz.title} - {self.score}/{self.total_possible}点 ({self.percentage:.1f}%) [{result}]"
     
     def save(self, *args, **kwargs):
-        # 保存前に合格判定
-        is_new = not self.id  # 新規作成かどうかの判定
+        # 保存前の基本的な処理のみ実行
+        # 合格判定
+        self.passed = (self.score >= self.quiz.pass_score)
         
-        if is_new:  # 新規作成時のみ
-            self.passed = (self.score >= self.quiz.pass_score)
-            if self.percentage == 0 and self.total_possible > 0:
-                self.percentage = (self.score / self.total_possible) * 100
+        # パーセンテージの計算（設定されていない場合）
+        if self.percentage == 0 and self.total_possible > 0:
+            self.percentage = (self.score / self.total_possible) * 100
         
-        # Djangoモデルを保存（post_saveシグナルがSupabase同期を担当）
-        super().save(*args, **kwargs)
-        
-        # 新規作成時のみ、関連する統計情報と活動履歴を更新
-        if is_new:
-            # 統計情報の更新
-            self._update_user_statistics()
-            
-            # 活動履歴の作成
-            self._create_activity_history()
-    
-    def _update_user_statistics(self):
-        """
-        ユーザー統計情報を更新
-        """
-        try:
-            # ここではUserStatisticsモデルを直接インポートせず、循環インポートを防止
-            from .user_statistics import UserStatistics
-            
-            # 統計情報の更新（既に存在すれば取得、なければ作成）
-            stats, created = UserStatistics.objects.get_or_create(
-                user=self.user,
-                category=self.quiz.category,
-                defaults={
-                    'quizzes_completed': 1,
-                    'total_points': self.score,
-                    'avg_score': self.percentage,
-                    'highest_score': self.score if self.passed else 0,
-                    'last_quiz_date': self.completed_at,
-                }
-            )
-            
-            # 既存の統計を更新
-            if not created:
-                stats.quizzes_completed += 1
-                stats.total_points += self.score
-                
-                # 平均スコアを更新（累積平均の計算）
-                total_quizzes = stats.quizzes_completed
-                stats.avg_score = ((stats.avg_score * (total_quizzes - 1)) + self.percentage) / total_quizzes
-                
-                # 最高スコアを更新（より高いスコアの場合のみ）
-                if self.score > stats.highest_score and self.passed:
-                    stats.highest_score = self.score
-                
-                # 最新のクイズ日時を更新
-                stats.last_quiz_date = self.completed_at
-                
-                stats.save()  # 統計情報を保存（これによりSupabase同期も行われる）
-        
-        except Exception as e:
-            # エラーログを出力するが、このエラーでクイズ結果の保存自体を失敗させない
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"クイズ結果保存後の統計更新中にエラー: {str(e)}")
-    
-    def _create_activity_history(self):
-        """
-        活動履歴を作成
-        """
-        try:
-            # ここではActivityHistoryモデルを直接インポートせず、循環インポートを防止
-            from .activity_history import ActivityHistory
-            
-            # 活動履歴を作成
-            ActivityHistory.create_from_quiz_result(self)
-        
-        except Exception as e:
-            # エラーログを出力するが、このエラーでクイズ結果の保存自体を失敗させない
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"クイズ結果保存後の活動履歴作成中にエラー: {str(e)}") 
+        # モデル保存（Supabaseトリガーが統計情報と活動履歴を自動更新）
+        super().save(*args, **kwargs) 

@@ -87,34 +87,8 @@ class ActivityHistory(models.Model, SupabaseModelMixin):
         if self.quiz and not self.difficulty:
             self.difficulty = self.quiz.difficulty
             
-        # Djangoモデルを保存（post_saveシグナルがSupabase同期を担当）
+        # モデル保存（Supabaseトリガーが自動処理）
         super().save(*args, **kwargs)
-        
-        # 古い履歴データのアーカイブをチェック（新規作成時のみ、かつ10％の確率で実行）
-        if not self.id and __import__('random').random() < 0.1:
-            self._check_old_activities()
-    
-    @classmethod
-    def create_from_quiz_result(cls, quiz_result, activity_type='quiz_completed'):
-        """
-        クイズ結果から活動履歴を作成するファクトリメソッド
-        
-        Args:
-            quiz_result: QuizResultインスタンス
-            activity_type: 活動タイプ
-            
-        Returns:
-            作成された活動履歴
-        """
-        return cls.objects.create(
-            user=quiz_result.user,
-            quiz=quiz_result.quiz,
-            category=quiz_result.quiz.category,
-            difficulty=quiz_result.quiz.difficulty,
-            score=quiz_result.score,
-            percentage=quiz_result.percentage,
-            activity_type=activity_type
-        )
     
     def _check_old_activities(self):
         """
