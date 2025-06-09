@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Category, Difficulty, QuizQuestion as QuizQuestionType, QuizResultRequest } from '../lib/api/types';
 import { 
   fetchCategoryFromSupabase, 
@@ -13,7 +13,7 @@ import QuizResult from '../components/quiz/QuizResult';
 
 interface QuizPageParams extends Record<string, string | undefined> {
   categoryId: string;
-  difficultyId: string;
+  difficultyId?: string;
 }
 
 interface QuizAnswer {
@@ -23,8 +23,14 @@ interface QuizAnswer {
 
 const QuizPage: React.FC = () => {
   const { categoryId, difficultyId } = useParams<QuizPageParams>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // 復習モードの検出
+  const isReviewMode = location.pathname.includes('/review');
+  const quizId = searchParams.get('quizId');
+  const activityId = searchParams.get('activityId');
 
   // State管理
   const [questions, setQuestions] = useState<QuizQuestionType[]>([]);
@@ -50,64 +56,110 @@ const QuizPage: React.FC = () => {
   // クイズデータの取得
   useEffect(() => {
     const fetchQuizData = async () => {
-      if (!categoryId || !difficultyId) {
-        setError('カテゴリーまたは難易度が指定されていません');
-        return;
-      }
-      
-      const categoryIdNum = parseInt(categoryId);
-      const difficultyIdNum = parseInt(difficultyId);
-      
-      if (isNaN(categoryIdNum) || isNaN(difficultyIdNum)) {
-        setError(`無効なパラメータです。カテゴリーID: ${categoryId}, 難易度ID: ${difficultyId}`);
-        return;
-      }
-
       try {
         setIsLoading(true);
         setError(null);
 
-        // カテゴリー、難易度、問題を並行して取得
-        const [categoryData, difficultyLevels, questionsData] = await Promise.all([
-          fetchCategoryFromSupabase(categoryIdNum),
-          fetchDifficultyLevelsFromSupabase(),
-          fetchQuestionsByCategoryAndDifficulty(
-            categoryIdNum, 
-            difficultyIdNum,
-            10 // 最大10問
-          )
-        ]);
+        if (isReviewMode) {
+          // 復習モードの処理
+          if (!quizId) {
+            setError('復習用のクイズIDが指定されていません');
+            return;
+          }
 
-        // 難易度データから該当するものを探す
-        const difficultyData = difficultyLevels.find((d: Difficulty) => d.id === difficultyIdNum);
-        
-        if (!difficultyData) {
-          throw new Error('指定された難易度が見つかりません');
-        }
+          const quizIdNum = parseInt(quizId);
+          if (isNaN(quizIdNum)) {
+            setError('無効なクイズIDです');
+            return;
+          }
 
-        if (!questionsData || questionsData.length === 0) {
-          throw new Error('この組み合わせのクイズ問題が見つかりません');
-        }
+          // QuizServiceを使ってクイズ詳細を取得
+          const quizData = await quizService.getQuizById(quizIdNum);
+          
+          // カテゴリーと難易度のデータを取得
+          const [categoryData, difficultyLevels] = await Promise.all([
+            fetchCategoryFromSupabase(quizData.category),
+            fetchDifficultyLevelsFromSupabase()
+          ]);
 
-        setCategory(categoryData);
-        setDifficulty(difficultyData);
-        setQuestions(questionsData);
-        
-        // クイズデータを設定（結果保存のため）
-        if (questionsData.length > 0) {
-          const firstQuestion = questionsData[0];
-          const quizData = {
-            id: firstQuestion.quiz,
-            title: `${categoryData.name} - ${difficultyData.name}`,
-            category: categoryData.id,
-            difficulty: difficultyData.id,
-            pass_score: 70, // デフォルト値
-            total_questions: questionsData.length
-          };
-          console.log('クイズデータを設定:', quizData);
+          const difficultyData = difficultyLevels.find((d: Difficulty) => d.id === quizData.difficulty);
+          if (!difficultyData) {
+            throw new Error('指定された難易度が見つかりません');
+          }
+
+          // クイズの問題を取得
+          const questionsData = await fetchQuestionsByCategoryAndDifficulty(
+            quizData.category,
+            quizData.difficulty,
+            10
+          );
+
+          if (!questionsData || questionsData.length === 0) {
+            throw new Error('復習用の問題が見つかりません');
+          }
+
+          setCategory(categoryData);
+          setDifficulty(difficultyData);
+          setQuestions(questionsData);
           setQuiz(quizData);
+
         } else {
-          console.log('問題データが空のため、クイズデータを設定できません');
+          // 通常モードの処理
+          if (!categoryId || !difficultyId) {
+            setError('カテゴリーまたは難易度が指定されていません');
+            return;
+          }
+          
+          const categoryIdNum = parseInt(categoryId);
+          const difficultyIdNum = parseInt(difficultyId);
+          
+          if (isNaN(categoryIdNum) || isNaN(difficultyIdNum)) {
+            setError(`無効なパラメータです。カテゴリーID: ${categoryId}, 難易度ID: ${difficultyId}`);
+            return;
+          }
+
+          // カテゴリー、難易度、問題を並行して取得
+          const [categoryData, difficultyLevels, questionsData] = await Promise.all([
+            fetchCategoryFromSupabase(categoryIdNum),
+            fetchDifficultyLevelsFromSupabase(),
+            fetchQuestionsByCategoryAndDifficulty(
+              categoryIdNum, 
+              difficultyIdNum,
+              10 // 最大10問
+            )
+          ]);
+
+          // 難易度データから該当するものを探す
+          const difficultyData = difficultyLevels.find((d: Difficulty) => d.id === difficultyIdNum);
+          
+          if (!difficultyData) {
+            throw new Error('指定された難易度が見つかりません');
+          }
+
+          if (!questionsData || questionsData.length === 0) {
+            throw new Error('この組み合わせのクイズ問題が見つかりません');
+          }
+
+          setCategory(categoryData);
+          setDifficulty(difficultyData);
+          setQuestions(questionsData);
+          
+          // クイズデータを設定（結果保存のため）
+          if (questionsData.length > 0) {
+            const firstQuestion = questionsData[0];
+            const quizData = {
+              id: firstQuestion.quiz,
+              title: `${categoryData.name} - ${difficultyData.name}`,
+              category: categoryData.id,
+              difficulty: difficultyData.id,
+              pass_score: 70, // デフォルト値
+              total_questions: questionsData.length
+            };
+            console.log('クイズデータを設定:', quizData);
+            setQuiz(quizData);
+          } else {
+            console.log('問題データが空のため、クイズデータを設定できません');
+          }
         }
         
         // クイズ開始時間を記録
@@ -122,7 +174,7 @@ const QuizPage: React.FC = () => {
     };
 
     fetchQuizData();
-  }, [categoryId, difficultyId]);
+  }, [categoryId, difficultyId, isReviewMode, quizId]);
 
   // 現在の問題が変わったときに選択答えをリセット
   useEffect(() => {
@@ -175,6 +227,7 @@ const QuizPage: React.FC = () => {
     console.log('=== クイズ完了処理開始 ===');
     console.log('現在のユーザー:', user);
     console.log('現在のクイズ:', quiz);
+    console.log('復習モード:', isReviewMode);
     console.log('開始時間:', startTime);
     
     setIsQuizCompleted(true);

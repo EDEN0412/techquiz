@@ -6,6 +6,7 @@ import { useRecentActivities } from '../hooks/useRecentActivities';
 import { useCategories } from '../hooks/useCategories';
 import { enrichCategoriesWithIcons } from '../lib/utils/categoryIcons';
 import { useAuth } from '../lib/contexts/AuthContext';
+import { ActivityHistory } from '../lib/api/types';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -19,6 +20,16 @@ export function Dashboard() {
 
   const handleStartQuiz = (categorySlug: string) => {
     navigate(`/quiz/${categorySlug}/difficulty`);
+  };
+
+  // 復習機能のハンドラー
+  const handleReviewQuiz = (activity: ActivityHistory) => {
+    // カテゴリー一覧からslugを取得
+    const category = categories.find(cat => cat.id === activity.category);
+    const categorySlug = category?.slug || 'unknown';
+    
+    // 復習モードでクイズページに遷移
+    navigate(`/quiz/${categorySlug}/review?quizId=${activity.quiz}&activityId=${activity.id}`);
   };
 
   // 統計情報の表示値（未認証時は '-' を表示）
@@ -161,7 +172,11 @@ export function Dashboard() {
                       <p className="text-lg font-semibold text-gray-900">{Math.round(activity.percentage)}%</p>
                       <p className="text-sm text-gray-500">スコア</p>
                     </div>
-                    <Button variant="secondary" size="sm">
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={() => handleReviewQuiz(activity)}
+                    >
                       復習する
                     </Button>
                   </div>

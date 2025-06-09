@@ -25,6 +25,7 @@ function App() {
             <Route path="/quiz/:categoryId" element={<div>カテゴリー別クイズ画面</div>} />
             <Route path="/quiz/:categoryId/difficulty" element={<DifficultySelection />} />
             <Route path="/quiz/:categoryId/:difficultyId/start" element={<QuizPage />} />
+            <Route path="/quiz/:categoryId/review" element={<QuizPage />} />
             <Route path="/results" element={<div>結果画面</div>} />
             <Route path="/profile" element={<div>プロフィール画面</div>} />
             <Route path="*" element={<div>404 - ページが見つかりません</div>} />

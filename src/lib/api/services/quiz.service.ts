@@ -101,6 +101,13 @@ export class QuizService {
   }
 
   /**
+   * 特定のクイズの詳細を取得（復習機能用のエイリアス）
+   */
+  async getQuizById(quizId: number): Promise<any> {
+    return this.getQuiz(quizId);
+  }
+
+  /**
    * 特定のクイズに属する問題一覧を取得
    */
   async getQuestions(quizId: number): Promise<QuizQuestion[]> {
