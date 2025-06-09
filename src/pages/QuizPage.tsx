@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Category, Difficulty, QuizQuestion as QuizQuestionType, QuizResultRequest } from '../lib/api/types';
 import { 
   fetchCategoryFromSupabase, 
@@ -25,12 +25,12 @@ const QuizPage: React.FC = () => {
   const { categoryId, difficultyId } = useParams<QuizPageParams>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   // 復習モードの検出
   const isReviewMode = location.pathname.includes('/review');
   const quizId = searchParams.get('quizId');
-  const activityId = searchParams.get('activityId');
 
   // State管理
   const [questions, setQuestions] = useState<QuizQuestionType[]>([]);
