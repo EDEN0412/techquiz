@@ -316,7 +316,7 @@ alwaysApply: true
   ダッシュボードの最近の活動セクションに「復習する」ボタンの機能を実装。ActivityHistoryからカテゴリslugと難易度を取得し、復習モード（/quiz/{categorySlug}/review）でクイズページにナビゲート。QuizPageコンポーネントでURLパラメータから復習モードを検出し、適切にクイズIDを取得してクイズを再実行する機能を完了しました。QuizServiceにgetQuizByIdメソッドも追加し、復習時のクイズデータ取得をサポートしています。
 - [x] 統計情報の自動更新機能の実装
   Done
-  DjangoとSupabaseの両方で統計情報更新処理が重複していたため、Supabaseデータベーストリガーに一本化しました。QuizResultモデルとActivityHistoryモデルから統計情報更新ロジックを削除し、Supabaseの`update_user_statistics_on_quiz_result`トリガー関数による自動更新に統合。これによりデータベースレベルでの一貫性を保ちながら、コードの複雑性を削減しました。
+  DjangoとSupabaseの両方で統計情報更新処理が重複していたため、Supabaseデータベーストリガーに一本化しました。QuizResultモデルとActivityHistoryモデルから統計情報更新ロジックを削除し、Supabaseの`update_user_statistics_on_quiz_result`トリガー関数による自動更新に統合。これによりデータベースレベルでの一貫性を保ちながら、コードの複雑性を削減しました。フロントエンドでの動作確認完了し、統計情報がダッシュボードに正常に表示されることを確認。
 - [ ] 古いデータの自動アーカイブ機能の実装
 
 ## テストとデプロイ

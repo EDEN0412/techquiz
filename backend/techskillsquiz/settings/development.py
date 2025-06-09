@@ -2,9 +2,17 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# .envファイルを読み込み（開発環境用）
-env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+# .env.developmentファイルを読み込み（開発環境用）
+project_root = Path(__file__).resolve().parent.parent.parent.parent
+env_path = project_root / '.env.development'
+print(f"Loading env from: {env_path}")
+print(f"Env file exists: {env_path.exists()}")
 load_dotenv(dotenv_path=env_path)
+
+# 環境変数の読み込み確認
+print(f"SUPABASE_URL after load: {os.environ.get('SUPABASE_URL', 'Not found')}")
+print(f"DATABASE_HOST after load: {os.environ.get('DATABASE_HOST', 'Not found')}")
+print(f"DATABASE_PORT after load: {os.environ.get('DATABASE_PORT', 'Not found')}")
 
 # 基本設定を継承
 from .base import *
@@ -22,7 +30,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 SUPABASE_AUTO_SYNC = os.environ.get("SUPABASE_AUTO_SYNC", "True").lower() in ("true", "1", "t")
 
 # 開発環境用データベース設定
-# PostgreSQLを開発環境で使用する
+# PostgreSQLを開発環境で使用する（Supabase local）
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -32,7 +40,10 @@ DATABASES = {
         "HOST": os.environ.get("DATABASE_HOST", "127.0.0.1"), # Supabaseローカル用ホスト
         "PORT": os.environ.get("DATABASE_PORT", "54322"),   # Supabaseローカル用ポート
         "OPTIONS": {
-            "sslmode": "disable", # SSLモードを無効化 (ローカル開発用)
+            "sslmode": "disable",    # SSLモードを無効化 (ローカル開発用)
+            "sslcert": None,         # SSL証明書を無効化
+            "sslkey": None,          # SSLキーを無効化
+            "sslrootcert": None,     # SSLルート証明書を無効化
         },
     }
 }
