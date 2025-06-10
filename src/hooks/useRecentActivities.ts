@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ActivityHistory } from '../lib/api/types';
 import { QuizService } from '../lib/api/services/quiz.service';
-import { getAccessToken } from '../lib/api/token';
 import { useAuth } from '../lib/contexts/AuthContext';
+import { getAccessToken } from '../lib/api/token';
 
 export interface UseRecentActivitiesReturn {
   activities: ActivityHistory[];
@@ -28,7 +28,7 @@ export function useRecentActivities(limit: number = 5): UseRecentActivitiesRetur
       const token = getAccessToken();
       
       if (!token || !isAuthenticated) {
-        setError('活動履歴を表示するにはログインしてください');
+        // 未認証時はエラーではなく、単純に空の配列を設定
         setActivities([]);
         setLoading(false);
         return;
@@ -42,7 +42,8 @@ export function useRecentActivities(limit: number = 5): UseRecentActivitiesRetur
       // 認証エラーや実際のサーバーエラーの場合のみエラーとして扱う
       // 404やデータなしの場合は正常な空状態として扱う
       if (err?.response?.status === 401) {
-        setError('活動履歴を表示するにはログインしてください');
+        // 未認証エラーの場合も、エラーとして扱わずに空配列を設定
+        setActivities([]);
       } else if (err?.response?.status >= 500) {
         setError('サーバーエラーが発生しました');
       } else if (err?.code === 'ERR_NETWORK') {
@@ -67,9 +68,9 @@ export function useRecentActivities(limit: number = 5): UseRecentActivitiesRetur
   useEffect(() => {
     const unsubscribe = onAuthChange((authenticated) => {
       if (!authenticated) {
-        // ログアウト時は即座にエラーメッセージを表示
-        setError('活動履歴を表示するにはログインしてください');
+        // ログアウト時は即座に活動履歴をリセット（エラーメッセージなし）
         setActivities([]);
+        setError(null);
         setLoading(false);
       } else {
         // ログイン時は活動履歴を再取得

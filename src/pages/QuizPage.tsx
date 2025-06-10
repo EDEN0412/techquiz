@@ -235,13 +235,14 @@ const QuizPage: React.FC = () => {
     
     // 認証済みユーザーかつクイズデータが存在する場合のみ結果を保存
     if (user && quiz && startTime) {
-      console.log('条件を満たしているため、結果を保存します');
+      console.log('認証済みユーザーのため、結果を保存します');
       await saveQuizResult();
     } else {
-      console.log('結果保存の条件を満たしていません:');
-      console.log('- user:', !!user);
+      console.log('未認証または必要な情報が不足しているため、結果保存をスキップしました:');
+      console.log('- 認証状態:', !!user);
       console.log('- quiz:', !!quiz);
       console.log('- startTime:', !!startTime);
+      // 未認証時でもクイズ結果画面は表示する
     }
   };
 

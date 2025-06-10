@@ -18,49 +18,30 @@ function App() {
         <Navbar />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <Routes>
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
+            {/* ホーム画面 - 認証不要 */}
+            <Route path="/" element={<Dashboard />} />
+            
+            {/* 認証関連ページ */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/quiz" element={
-              <ProtectedRoute>
-                <div>クイズ画面</div>
-              </ProtectedRoute>
-            } />
+            
+            {/* クイズ関連ページ - 認証不要 */}
+            <Route path="/quiz" element={<div>クイズ画面</div>} />
             <Route path="/quiz/demo" element={<QuizQuestionDemo />} />
-            <Route path="/quiz/:categoryId" element={
-              <ProtectedRoute>
-                <div>カテゴリー別クイズ画面</div>
-              </ProtectedRoute>
-            } />
-            <Route path="/quiz/:categoryId/difficulty" element={
-              <ProtectedRoute>
-                <DifficultySelection />
-              </ProtectedRoute>
-            } />
-            <Route path="/quiz/:categoryId/:difficultyId/start" element={
-              <ProtectedRoute>
-                <QuizPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/quiz/:categoryId/review" element={
-              <ProtectedRoute>
-                <QuizPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/results" element={
-              <ProtectedRoute>
-                <div>結果画面</div>
-              </ProtectedRoute>
-            } />
+            <Route path="/quiz/:categoryId" element={<div>カテゴリー別クイズ画面</div>} />
+            <Route path="/quiz/:categoryId/difficulty" element={<DifficultySelection />} />
+            <Route path="/quiz/:categoryId/:difficultyId/start" element={<QuizPage />} />
+            <Route path="/quiz/:categoryId/review" element={<QuizPage />} />
+            <Route path="/results" element={<div>結果画面</div>} />
+            
+            {/* 認証が必要なページ */}
             <Route path="/profile" element={
               <ProtectedRoute>
                 <div>プロフィール画面</div>
               </ProtectedRoute>
             } />
+            
+            {/* 404ページ */}
             <Route path="*" element={<div>404 - ページが見つかりません</div>} />
           </Routes>
         </main>

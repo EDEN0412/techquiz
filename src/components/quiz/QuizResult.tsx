@@ -109,6 +109,16 @@ const QuizResult: React.FC<QuizResultProps> = ({
               </div>
             </div>
           )}
+          
+          {/* 未認証時の案内メッセージ */}
+          {!isResultSaving && !resultSaved && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-amber-600">ℹ️</span>
+                <span className="text-amber-700 text-sm">ログインすると結果を保存できます</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* スコア表示 */}
