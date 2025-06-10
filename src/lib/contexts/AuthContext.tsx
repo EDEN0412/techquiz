@@ -8,7 +8,7 @@ import {
   LoginCredentials,
   User
 } from '../api/services/authService';
-import { getAccessToken, hasValidToken } from '../api/token';
+import { hasValidToken } from '../api/token';
 
 interface AuthContextType {
   user: User | null;
