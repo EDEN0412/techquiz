@@ -32,6 +32,15 @@ export function Dashboard() {
     navigate(`/quiz/${categorySlug}/review?quizId=${activity.quiz}&activityId=${activity.id}`);
   };
 
+  // 完了したクイズ一覧ページへ遷移
+  const handleViewCompletedQuizzes = () => {
+    if (isAuthenticated) {
+      navigate('/completed-quizzes');
+    } else {
+      navigate('/login');
+    }
+  };
+
   // 統計情報の表示値（未認証時は '-' を表示）
   const totalQuizzes = stats?.total_quizzes_completed ?? '-';
   const averageScore = stats?.overall_avg_score ? Math.round(stats.overall_avg_score) : '-';
@@ -54,7 +63,11 @@ export function Dashboard() {
           </p>
         </div>
         <div className="flex items-center space-x-4 rounded-lg bg-white p-4 shadow-sm">
-          <div className="text-center">
+          <div 
+            className="text-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            onClick={handleViewCompletedQuizzes}
+            title="クリックして完了したクイズの一覧を表示"
+          >
             <p className="text-sm text-gray-500">完了したクイズ</p>
             <p className="text-2xl font-bold text-gray-900">
               {statsLoading ? '...' : totalQuizzes}

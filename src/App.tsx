@@ -5,6 +5,7 @@ import { SignUp } from './pages/SignUp';
 import { Login } from './pages/Login';
 import { DifficultySelection } from './pages/DifficultySelection';
 import QuizPage from './pages/QuizPage';
+import { CompletedQuizzes } from './pages/CompletedQuizzes';
 import { AuthProvider } from './lib/contexts/AuthContext';
 import QuizQuestionDemo from './components/quiz/QuizQuestionDemo';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -40,6 +41,9 @@ function App() {
                 <div>プロフィール画面</div>
               </ProtectedRoute>
             } />
+            
+            {/* 完了したクイズ一覧ページ */}
+            <Route path="/completed-quizzes" element={<CompletedQuizzes />} />
             
             {/* 404ページ */}
             <Route path="*" element={<div>404 - ページが見つかりません</div>} />

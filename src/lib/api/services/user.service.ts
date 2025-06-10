@@ -2,7 +2,7 @@
  * ユーザー関連のAPIサービス
  */
 import api from '../client';
-import { UserProfile, QuizResult, PaginatedResponse, UserStatistics, UserStatsSummary } from '../types';
+import { UserProfile, QuizResult, PaginatedResponse, UserStatistics, UserStatsSummary, QuizResultResponse } from '../types';
 
 export class UserService {
   private baseUrl = '';
@@ -33,6 +33,18 @@ export class UserService {
         limit
       }
     });
+    return response.data;
+  }
+
+  /**
+   * ユーザーの完了したクイズ結果の一覧を取得
+   */
+  async getUserQuizResults(): Promise<QuizResultResponse[]> {
+    const response = await api.get<any>(`${this.baseUrl}/quiz/quiz-results/`);
+    // ページネーション形式のレスポンスを処理
+    if (response.data.results) {
+      return response.data.results;
+    }
     return response.data;
   }
   
