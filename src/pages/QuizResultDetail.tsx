@@ -35,8 +35,6 @@ export function QuizResultDetail() {
     return 'text-red-600';
   };
 
-
-
   // 復習機能
   const handleReviewQuiz = () => {
     navigate(`/quiz/review/${quizResult.quiz}`, {

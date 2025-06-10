@@ -34,6 +34,7 @@ function App() {
             <Route path="/quiz/:categoryId/difficulty" element={<DifficultySelection />} />
             <Route path="/quiz/:categoryId/:difficultyId/start" element={<QuizPage />} />
             <Route path="/quiz/:categoryId/review" element={<QuizPage />} />
+            <Route path="/quiz/review/:quizId" element={<QuizPage />} />
             <Route path="/results" element={<div>結果画面</div>} />
             
             {/* 認証が必要なページ */}

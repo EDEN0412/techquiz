@@ -12,8 +12,9 @@ import QuizQuestion from '../components/quiz/QuizQuestion';
 import QuizResult from '../components/quiz/QuizResult';
 
 interface QuizPageParams extends Record<string, string | undefined> {
-  categoryId: string;
+  categoryId?: string;
   difficultyId?: string;
+  quizId?: string;
 }
 
 interface QuizAnswer {
@@ -22,7 +23,7 @@ interface QuizAnswer {
 }
 
 const QuizPage: React.FC = () => {
-  const { categoryId, difficultyId } = useParams<QuizPageParams>();
+  const { categoryId, difficultyId, quizId: routeQuizId } = useParams<QuizPageParams>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,7 +31,7 @@ const QuizPage: React.FC = () => {
 
   // 復習モードの検出
   const isReviewMode = location.pathname.includes('/review');
-  const quizId = searchParams.get('quizId');
+  const quizId = routeQuizId || searchParams.get('quizId');
 
   // State管理
   const [questions, setQuestions] = useState<QuizQuestionType[]>([]);
