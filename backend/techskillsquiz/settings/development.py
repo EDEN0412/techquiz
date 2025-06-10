@@ -40,10 +40,8 @@ DATABASES = {
         "HOST": os.environ.get("DATABASE_HOST", "127.0.0.1"), # Supabaseローカル用ホスト
         "PORT": os.environ.get("DATABASE_PORT", "54322"),   # Supabaseローカル用ポート
         "OPTIONS": {
-            "sslmode": "disable",    # SSLモードを無効化 (ローカル開発用)
-            "sslcert": None,         # SSL証明書を無効化
-            "sslkey": None,          # SSLキーを無効化
-            "sslrootcert": None,     # SSLルート証明書を無効化
+            # SSLを完全に無効化（ローカル開発用）
+            "sslmode": "disable",
         },
     }
 }

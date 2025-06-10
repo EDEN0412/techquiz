@@ -153,7 +153,7 @@ export async function fetchQuestionsByCategoryAndDifficulty(
 
     const quizIds = quizzes.map((q: any) => q.id);
 
-    // 2. 問題を取得
+    // 2. 問題を取得 - 今はdisplay_orderカラムを使用
     const questionsResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/quiz_question?select=*&quiz_id=in.(${quizIds.join(',')})&order=display_order.asc&limit=${limit}`,
       {
@@ -194,7 +194,7 @@ export async function fetchQuestionsByCategoryAndDifficulty(
 
     const answers = await answersResponse.json();
 
-    // 4. 問題と選択肢を結合
+    // 4. 問題と選択肢を結合 - 今はdisplay_orderを使用
     const questionsWithAnswers: QuizQuestion[] = questions.map((question: any, index: number) => ({
       id: question.id,
       quiz: question.quiz_id,
@@ -202,7 +202,7 @@ export async function fetchQuestionsByCategoryAndDifficulty(
       question_type: question.question_type as 'multiple_choice' | 'single_choice' | 'true_false' | 'fill_blank',
       explanation: question.explanation,
       points: question.points,
-      order: question.display_order || index + 1,
+      order: question.display_order || index + 1, // display_orderカラムを使用
       answers: (answers || [])
         .filter((answer: any) => answer.question_id === question.id)
         .map((answer: any, answerIndex: number) => ({
@@ -210,7 +210,7 @@ export async function fetchQuestionsByCategoryAndDifficulty(
           question: answer.question_id,
           answer_text: answer.answer_text,
           is_correct: answer.is_correct,
-          order: answerIndex + 1 // orderカラムがないので、インデックスベースでorderを生成
+          order: answer.display_order || answerIndex + 1 // display_orderカラムを使用
         }))
         .sort((a: Answer, b: Answer) => a.order - b.order)
     }));
