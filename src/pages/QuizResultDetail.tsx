@@ -1,5 +1,4 @@
-import React from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { QuizResultResponse } from '../lib/api/types';
@@ -7,7 +6,6 @@ import { QuizResultResponse } from '../lib/api/types';
 export function QuizResultDetail() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams<{ id: string }>();
 
   // locationのstateからクイズ結果データを取得
   const quizResult = location.state?.quizResult as QuizResultResponse;
