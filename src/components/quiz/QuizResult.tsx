@@ -59,7 +59,7 @@ const QuizResult: React.FC<QuizResultProps> = ({
     } else if (percentage >= 50) {
       return {
         icon: "👍",
-        title: "合格です！",
+        title: "よく頑張りました！",
         message: "もう少し頑張りましょう！",
         color: "text-blue-600",
         bgColor: "bg-blue-50",

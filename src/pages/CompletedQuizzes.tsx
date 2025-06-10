@@ -93,18 +93,7 @@ export function CompletedQuizzes() {
     return 'text-red-600';
   };
 
-  // 合格状況のバッジ
-  const getPassBadge = (passed: boolean, percentage: number) => {
-    return passed ? (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        合格
-      </span>
-    ) : (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        不合格
-      </span>
-    );
-  };
+
 
   if (!isAuthenticated) {
     return (
@@ -226,13 +215,12 @@ export function CompletedQuizzes() {
               <Card key={quiz.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="py-6">
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {quiz.quiz_title}
-                        </h3>
-                        {getPassBadge(quiz.passed, quiz.percentage)}
-                      </div>
+                                         <div className="flex-1">
+                       <div className="mb-2">
+                         <h3 className="text-lg font-semibold text-gray-900">
+                           {quiz.quiz_title}
+                         </h3>
+                       </div>
                       <div className="space-y-1 text-sm text-gray-600">
                         <p>
                           <span className="font-medium">カテゴリー:</span> {quiz.category_name}
