@@ -24,12 +24,9 @@ export function Dashboard() {
 
   // 復習機能のハンドラー
   const handleReviewQuiz = (activity: ActivityHistory) => {
-    // カテゴリー一覧からslugを取得
-    const category = categories.find(cat => cat.id === activity.category);
-    const categorySlug = category?.slug || 'unknown';
-    
-    // 復習モードでクイズページに遷移
-    navigate(`/quiz/${categorySlug}/review?quizId=${activity.quiz}&activityId=${activity.id}`);
+    // category id は activity.category に含まれている
+    const categoryId = activity.category;
+    navigate(`/quiz/${categoryId}/review?quizId=${activity.quiz}`);
   };
 
   // 完了したクイズ一覧ページへ遷移

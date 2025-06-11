@@ -151,21 +151,20 @@ const mockDifficulties: MockDifficulty[] = [
 // 設定フラグ - APIを使用するように変更
 const USE_MOCK_DATA = false;
 
+interface QuizCardData {
+  quiz: Quiz;
+  difficulty: Difficulty;
+}
+
 // Django APIサービスのインスタンス
 const quizService = new QuizService();
-
-interface DifficultyWithQuiz extends Difficulty {
-  quiz?: Quiz;
-  is_active: boolean;
-  display_order: number;
-}
 
 export function DifficultySelection() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   
   const [category, setCategory] = useState<Category | null>(null);
-  const [difficulties, setDifficulties] = useState<DifficultyWithQuiz[]>([]);
+  const [quizzesData, setQuizzesData] = useState<QuizCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -195,11 +194,8 @@ export function DifficultySelection() {
 
           setCategory(foundCategory);
 
-          const activeDifficulties = mockDifficulties
-            .filter(diff => diff.is_active)
-            .sort((a, b) => a.level - b.level);
-          
-          setDifficulties(activeDifficulties);
+          // モックデータ使用時はクイズ一覧を定義していないため、空配列で代用
+          setQuizzesData([]);
         } else {
           // Django APIからデータを取得
           
@@ -215,30 +211,22 @@ export function DifficultySelection() {
 
           setCategory(foundCategory);
 
-          // 2. 難易度一覧を取得
-          const difficultyLevels = await quizService.getDifficultyLevels();
-          
-          // 3. このカテゴリーのクイズを取得
-          const quizzes = await quizService.getQuizzes();
+          // 2. 難易度一覧とクイズ一覧を取得
+          const [difficultyLevels, quizzes] = await Promise.all([
+            quizService.getDifficultyLevels(),
+            quizService.getQuizzes()
+          ]);
+
+          // 3. このカテゴリーのクイズのみ抽出
           const categoryQuizzes = quizzes.filter(quiz => quiz.category === foundCategory.id);
-          
-          // 4. 難易度とクイズを組み合わせる
-          const difficultiesWithQuizzes: DifficultyWithQuiz[] = difficultyLevels
-            .map(diff => {
-              // この難易度でこのカテゴリーのクイズを探す
-              const quiz = categoryQuizzes.find(q => q.difficulty === diff.id);
-              
-              return {
-                ...diff,
-                quiz: quiz,
-                is_active: !!quiz, // クイズが存在する場合のみアクティブ
-                display_order: diff.level // levelをdisplay_orderとして使用
-              };
-            })
-            .filter(diff => diff.is_active) // クイズが存在する難易度のみ表示
-            .sort((a, b) => a.level - b.level);
-          
-          setDifficulties(difficultiesWithQuizzes);
+
+          // 4. クイズごとに難易度データを紐付け
+          const quizCardList: QuizCardData[] = categoryQuizzes.map(quiz => {
+            const diff = difficultyLevels.find(d => d.id === quiz.difficulty)!;
+            return { quiz, difficulty: diff };
+          }).sort((a, b) => a.difficulty.level - b.difficulty.level);
+
+          setQuizzesData(quizCardList);
         }
       } catch (err) {
         console.error('データの取得に失敗しました:', err);
@@ -249,10 +237,8 @@ export function DifficultySelection() {
           const foundCategory = mockCategories.find(cat => cat.slug === categoryId);
           if (foundCategory) {
             setCategory(foundCategory);
-            const activeDifficulties = mockDifficulties
-              .filter(diff => diff.is_active)
-              .sort((a, b) => a.level - b.level);
-            setDifficulties(activeDifficulties);
+            // モックデータ使用時はクイズ一覧を定義していないため、空配列で代用
+            setQuizzesData([]);
           } else {
             setError('指定されたカテゴリーが見つかりません');
           }
@@ -267,10 +253,11 @@ export function DifficultySelection() {
     fetchData();
   }, [categoryId]);
 
-  const handleStartQuiz = (difficultyId: number) => {
-    if (category) {
-      navigate(`/quiz/${category.id}/${difficultyId}/start`);
-    }
+  const handleStartQuiz = (quizData: QuizCardData) => {
+    const { quiz, difficulty } = quizData;
+    // 既存の QuizPage は categoryId と difficultyId で問題を取得するため、
+    // クイズIDはクエリパラメータで渡す
+    navigate(`/quiz/${quiz.category}/${difficulty.id}/start?quizId=${quiz.id}`);
   };
 
   const handleBack = () => {
@@ -386,7 +373,7 @@ export function DifficultySelection() {
       <div>
         <h2 className="mb-6 text-xl font-semibold text-gray-900">難易度を選択してください</h2>
         
-        {difficulties.length === 0 ? (
+        {quizzesData.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-gray-500">
               このカテゴリーには利用可能な難易度がありません。
@@ -394,19 +381,20 @@ export function DifficultySelection() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {difficulties.map((difficulty) => {
+            {quizzesData.map((item) => {
+              const { difficulty, quiz } = item;
               const colorConfig = getDifficultyColor(difficulty.level);
               
               return (
                 <Card 
-                  key={difficulty.id} 
+                  key={quiz.id} 
                   interactive 
                   className={`group cursor-pointer border-2 ${colorConfig.borderColor} hover:shadow-lg`}
                 >
                   <CardHeader className={colorConfig.bgColor}>
                     <div className="flex items-center justify-between">
                       <CardTitle className={`${colorConfig.color} flex items-center space-x-2`}>
-                        <span>{difficulty.name}</span>
+                        <span>{quiz.title}</span>
                         <div className="flex">
                           {[...Array(difficulty.level)].map((_, i) => (
                             <Star key={i} className={`h-4 w-4 ${colorConfig.color} fill-current`} />
@@ -425,7 +413,7 @@ export function DifficultySelection() {
                     </div>
                     <Button 
                       className="w-full" 
-                      onClick={() => handleStartQuiz(difficulty.id)}
+                      onClick={() => handleStartQuiz(item)}
                     >
                       開始する
                     </Button>

@@ -275,10 +275,11 @@ class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         if end_date:
             stats_query = stats_query.filter(last_quiz_date__lte=end_date)
         
-        # 全体の統計情報を計算
-        total_quizzes = stats_query.aggregate(total=Sum('quizzes_completed'))['total'] or 0
-        total_points = stats_query.aggregate(total=Sum('total_points'))['total'] or 0
-        avg_score = stats_query.aggregate(avg=Avg('avg_score'))['avg'] or 0
+        # 全体統計（カテゴリと難易度がどちらも NULL のレコード）
+        overall_qs = stats_query.filter(category__isnull=True, difficulty__isnull=True)
+        total_quizzes = overall_qs.aggregate(total=Sum('quizzes_completed'))['total'] or 0
+        total_points = overall_qs.aggregate(total=Sum('total_points'))['total'] or 0
+        avg_score = overall_qs.aggregate(avg=Avg('avg_score'))['avg'] or 0
         
         # カテゴリごとの統計（難易度=Noneのレコードで集計）
         categories_query = stats_query.filter(difficulty=None)

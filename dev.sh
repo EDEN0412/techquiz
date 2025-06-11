@@ -157,14 +157,25 @@ start_supabase_monitor() {
 echo -e "${BLUE}Supabase監視機能を開始しています...${NC}"
 start_supabase_monitor
 
-# バックグラウンドでバックエンドサーバーを起動
-echo -e "${YELLOW}バックエンドサーバーを起動中...${NC}"
+# マイグレーションの適用
+echo -e "${BLUE}Djangoマイグレーションを適用しています...${NC}"
 cd backend || exit
+
+if [ "$HAS_POETRY" = true ]; then
+  DJANGO_ENV=development poetry run python manage.py migrate --noinput
+else
+  DJANGO_ENV=development python manage.py migrate --noinput
+fi
+
+# バックエンドサーバーをバックグラウンドで起動
+echo -e "${YELLOW}バックエンドサーバーを起動中...${NC}"
+
 if [ "$HAS_POETRY" = true ]; then
   DJANGO_ENV=development poetry run python manage.py runserver 0.0.0.0:8000 &
 else
   DJANGO_ENV=development python manage.py runserver 0.0.0.0:8000 &
 fi
+
 BACKEND_PID=$!
 cd ..
 
