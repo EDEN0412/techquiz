@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg, Sum
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.db import transaction
 
 from .models import (
     Category, 
@@ -209,20 +211,19 @@ class QuizResultViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        クイズ結果を保存する際に、ユーザーとpassedフラグを自動的に設定する
+        クイズ結果を保存する際に、正答率と合否のみ計算して保存する。
+        ActivityHistory と UserStatistics の更新は Supabase 側の
+        trigger_update_user_statistics に委任する。
         """
         quiz = serializer.validated_data.get('quiz')
         score = serializer.validated_data.get('score')
         total_possible = serializer.validated_data.get('total_possible', 0)
-        
-        # パスしたかどうかを計算
-        passed = False
-        percentage = 0
-        if total_possible > 0:
-            percentage = (score / total_possible) * 100
-            passed = percentage >= quiz.pass_score
-        
-        # パーセンテージを明示的に設定（テストのために必要）
+
+        # 正答率と合否を計算
+        percentage = (score / total_possible) * 100 if total_possible else 0
+        passed = percentage >= quiz.pass_score if total_possible else False
+
+        # QuizResult だけを保存（後続処理は DB トリガーに任せる）
         serializer.save(user=self.request.user, passed=passed, percentage=percentage)
 
 

@@ -416,4 +416,12 @@ COMMENT ON TABLE quiz_question IS 'クイズ問題テーブル（Django: quiz.Qu
 COMMENT ON TABLE quiz_answer IS '回答選択肢テーブル（Django: quiz.Answer）';
 COMMENT ON TABLE quiz_quizresult IS 'クイズ結果テーブル（Django: quiz.QuizResult）';
 COMMENT ON TABLE quiz_userstatistics IS 'ユーザー統計情報テーブル（Django: quiz.UserStatistics）';
-COMMENT ON TABLE quiz_activityhistory IS '活動履歴テーブル（Django: quiz.ActivityHistory）'; 
+COMMENT ON TABLE quiz_activityhistory IS '活動履歴テーブル（Django: quiz.ActivityHistory）';
+
+-- =========================================================
+-- クイズ問題データ (HTML & CSS, 初級〜上級)
+-- Supabase CLI の db reset 時に自動で取り込むため、
+-- 外部 SQL ファイルを読み込みます。
+-- =========================================================
+\i migrations/create_html_css_quiz_part1_fixed2.sql
+\i migrations/create_html_css_quiz_part2_fixed2.sql 

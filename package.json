@@ -21,7 +21,8 @@
     "test:watch": "vitest",
     "docker:build": "docker build -t tech-skills-quiz -f docker/Dockerfile .",
     "docker:dev": "docker-compose up",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "db:reset": "./dev_reset.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
