@@ -17,7 +17,7 @@ jobs:
       DATABASE_PORT: 54322
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
-      DATABASE_NAME: postgres
+      DATABASE_NAME: postgres_test
       SUPABASE_URL: http://127.0.0.1:54321
       SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.SGVsbG8gV29ybGQ.signature
       # Supabase CLI が起動するポート設定（デフォルトを利用）
