@@ -34,13 +34,6 @@ jobs:
             echo "Supabase CLI already installed"
           fi
 
-      - name: Install Node dependencies
-        run: npm install
-
-      # Supabase CLI は Docker を利用。runner 上の Docker デーモンを使用するため追加セットアップは不要
-      - name: Run full DB reset script
-        run: npm run db:reset
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -55,6 +48,12 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --with dev
           pip install pytest pytest-django pytest-cov
+
+      - name: Run full DB reset script
+        run: npm run db:reset
+
+      - name: Install Node dependencies
+        run: npm install
 
       - name: Run minimal backend smoke tests
         run: |
