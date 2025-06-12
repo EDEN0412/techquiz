@@ -101,53 +101,6 @@ const mockCategories: Category[] = [
   },
 ];
 
-interface MockDifficulty extends Difficulty {
-  is_active: boolean;
-  display_order: number;
-}
-
-const mockDifficulties: MockDifficulty[] = [
-  {
-    id: 1,
-    name: '初級',
-    slug: 'beginner',
-    level: 1,
-    description: '基本的な概念を学ぶレベル',
-    point_multiplier: 1,
-    time_limit: 15,
-    is_active: true,
-    display_order: 1,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 2,
-    name: '中級',
-    slug: 'intermediate',
-    level: 2,
-    description: '実践的な応用問題に挑戦',
-    point_multiplier: 2,
-    time_limit: 20,
-    is_active: true,
-    display_order: 2,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 3,
-    name: '上級',
-    slug: 'advanced',
-    level: 3,
-    description: '高度な知識が求められる難問',
-    point_multiplier: 3,
-    time_limit: 30,
-    is_active: true,
-    display_order: 3,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-  },
-];
-
 // 設定フラグ - APIを使用するように変更
 const USE_MOCK_DATA = false;
 
