@@ -24,10 +24,14 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install Supabase CLI binary
+      - name: Install Supabase CLI binary (skip if already installed)
         run: |
-          curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_$(uname -s)_amd64.tar.gz | tar xz
-          sudo mv supabase /usr/local/bin/
+          if ! command -v supabase >/dev/null 2>&1; then
+            curl -sL https://github.com/supabase/cli/releases/latest/download/supabase_$(uname -s)_amd64.tar.gz | tar xz
+            sudo mv -f supabase /usr/local/bin/
+          else
+            echo "Supabase CLI already installed"
+          fi
 
       - name: Install Node dependencies
         run: npm install
