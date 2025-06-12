@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DJANGO_SETTINGS_MODULE: techskillsquiz.settings.test
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_PORT: 54322
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      SUPABASE_URL: http://127.0.0.1:54321
+      SUPABASE_ANON_KEY: supabase_dummy_anon_key
       # Supabase CLI が起動するポート設定（デフォルトを利用）
     steps:
       - name: Checkout repository
