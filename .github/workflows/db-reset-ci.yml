@@ -1,0 +1,60 @@
+name: DB Reset Flow
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  db_reset_and_tests:
+    name: DB Reset & Smoke Tests
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: techskillsquiz.settings.test
+      # Supabase CLI が起動するポート設定（デフォルトを利用）
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install global Supabase CLI
+        run: npm install -g supabase@latest
+
+      - name: Install Node dependencies
+        run: npm install
+
+      # Supabase CLI は Docker を利用。runner 上の Docker デーモンを使用するため追加セットアップは不要
+      - name: Run full DB reset script
+        run: npm run db:reset
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          cd backend
+          poetry config virtualenvs.create false
+          poetry install --with dev
+          pip install pytest pytest-django pytest-cov
+
+      - name: Run minimal backend smoke tests
+        run: |
+          cd backend
+          pytest -q
+
+      - name: Run minimal frontend tests
+        run: npm test -- --run
+
+      - name: Stop Supabase containers
+        if: always()
+        run: npx supabase stop || true 
