@@ -282,6 +282,12 @@ class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         total_points = overall_qs.aggregate(total=Sum('total_points'))['total'] or 0
         avg_score = overall_qs.aggregate(avg=Avg('avg_score'))['avg'] or 0
         
+        # フォールバック: 全体行がまだ無い場合は全レコードから集計
+        if total_quizzes == 0:
+            total_quizzes = stats_query.aggregate(total=Sum('quizzes_completed'))['total'] or 0
+            total_points = stats_query.aggregate(total=Sum('total_points'))['total'] or 0
+            avg_score = stats_query.aggregate(avg=Avg('avg_score'))['avg'] or 0
+        
         # カテゴリごとの統計（難易度=Noneのレコードで集計）
         categories_query = stats_query.filter(difficulty=None)
         
