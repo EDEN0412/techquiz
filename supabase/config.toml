@@ -52,7 +52,8 @@ schema_paths = []
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
-enabled = true
+# 開発スクリプト dev_reset.sh 内で Django マイグレーション後に seed.sql を流すため自動シードを無効化
+enabled = false
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = ["./seed.sql"]
