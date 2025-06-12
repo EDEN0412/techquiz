@@ -73,6 +73,11 @@ if [ $RESET_EXIT -ne 0 ]; then
 fi
 
 # 3. Django マイグレーション適用
+# テスト用データベースが存在しない場合は作成
+echo "[dev_reset] ensure postgres_test database exists"
+docker exec supabase_db_techquiz psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='postgres_test'" | grep -q 1 || \
+  docker exec supabase_db_techquiz psql -U postgres -c "CREATE DATABASE postgres_test;"
+
 echo "[dev_reset] django migrate"
 (cd backend && DJANGO_ENV=development python manage.py migrate --noinput)
 
