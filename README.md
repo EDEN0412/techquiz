@@ -75,5 +75,22 @@ supabase start
 # ブラウザでStudioにアクセス
 open http://localhost:54323
 ```
+
+### データベースのフルリセット（ワンコマンド）
+
+開発中にスキーマを壊してしまった場合や、クリーンな状態からやり直したい場合は **1 行だけ** で再構築できます。
+
+```bash
+# ルートディレクトリで実行
+npm run db:reset
+```
+
+処理内容:
+1. ローカル Supabase を再起動し、**スキーマのみ** をリセット
+2. Django マイグレーションをすべて適用（`backend/manage.py migrate`）
+3. `supabase/seed.sql` を流し込み、カテゴリ・難易度・クイズ問題などの初期データを投入
+
+10〜15 分ほどで **API・フロントエンドとも動く状態** になります。
+
 # マイグレーション関連ファイル
 - [DBマイグレーション管理手順書](docs/db_migration_guidelines.md)
