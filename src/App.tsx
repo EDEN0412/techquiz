@@ -3,6 +3,7 @@ import { Navbar } from './components/layout/Navbar';
 import { Dashboard } from './pages/Dashboard';
 import { SignUp } from './pages/SignUp';
 import { Login } from './pages/Login';
+import { Profile } from './pages/Profile';
 import { DifficultySelection } from './pages/DifficultySelection';
 import QuizPage from './pages/QuizPage';
 import { CompletedQuizzes } from './pages/CompletedQuizzes';
@@ -40,7 +41,7 @@ function App() {
             {/* 認証が必要なページ */}
             <Route path="/profile" element={
               <ProtectedRoute>
-                <div>プロフィール画面</div>
+                <Profile />
               </ProtectedRoute>
             } />
             

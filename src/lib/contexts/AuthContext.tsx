@@ -18,6 +18,7 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   onAuthChange: (callback: (isAuthenticated: boolean) => void) => () => void;
+  updateUser: (userData: User) => void;
 }
 
 // コンテキストの作成
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
   isAuthenticated: false,
   onAuthChange: () => () => {},
+  updateUser: () => {},
 });
 
 // カスタムフック
@@ -65,6 +67,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const updateAuthState = useCallback((userData: User | null, authenticated: boolean) => {
     setUser(userData);
     setIsAuthenticated(authenticated);
+  }, []);
+
+  // ユーザー情報のみを更新する関数
+  const updateUser = useCallback((userData: User) => {
+    setUser(userData);
   }, []);
 
   // 初期化時にトークンの検証とユーザー情報の取得
@@ -173,6 +180,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isAuthenticated,
     onAuthChange,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -30,6 +30,32 @@ class UserViewSet(viewsets.ModelViewSet):
             return User.objects.all()
         return User.objects.filter(id=user.id)
     
+    def update(self, request, *args, **kwargs):
+        """ユーザー情報の更新（自分の情報のみ更新可能）"""
+        user_to_update = self.get_object()
+        
+        # 自分の情報のみ更新可能
+        if request.user != user_to_update and not request.user.is_staff:
+            return Response(
+                {'detail': '他のユーザーの情報は更新できません'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        return super().update(request, *args, **kwargs)
+    
+    def partial_update(self, request, *args, **kwargs):
+        """ユーザー情報の部分更新（自分の情報のみ更新可能）"""
+        user_to_update = self.get_object()
+        
+        # 自分の情報のみ更新可能
+        if request.user != user_to_update and not request.user.is_staff:
+            return Response(
+                {'detail': '他のユーザーの情報は更新できません'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        return super().partial_update(request, *args, **kwargs)
+    
     @action(detail=False, methods=['get'])
     def me(self, request):
         """現在のログインユーザーの情報を返します"""

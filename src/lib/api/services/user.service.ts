@@ -18,8 +18,8 @@ export class UserService {
   /**
    * ユーザー情報の更新
    */
-  async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
-    const response = await api.patch<UserProfile>(`${this.baseUrl}/users/me/`, profileData);
+  async updateProfile(userId: number, profileData: Partial<UserProfile>): Promise<UserProfile> {
+    const response = await api.patch<UserProfile>(`${this.baseUrl}/users/${userId}/`, profileData);
     return response.data;
   }
   
@@ -67,4 +67,7 @@ export class UserService {
     });
     return response.data;
   }
-} 
+}
+
+// UserServiceのインスタンスをエクスポート
+export const userService = new UserService(); 
