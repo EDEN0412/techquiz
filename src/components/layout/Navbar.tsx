@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Brain, User, LogIn, PlayCircle } from 'lucide-react';
+import { Brain, User, LogIn, PlayCircle, Home } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../lib/contexts/AuthContext';
 
@@ -25,6 +25,12 @@ export function Navbar() {
             </Link>
             {isAuthenticated ? (
               <>
+                <Link to="/">
+                  <Button variant="secondary" size="sm">
+                    <Home className="mr-2 h-4 w-4" />
+                    ダッシュボード
+                  </Button>
+                </Link>
                 <Link to="/profile">
                   <Button variant="secondary" size="sm">
                     <User className="mr-2 h-4 w-4" />
