@@ -3,13 +3,14 @@ Django管理コマンドのテスト
 """
 
 import io
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from unittest.mock import patch, MagicMock
 from quiz.models import Category, DifficultyLevel
 
 
+@override_settings(SUPABASE_URL='http://test.co', SUPABASE_SERVICE_KEY='test-key')
 class SyncSupabaseCommandTest(TestCase):
     """sync_supabase管理コマンドのテストケース"""
     
@@ -174,6 +175,7 @@ class SyncSupabaseCommandTest(TestCase):
         self.assertIn('同期をキャンセルしました', output)
 
 
+@override_settings(SUPABASE_URL='http://test.co', SUPABASE_SERVICE_KEY='test-key')
 class CommandUtilsTest(TestCase):
     """管理コマンド用ユーティリティのテストケース"""
     
@@ -234,6 +236,7 @@ class CommandUtilsTest(TestCase):
         self.assertTrue(True)  # プレースホルダー
 
 
+@override_settings(SUPABASE_URL='http://test.co', SUPABASE_SERVICE_KEY='test-key')
 class CommandOutputTest(TestCase):
     """コマンド出力のテストケース"""
     
@@ -273,6 +276,7 @@ class CommandOutputTest(TestCase):
         self.assertIn('処理時間', output)
 
 
+@override_settings(SUPABASE_URL='http://test.co', SUPABASE_SERVICE_KEY='test-key')
 class CommandPerformanceTest(TestCase):
     """コマンドパフォーマンスのテストケース"""
     
