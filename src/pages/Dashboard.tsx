@@ -7,6 +7,8 @@ import { useCategories } from '../hooks/useCategories';
 import { enrichCategoriesWithIcons } from '../lib/utils/categoryIcons';
 import { useAuth } from '../lib/contexts/AuthContext';
 import { ActivityHistory } from '../lib/api/types';
+import { Trophy, Brain, Target, TrendingUp, BookOpen, Users, X, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -14,6 +16,18 @@ export function Dashboard() {
   const { stats, loading: statsLoading } = useUserStats();
   const { activities, loading: activitiesLoading, error: activitiesError } = useRecentActivities(3);
   const { categories: rawCategories, loading: categoriesLoading, error: categoriesError, retry: retryCategories } = useCategories();
+
+  // アプリ概要セクションの表示状態を管理
+  const [showAppOverview, setShowAppOverview] = useState(() => {
+    // localStorageから設定を読み込む（デフォルトはtrue）
+    const saved = localStorage.getItem('hideAppOverview');
+    return saved !== 'true';
+  });
+
+  // 表示状態が変更されたらlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('hideAppOverview', (!showAppOverview).toString());
+  }, [showAppOverview]);
 
   // カテゴリーにアイコン情報を追加
   const categories = enrichCategoriesWithIcons(rawCategories);
@@ -79,6 +93,132 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* App Overview Section */}
+      {showAppOverview ? (
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-8 relative">
+          {/* 閉じるボタン */}
+          <button
+            onClick={() => setShowAppOverview(false)}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+            title="このセクションを非表示にする"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              Techquizで技術力を向上させよう
+            </h2>
+            <p className="text-gray-700 text-center mb-8 max-w-3xl mx-auto">
+              楽しみながら技術知識を身につける、プログラミング学習者向けクイズアプリ
+            </p>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* 主な機能 */}
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="bg-blue-100 p-2 rounded-lg">
+                    <Brain className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="ml-3 font-semibold text-gray-900">段階的な学習</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  初級・中級・上級の3段階の難易度で、自分のペースで学習を進められます。
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <Target className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="ml-3 font-semibold text-gray-900">即時フィードバック</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  回答後すぐに正誤判定と詳しい解説が表示され、理解を深められます。
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="bg-purple-100 p-2 rounded-lg">
+                    <TrendingUp className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h3 className="ml-3 font-semibold text-gray-900">進捗管理</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  学習履歴や統計情報で、自分の成長を可視化できます。
+                  <span className="block text-xs text-gray-400 mt-1">
+                    ※ 完了したクイズを押すと完了したクイズの一覧を表示
+                  </span>
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="bg-orange-100 p-2 rounded-lg">
+                    <BookOpen className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <h3 className="ml-3 font-semibold text-gray-900">幅広いカテゴリー</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  HTML/CSS、JavaScript、Python、Git、データベースなど多様な技術分野をカバー。
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="bg-red-100 p-2 rounded-lg">
+                    <Trophy className="h-6 w-6 text-red-600" />
+                  </div>
+                  <h3 className="ml-3 font-semibold text-gray-900">復習機能</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  過去に解いたクイズを復習して、知識の定着を図れます。
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-3">
+                  <div className="bg-teal-100 p-2 rounded-lg">
+                    <Users className="h-6 w-6 text-teal-600" />
+                  </div>
+                  <h3 className="ml-3 font-semibold text-gray-900">初心者にやさしい</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  アウトプットが苦手な方でも、気軽に取り組める設計になっています。
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 text-center">
+              <p className="text-gray-700 mb-4">
+                さあ、今日から技術力向上の旅を始めましょう！
+              </p>
+              {!isAuthenticated && (
+                <Button
+                  onClick={() => navigate('/signup')}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  無料で始める
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        // アプリ概要を再表示するための小さなボタン
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowAppOverview(true)}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <Info className="h-4 w-4" />
+            Techquizについて
+          </button>
+        </div>
+      )}
 
       {/* Categories Grid */}
       <div>
