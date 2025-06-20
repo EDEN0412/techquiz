@@ -95,7 +95,7 @@ class SyncSupabaseCommandTest(TestCase):
         output = out.getvalue()
         self.assertTrue(len(output) >= 0)
     
-    @patch('techskillsquiz.supabase_sync.sync_model_to_supabase')
+    @patch('techskillsquiz.supabase_sync.sync_django_model_to_supabase')
     def test_command_sync_failure(self, mock_sync):
         """同期処理でエラーが発生した場合のテスト"""
         # モックでエラーを発生させる
@@ -146,7 +146,7 @@ class SyncSupabaseCommandTest(TestCase):
         self.assertIn('Supabase', help_output)
     
     @patch('builtins.input', return_value='y')
-    @patch('techskillsquiz.supabase_sync.sync_model_to_supabase')
+    @patch('techskillsquiz.supabase_sync.sync_django_model_to_supabase')
     def test_command_confirmation_yes(self, mock_sync, mock_input):
         """確認プロンプトで'y'を入力した場合のテスト"""
         mock_sync.return_value = True
@@ -161,7 +161,7 @@ class SyncSupabaseCommandTest(TestCase):
         self.assertIn('同期を開始', output)
     
     @patch('builtins.input', return_value='n')
-    @patch('techskillsquiz.supabase_sync.sync_model_to_supabase')
+    @patch('techskillsquiz.supabase_sync.sync_django_model_to_supabase')
     def test_command_confirmation_no(self, mock_sync, mock_input):
         """確認プロンプトで'n'を入力した場合のテスト"""
         out = io.StringIO()
@@ -171,7 +171,7 @@ class SyncSupabaseCommandTest(TestCase):
         self.assertFalse(mock_sync.called)
         
         output = out.getvalue()
-        self.assertIn('キャンセル', output)
+        self.assertIn('同期をキャンセルしました', output)
 
 
 class CommandUtilsTest(TestCase):
@@ -250,7 +250,7 @@ class CommandOutputTest(TestCase):
     
     def test_error_reporting(self):
         """エラーレポート機能のテスト"""
-        with patch('techskillsquiz.supabase_sync.sync_model_to_supabase') as mock_sync:
+        with patch('techskillsquiz.supabase_sync.sync_django_model_to_supabase') as mock_sync:
             mock_sync.side_effect = Exception('テストエラー')
             
             out = io.StringIO()
@@ -291,7 +291,7 @@ class CommandPerformanceTest(TestCase):
         # 実行時間が妥当な範囲内であることを確認（5秒以内）
         self.assertLess(execution_time, 5.0)
     
-    @patch('techskillsquiz.supabase_sync.sync_model_to_supabase')
+    @patch('techskillsquiz.supabase_sync.sync_django_model_to_supabase')
     def test_large_dataset_handling(self, mock_sync):
         """大量データ処理のテスト"""
         # 大量のテストデータを作成
