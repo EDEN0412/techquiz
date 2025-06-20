@@ -67,5 +67,8 @@ Thumbs.db
 # Supabase
 supabase/data/
 
+# Django管理コマンドの出力ファイル
+supabase_sync_report_*.txt
+
 # Cursor設定ファイル
 .cursor/
