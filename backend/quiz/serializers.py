@@ -111,6 +111,41 @@ class QuizResultSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'user', 'username', 'quiz_title', 'category_name', 'difficulty_name', 'passed', 'completed_at', 'created_at', 'updated_at']
+    
+    def validate(self, data):
+        """クイズ結果データのバリデーション"""
+        score = data.get('score', 0)
+        total_possible = data.get('total_possible', 0)
+        
+        # スコアが総得点を超えていないか確認
+        if score > total_possible:
+            raise serializers.ValidationError({
+                'score': 'スコアは総得点を超えることはできません。'
+            })
+        
+        # スコアと総得点が負の値でないか確認
+        if score < 0:
+            raise serializers.ValidationError({
+                'score': 'スコアは0以上である必要があります。'
+            })
+        
+        if total_possible < 0:
+            raise serializers.ValidationError({
+                'total_possible': '総得点は0以上である必要があります。'
+            })
+        
+        # パーセンテージの整合性を確認（提供されている場合）
+        if 'percentage' in data:
+            expected_percentage = (score / total_possible * 100) if total_possible > 0 else 0
+            provided_percentage = data['percentage']
+            
+            # 小数点以下の誤差を考慮
+            if abs(expected_percentage - provided_percentage) > 0.01:
+                raise serializers.ValidationError({
+                    'percentage': f'パーセンテージが正しくありません。期待値: {expected_percentage:.2f}%'
+                })
+        
+        return data
 
 
 class UserStatisticsSerializer(serializers.ModelSerializer):
