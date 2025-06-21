@@ -290,6 +290,10 @@ class SyncSupabaseCommandIntegrationTest(TestCase):
 class SyncSupabaseCommandErrorTest(TestCase):
     """sync_supabaseコマンドのエラーハンドリングテスト"""
     
+    @override_settings(
+        SUPABASE_URL='https://test.supabase.co',
+        SUPABASE_SERVICE_KEY='test-key'
+    )
     def test_invalid_app_option(self):
         """無効なアプリ名指定のテスト"""
         out = io.StringIO()
@@ -300,6 +304,10 @@ class SyncSupabaseCommandErrorTest(TestCase):
         # 警告メッセージが出力されることを確認
         self.assertIn('同期対象のモデルが見つかりませんでした', output)
     
+    @override_settings(
+        SUPABASE_URL='https://test.supabase.co',
+        SUPABASE_SERVICE_KEY='test-key'
+    )
     def test_invalid_model_option(self):
         """無効なモデル名指定のテスト"""
         out = io.StringIO()
@@ -314,7 +322,7 @@ class SyncSupabaseCommandErrorTest(TestCase):
         SUPABASE_URL='https://test.supabase.co',
         SUPABASE_SERVICE_KEY='test-key'
     )
-    @patch('techskillsquiz.supabase_sync.sync_django_model_to_supabase')
+    @patch('techskillsquiz.management.commands.sync_supabase.sync_django_model_to_supabase')
     def test_sync_error_handling(self, mock_sync):
         """同期エラーのハンドリングテスト"""
         # モックでエラーを発生させる

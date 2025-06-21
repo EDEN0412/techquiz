@@ -347,6 +347,8 @@ class Command(BaseCommand):
                 # resultがbooleanの場合は辞書形式に正規化
                 if not isinstance(result, dict):
                     result = {'status': 'ok' if result else 'error'}
+                    # 元の辞書も更新
+                    results[model_name] = result
                 
                 status = result.get('status', '不明')
                 status_label = {
@@ -380,16 +382,10 @@ class Command(BaseCommand):
                 f.write("\n")
             
             f.write("## まとめ\n")
-            # 結果を正規化してから集計
-            normalized_results = []
-            for r in results.values():
-                if not isinstance(r, dict):
-                    r = {'status': 'ok' if r else 'error'}
-                normalized_results.append(r)
-            
-            success_count = sum(1 for r in normalized_results if r.get('status') in ('ok', 'fixed'))
-            error_count = sum(1 for r in normalized_results if r.get('status') == 'error')
-            mismatch_count = sum(1 for r in normalized_results if r.get('status') == 'mismatch')
+            # resultsは既に正規化済みなので、直接使用
+            success_count = sum(1 for r in results.values() if r.get('status') in ('ok', 'fixed'))
+            error_count = sum(1 for r in results.values() if r.get('status') == 'error')
+            mismatch_count = sum(1 for r in results.values() if r.get('status') == 'mismatch')
             
             f.write(f"- 成功/修正済み: {success_count}件\n")
             f.write(f"- エラー: {error_count}件\n")
