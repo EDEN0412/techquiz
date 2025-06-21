@@ -58,7 +58,7 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --with dev
           # 確実にpytestとカバレッジプラグインをインストール
-          pip install pytest pytest-cov pytest-django
+          pip install pytest pytest-cov pytest-django psutil
       
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -208,7 +208,7 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --with dev
           # 確実にpytestとカバレッジプラグインをインストール
-          pip install pytest pytest-cov pytest-django
+          pip install pytest pytest-cov pytest-django psutil
       
       - name: Install frontend dependencies
         run: |
