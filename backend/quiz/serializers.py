@@ -139,8 +139,8 @@ class QuizResultSerializer(serializers.ModelSerializer):
             expected_percentage = (score / total_possible * 100) if total_possible > 0 else 0
             provided_percentage = data['percentage']
             
-            # 小数点以下の誤差を考慮
-            if abs(expected_percentage - provided_percentage) > 0.01:
+            # 小数点以下の丸め誤差を許容（±0.1% まで）
+            if abs(expected_percentage - provided_percentage) > 0.1:
                 raise serializers.ValidationError({
                     'percentage': f'パーセンテージが正しくありません。期待値: {expected_percentage:.2f}%'
                 })
