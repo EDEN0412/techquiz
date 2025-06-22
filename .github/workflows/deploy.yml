@@ -1,0 +1,263 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["Comprehensive Tests"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  check_tests:
+    name: Check Test Results
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    outputs:
+      deploy: ${{ steps.check.outputs.deploy }}
+      environment: ${{ steps.check.outputs.environment }}
+    
+    steps:
+      - name: Check test results and determine deployment
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Manual deployment triggered"
+            echo "deploy=true" >> $GITHUB_OUTPUT
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            echo "All tests passed, proceeding with deployment"
+            echo "deploy=true" >> $GITHUB_OUTPUT
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "Tests failed, skipping deployment"
+            echo "deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  deploy_backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    needs: check_tests
+    if: needs.check_tests.outputs.deploy == 'true'
+    environment: ${{ needs.check_tests.outputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          cd backend
+          poetry config virtualenvs.create false
+          poetry install --only=main
+      
+      - name: Run database migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DJANGO_SETTINGS_MODULE: techskillsquiz.settings.production
+        run: |
+          cd backend
+          python manage.py migrate --noinput
+      
+      - name: Collect static files
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DJANGO_SETTINGS_MODULE: techskillsquiz.settings.production
+        run: |
+          cd backend
+          python manage.py collectstatic --noinput
+      
+      - name: Deploy to production server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          echo "Deploying backend to ${{ needs.check_tests.outputs.environment }}"
+          # ここに実際のデプロイコマンドを追加
+          # 例: rsync, scp, AWS CLI, Docker deploymentなど
+          echo "Backend deployment completed"
+
+  deploy_frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: check_tests
+    if: needs.check_tests.outputs.deploy == 'true'
+    environment: ${{ needs.check_tests.outputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build frontend
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: npm run build
+      
+      - name: Deploy to S3 and CloudFront
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          # AWS CLIをインストール
+          pip install awscli
+          
+          # S3にファイルをアップロード
+          aws s3 sync dist/ s3://$S3_BUCKET --delete
+          
+          # CloudFrontのキャッシュを無効化
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+          
+          echo "Frontend deployment completed"
+
+  update_supabase:
+    name: Update Supabase Schema
+    runs-on: ubuntu-latest
+    needs: [check_tests, deploy_backend]
+    if: needs.check_tests.outputs.deploy == 'true'
+    environment: ${{ needs.check_tests.outputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Update Supabase schema
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          # Supabaseにログイン
+          supabase login --token $SUPABASE_ACCESS_TOKEN
+          
+          # プロジェクトをリンク
+          supabase link --project-ref $SUPABASE_PROJECT_ID
+          
+          # データベーススキーマを更新
+          supabase db push
+          
+          echo "Supabase schema update completed"
+
+  post_deployment_tests:
+    name: Post-Deployment Tests
+    runs-on: ubuntu-latest
+    needs: [deploy_backend, deploy_frontend, update_supabase]
+    if: always() && needs.check_tests.outputs.deploy == 'true'
+    environment: ${{ needs.check_tests.outputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          npm install
+          pip install requests
+      
+      - name: Run smoke tests
+        env:
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          echo "Running post-deployment smoke tests..."
+          
+          # フロントエンドの動作確認
+          curl -f $PRODUCTION_URL || (echo "Frontend health check failed" && exit 1)
+          
+          # バックエンドAPIの動作確認
+          curl -f $API_BASE_URL/api/v1/quiz/categories/ || (echo "Backend API health check failed" && exit 1)
+          
+          echo "Smoke tests passed"
+      
+      - name: Run integration tests against production
+        env:
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          echo "Running integration tests against production environment..."
+          
+          # 本番環境に対する軽量な統合テストを実行
+          # （実際のデータを変更しない読み取り専用テスト）
+          python -c "
+          import requests
+          import sys
+          
+          try:
+              # カテゴリー一覧の取得テスト
+              response = requests.get('$API_BASE_URL/api/v1/quiz/categories/')
+              assert response.status_code == 200
+              print('✅ Categories API test passed')
+              
+              # 難易度一覧の取得テスト
+              response = requests.get('$API_BASE_URL/api/v1/quiz/difficulty-levels/')
+              assert response.status_code == 200
+              print('✅ Difficulty levels API test passed')
+              
+              print('🎉 All production integration tests passed')
+          except Exception as e:
+              print(f'❌ Production integration test failed: {e}')
+              sys.exit(1)
+          "
+
+  notify_deployment:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy_backend, deploy_frontend, update_supabase, post_deployment_tests]
+    if: always() && needs.check_tests.outputs.deploy == 'true'
+    
+    steps:
+      - name: Notify success
+        if: needs.deploy_backend.result == 'success' && needs.deploy_frontend.result == 'success' && needs.update_supabase.result == 'success' && needs.post_deployment_tests.result == 'success'
+        run: |
+          echo "🎉 Deployment to ${{ needs.check_tests.outputs.environment }} completed successfully!"
+          echo "Frontend: Deployed to S3/CloudFront"
+          echo "Backend: Deployed and migrations applied"
+          echo "Database: Schema updated in Supabase"
+          echo "Tests: Post-deployment tests passed"
+      
+      - name: Notify failure
+        if: needs.deploy_backend.result == 'failure' || needs.deploy_frontend.result == 'failure' || needs.update_supabase.result == 'failure' || needs.post_deployment_tests.result == 'failure'
+        run: |
+          echo "❌ Deployment to ${{ needs.check_tests.outputs.environment }} failed!"
+          echo "Backend status: ${{ needs.deploy_backend.result }}"
+          echo "Frontend status: ${{ needs.deploy_frontend.result }}"
+          echo "Supabase status: ${{ needs.update_supabase.result }}"
+          echo "Post-deployment tests: ${{ needs.post_deployment_tests.result }}"
+          exit 1 
