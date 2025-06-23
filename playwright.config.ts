@@ -4,6 +4,21 @@ import { defineConfig, devices } from '@playwright/test';
  * Playwrightの設定ファイル
  * ユーザーフロー検証テスト（E2Eテスト）用の設定
  */
+
+// 動的ポート検出のための関数
+const getDevServerPort = () => {
+  // 環境変数からポート取得を試行
+  const envPort = process.env.VITE_PORT || process.env.PORT;
+  if (envPort) return parseInt(envPort);
+  
+  // デフォルトポートとフォールバック
+  const defaultPorts = [5173, 5174, 5175, 3000];
+  return defaultPorts[0]; // 最初のポートをデフォルトとして使用
+};
+
+const DEV_SERVER_PORT = getDevServerPort();
+const BASE_URL = `http://localhost:${DEV_SERVER_PORT}`;
+
 export default defineConfig({
   // テストファイルの場所を指定
   testDir: './e2e',
@@ -28,8 +43,8 @@ export default defineConfig({
   
   // 全テストで共通の設定
   use: {
-    // ベースURL（ローカル開発サーバー）
-    baseURL: 'http://localhost:5173',
+    // ベースURL（動的ポート対応）
+    baseURL: BASE_URL,
     
     // 失敗時にスクリーンショットを撮影
     screenshot: 'only-on-failure',
@@ -63,7 +78,7 @@ export default defineConfig({
   // テスト実行前にローカルサーバーを起動
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5173',
+    url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000, // 2分でタイムアウト
   },

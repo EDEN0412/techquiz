@@ -124,7 +124,6 @@ export function SignUp() {
               name="password"
               type="password"
               required
-              minLength={4}
               value={formData.password}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
@@ -140,7 +139,6 @@ export function SignUp() {
               name="password2"
               type="password"
               required
-              minLength={4}
               value={formData.password2}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
