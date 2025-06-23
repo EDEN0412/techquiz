@@ -17,7 +17,10 @@ const getDevServerPort = () => {
 };
 
 const DEV_SERVER_PORT = getDevServerPort();
-const BASE_URL = `http://localhost:${DEV_SERVER_PORT}`;
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${DEV_SERVER_PORT}`;
+
+// CI環境の検出
+const isCI = !!process.env.CI;
 
 export default defineConfig({
   // テストファイルの場所を指定
@@ -36,50 +39,89 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   
   // レポート形式（HTMLレポートとJUnitレポートを生成）
-  reporter: [
-    ['html'],
-    ['junit', { outputFile: 'test-results/junit.xml' }]
-  ],
+  reporter: isCI 
+    ? [
+        ['github-actions'],
+        ['html', { open: 'never' }],
+        ['junit', { outputFile: 'test-results/junit-results.xml' }]
+      ]
+    : [
+        ['list'],
+        ['html', { open: 'on-failure' }]
+      ],
   
-  // 全テストで共通の設定
+  // 全テスト共通の設定
   use: {
-    // ベースURL（動的ポート対応）
+    // ベースURL
     baseURL: BASE_URL,
     
-    // 失敗時にスクリーンショットを撮影
+    // テスト実行時にブラウザのトレースを取得
+    trace: 'on-first-retry',
+    
+    // スクリーンショット撮影タイミング
     screenshot: 'only-on-failure',
     
-    // 失敗時にビデオを録画
-    video: 'retain-on-failure',
+    // 動画録画設定
+    video: isCI ? 'retain-on-failure' : 'off',
     
-    // ブラウザのトレースを記録（デバッグ用）
-    trace: 'on-first-retry',
+    // ビューポートサイズ（モバイル対応確認）
+    viewport: { width: 1280, height: 720 },
+    
+    // タイムアウト設定
+    actionTimeout: 30000,
+    navigationTimeout: 60000,
   },
 
-  // 異なるブラウザでのテスト設定
+  // ブラウザ別のプロジェクト設定
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // CI環境ではヘッドレスモードで実行
+        headless: isCI ? true : false
+      },
     },
     
-    // 必要に応じて他のブラウザも追加可能
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    // CI環境以外では複数ブラウザでテスト
+    ...(!isCI ? [
+      {
+        name: 'firefox',
+        use: { ...devices['Desktop Firefox'] },
+      },
+      {
+        name: 'webkit',
+        use: { ...devices['Desktop Safari'] },
+      },
+      
+      // Mobile Chrome
+      {
+        name: 'Mobile Chrome',
+        use: { ...devices['Pixel 5'] },
+      },
+      
+      // Mobile Safari
+      {
+        name: 'Mobile Safari',
+        use: { ...devices['iPhone 12'] },
+      },
+    ] : []),
   ],
 
-  // テスト実行前にローカルサーバーを起動
-  webServer: {
-    command: 'npm run dev',
-    url: BASE_URL,
+  // 開発サーバーの自動起動設定（CI環境以外）
+  webServer: !isCI ? {
+    command: `npm run preview -- --port ${DEV_SERVER_PORT}`,
+    port: DEV_SERVER_PORT,
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000, // 2分でタイムアウト
+    timeout: 120 * 1000,
+  } : undefined,
+
+  // 出力ディレクトリ
+  outputDir: 'test-results/',
+  
+  // タイムアウト設定の詳細
+  timeout: 60 * 1000, // 各テストのタイムアウト：60秒
+  expect: {
+    timeout: 10 * 1000, // expectアサーションのタイムアウト：10秒
   },
 }); 

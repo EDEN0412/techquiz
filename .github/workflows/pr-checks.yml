@@ -115,6 +115,9 @@ jobs:
       - name: Install dependencies
         run: npm install
       
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
       - name: Check TypeScript compilation
         run: npm run type-check || npx tsc --noEmit || echo "TypeScript check completed"
       
@@ -132,6 +135,53 @@ jobs:
           else
             echo "No critical frontend tests found"
           fi
+      
+      - name: Start backend for E2E tests
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install --no-dev
+          
+          # Create minimal .env for testing
+          echo "DEBUG=False" > .env.test
+          echo "SECRET_KEY=test-secret-key-for-ci" >> .env.test
+          echo "DATABASE_URL=sqlite:///test.db" >> .env.test
+          
+          # Run migrations and start server in background
+          python manage.py migrate --settings=techskillsquiz.settings.test
+          python manage.py runserver 8000 --settings=techskillsquiz.settings.test &
+          
+          # Wait for server to start
+          sleep 10
+          echo "Backend server started for E2E tests"
+        env:
+          DJANGO_SETTINGS_MODULE: techskillsquiz.settings.test
+      
+      - name: Start frontend for E2E tests
+        run: |
+          npm run build
+          npm run preview -- --port 5173 &
+          sleep 5
+          echo "Frontend server started for E2E tests"
+      
+      - name: Run critical E2E tests
+        run: |
+          # Run only the most critical E2E test (signup flow)
+          npx playwright test e2e/user-signup-to-quiz-completion.spec.ts --project=chromium --grep "ナビゲーション：基本的な画面遷移"
+        env:
+          VITE_PORT: 5173
+      
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-e2e-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
 
   security_quick_scan:
     name: Security Quick Scan
