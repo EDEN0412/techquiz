@@ -251,26 +251,11 @@ jobs:
     needs: [backend_unit_tests, frontend_tests]
     env:
       DJANGO_SETTINGS_MODULE: techskillsquiz.settings.test
-      DATABASE_NAME: test_db
-      DATABASE_USER: test_user
-      DATABASE_PASSWORD: test_password
+      DATABASE_NAME: postgres
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: this_password_is_insecure_and_should_be_updated
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_DB: ${{ env.DATABASE_NAME }}
-          POSTGRES_USER: ${{ env.DATABASE_USER }}
-          POSTGRES_PASSWORD: ${{ env.DATABASE_PASSWORD }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -307,16 +292,16 @@ jobs:
       
       - name: Start Supabase local instance
         run: |
-          npx supabase@latest start --exclude gotrue,realtime,storage-api,imgproxy,inbucket,edge-runtime,logflare,vector,analytics --db-port 54322
+          npx supabase@latest start --exclude gotrue,realtime,storage-api,imgproxy,inbucket,edge-runtime,logflare,vector,analytics
           echo "Supabase local instance started"
       
-      - name: Wait for PostgreSQL to be ready
+      - name: Wait for Supabase Database to be ready
         run: |
-          until pg_isready -h localhost -p 5432 -U ${{ env.DATABASE_USER }}; do
-            echo "Waiting for PostgreSQL to start..."
-            sleep 1
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for Supabase PostgreSQL to start..."
+            sleep 2
           done
-          echo "PostgreSQL started."
+          echo "Supabase PostgreSQL started."
       
       - name: Setup backend for E2E tests
         run: |
