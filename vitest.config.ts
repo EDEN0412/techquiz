@@ -7,7 +7,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/tests/setup.ts'],
-    include: ['**/*.{test,spec}.{ts,tsx}'],
+    // Vitestのテスト対象をsrcディレクトリ配下に限定
+    // これによりe2eディレクトリのPlaywrightテストファイルが読み込まれるのを防ぐ
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // 念のため、e2eディレクトリを明示的に除外
+    exclude: ['node_modules', 'dist', 'e2e'],
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
