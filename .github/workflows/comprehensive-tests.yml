@@ -305,14 +305,9 @@ jobs:
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       
-      - name: Install Supabase CLI
-        run: |
-          npm install -g supabase@latest
-      
       - name: Start Supabase local instance
         run: |
-          cd supabase
-          supabase start --exclude gotrue,realtime,storage-api,imgproxy,inbucket,edge-runtime,logflare,vector,analytics --db-port 54322
+          npx supabase@latest start --exclude gotrue,realtime,storage-api,imgproxy,inbucket,edge-runtime,logflare,vector,analytics --db-port 54322
           echo "Supabase local instance started"
       
       - name: Wait for PostgreSQL to be ready
