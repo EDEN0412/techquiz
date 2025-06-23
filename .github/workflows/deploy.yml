@@ -66,7 +66,10 @@ jobs:
           pip install poetry
           cd backend
           poetry config virtualenvs.create false
-          poetry install --only=main
+          poetry install --without dev
+          # 念のため重要なパッケージが確実にインストールされているか確認
+          python -c "import dotenv; print('python-dotenv installed successfully')"
+          python -c "import psycopg2; print('psycopg2-binary installed successfully')"
       
       - name: Run database migrations
         env:
@@ -128,12 +131,23 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           # AWS CLIをインストール
           pip install awscli
+          
+          # 環境変数が設定されているか確認
+          if [ -z "$S3_BUCKET" ]; then
+            echo "Error: S3_BUCKET is not set"
+            exit 1
+          fi
+          
+          if [ -z "$CLOUDFRONT_DISTRIBUTION_ID" ]; then
+            echo "Error: CLOUDFRONT_DISTRIBUTION_ID is not set"
+            exit 1
+          fi
           
           # S3にファイルをアップロード
           aws s3 sync dist/ s3://$S3_BUCKET --delete
@@ -193,10 +207,21 @@ jobs:
       
       - name: Run smoke tests
         env:
-          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: |
           echo "Running post-deployment smoke tests..."
+          
+          # 環境変数が設定されているか確認
+          if [ -z "$PRODUCTION_URL" ]; then
+            echo "Error: PRODUCTION_URL is not set"
+            exit 1
+          fi
+          
+          if [ -z "$API_BASE_URL" ]; then
+            echo "Error: API_BASE_URL is not set"
+            exit 1
+          fi
           
           # フロントエンドの動作確認
           curl -f $PRODUCTION_URL || (echo "Frontend health check failed" && exit 1)
@@ -208,25 +233,37 @@ jobs:
       
       - name: Run integration tests against production
         env:
-          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: |
           echo "Running integration tests against production environment..."
+          
+          # 環境変数が設定されているか確認
+          if [ -z "$API_BASE_URL" ]; then
+            echo "Error: API_BASE_URL is not set"
+            exit 1
+          fi
           
           # 本番環境に対する軽量な統合テストを実行
           # （実際のデータを変更しない読み取り専用テスト）
           python -c "
           import requests
           import sys
+          import os
+          
+          api_base_url = os.environ.get('API_BASE_URL')
+          if not api_base_url:
+              print('❌ API_BASE_URL is not set')
+              sys.exit(1)
           
           try:
               # カテゴリー一覧の取得テスト
-              response = requests.get('$API_BASE_URL/api/v1/quiz/categories/')
+              response = requests.get(f'{api_base_url}/api/v1/quiz/categories/')
               assert response.status_code == 200
               print('✅ Categories API test passed')
               
               # 難易度一覧の取得テスト
-              response = requests.get('$API_BASE_URL/api/v1/quiz/difficulty-levels/')
+              response = requests.get(f'{api_base_url}/api/v1/quiz/difficulty-levels/')
               assert response.status_code == 200
               print('✅ Difficulty levels API test passed')
               
@@ -239,7 +276,7 @@ jobs:
   notify_deployment:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
-    needs: [deploy_backend, deploy_frontend, update_supabase, post_deployment_tests]
+    needs: [check_tests, deploy_backend, deploy_frontend, update_supabase, post_deployment_tests]
     if: always() && needs.check_tests.outputs.deploy == 'true'
     
     steps:

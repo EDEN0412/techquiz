@@ -1,59 +1,94 @@
-# GitHub Actionsシークレットの設定方法
+# GitHub Actions Secrets and Variables 設定ガイド
 
-Supabaseマイグレーションワークフローを使用するには、以下のシークレット（機密情報）をGitHubリポジトリに設定する必要があります。
+このドキュメントでは、Techquizプロジェクトのデプロイに必要なGitHub ActionsのSecretsとVariablesの設定方法を説明します。
 
-## 必要なシークレット
+## 設定場所
 
-### 本番環境（mainブランチ）
-1. `SUPABASE_ACCESS_TOKEN` - Supabase CLIアクセストークン
-2. `SUPABASE_PROJECT_ID` - 本番環境のSupabaseプロジェクトID
-3. `SUPABASE_DB_PASSWORD` - 本番環境のSupabaseデータベースパスワード
+GitHubリポジトリの **Settings** > **Secrets and variables** > **Actions** から設定します。
 
-### ステージング環境（developブランチ）
-1. `SUPABASE_ACCESS_TOKEN` - Supabase CLIアクセストークン（本番環境と共通で使用可能）
-2. `SUPABASE_STAGING_PROJECT_ID` - ステージング環境のSupabaseプロジェクトID
-3. `SUPABASE_STAGING_DB_PASSWORD` - ステージング環境のSupabaseデータベースパスワード
+## 必要な設定
 
-## シークレットの設定方法
+### Secrets（機密情報）
 
-### リポジトリ全体で共有するシークレット
+以下の値を **Secrets** タブから追加してください：
 
-1. GitHubリポジトリのページで「Settings」タブをクリックします。
-2. 左側のメニューから「Secrets and variables」→「Actions」を選択します。
-3. 「New repository secret」ボタンをクリックします。
-4. シークレットの名前と値を入力して保存します。
+| Secret名 | 説明 | 例 |
+|---------|------|-----|
+| `AWS_ACCESS_KEY_ID` | AWSアクセスキーID | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY` | AWSシークレットアクセスキー | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `DATABASE_URL` | 本番環境のSupabaseデータベース接続URL | `postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres` |
+| `DJANGO_SECRET_KEY` | Django本番環境用のシークレットキー | ランダムな50文字以上の文字列 |
+| `VITE_API_BASE_URL` | フロントエンドが使用するAPIのベースURL | `https://api.your-domain.com` |
+| `VITE_SUPABASE_URL` | SupabaseプロジェクトのURL | `https://[project-ref].supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabaseの匿名キー | Supabaseダッシュボードから取得 |
+| `SUPABASE_ACCESS_TOKEN` | Supabase CLIアクセストークン | Supabaseダッシュボードから取得 |
+| `SUPABASE_PROJECT_ID` | SupabaseプロジェクトID | `[project-ref]` |
+| `DEPLOY_HOST` | デプロイ先サーバーのホスト名（オプション） | `your-server.com` |
+| `DEPLOY_USER` | デプロイ用のユーザー名（オプション） | `deploy-user` |
+| `DEPLOY_KEY` | デプロイ用のSSH秘密鍵（オプション） | SSH秘密鍵の内容 |
 
-### 環境ごとのシークレット（本番/ステージング）
+### Variables（公開可能な設定値）
 
-1. GitHubリポジトリのページで「Settings」タブをクリックします。
-2. 左側のメニューから「Environments」を選択します。
-3. 「New environment」ボタンをクリックし、`production`と`staging`の2つの環境を作成します。
-4. 各環境をクリックし、「Environment secrets」セクションで「Add secret」ボタンを使用して環境固有のシークレットを追加します。
+以下の値を **Variables** タブから追加してください：
 
-## シークレットの取得方法
+| Variable名 | 説明 | 例 |
+|-----------|------|-----|
+| `AWS_REGION` | AWSリージョン | `ap-northeast-1` |
+| `S3_BUCKET` | フロントエンド用S3バケット名 | `techquiz-frontend-prod` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | CloudFrontディストリビューションID | `E1234567890ABC` |
+| `PRODUCTION_URL` | 本番環境のフロントエンドURL | `https://www.your-domain.com` |
+| `API_BASE_URL` | 本番環境のAPIベースURL | `https://api.your-domain.com` |
 
-### SUPABASE_ACCESS_TOKEN
+## 設定手順
 
-1. [Supabaseダッシュボード](https://app.supabase.io/)にログインします。
-2. 右上のユーザーアイコンをクリックし、「Access Tokens」を選択します。
-3. 「Generate New Token」をクリックして新しいトークンを作成します。
-4. 作成したトークンをコピーします（一度しか表示されないので注意）。
+### 1. Secretsの追加
 
-### プロジェクトID（SUPABASE_PROJECT_ID, SUPABASE_STAGING_PROJECT_ID）
+1. リポジトリの **Settings** に移動
+2. 左側のメニューから **Secrets and variables** > **Actions** を選択
+3. **New repository secret** ボタンをクリック
+4. **Name** フィールドにSecret名を入力（例: `AWS_ACCESS_KEY_ID`）
+5. **Secret** フィールドに実際の値を入力
+6. **Add secret** ボタンをクリック
 
-1. [Supabaseダッシュボード](https://app.supabase.io/)で対象の環境のプロジェクトを選択します。
-2. 「Project Settings」→「General」を選択します。
-3. 「Project ID」の値をコピーします。
+### 2. Variablesの追加
 
-### データベースパスワード（SUPABASE_DB_PASSWORD, SUPABASE_STAGING_DB_PASSWORD）
+1. 同じページで **Variables** タブに切り替え
+2. **New repository variable** ボタンをクリック
+3. **Name** フィールドにVariable名を入力（例: `AWS_REGION`）
+4. **Value** フィールドに実際の値を入力
+5. **Add variable** ボタンをクリック
 
-1. [Supabaseダッシュボード](https://app.supabase.io/)で対象の環境のプロジェクトを選択します。
-2. 「Project Settings」→「Database」を選択します。
-3. 「Database Password」セクションで「View」または「Reset」でパスワードを確認します。
+## 環境別の設定
 
-## 注意事項
+production環境とstaging環境で異なる値を使用する場合は、GitHub Environmentsを使用できます：
 
-- これらのシークレットは機密情報です。公開リポジトリではGitHub Secretsを使って保護し、コード内に直接記述しないでください。
-- シークレットを変更した場合は、関連するワークフローを再実行する必要があります。
-- 環境変数の名前はワークフローファイル内の参照名と完全に一致する必要があります。
-- ワークフローファイルで`environment: production`や`environment: staging`を指定すると、その環境に設定されたシークレットのみが利用可能になります。 
+1. **Settings** > **Environments** から環境を作成
+2. 各環境に固有のSecretsとVariablesを設定
+3. ワークフローで `environment: production` または `environment: staging` を指定
+
+## セキュリティのベストプラクティス
+
+1. **最小権限の原則**: AWSアクセスキーは必要最小限の権限のみを持つIAMユーザーのものを使用
+2. **定期的なローテーション**: シークレットキーは定期的に更新
+3. **アクセス制限**: 本番環境へのデプロイは特定のブランチ（main）からのみ許可
+4. **監査ログ**: GitHub Actionsのログで誰がいつデプロイしたかを確認可能
+
+## トラブルシューティング
+
+### エラー: `Invalid bucket name ""`
+
+S3_BUCKETがVariablesに設定されていることを確認してください。
+
+### エラー: `ModuleNotFoundError: No module named 'dotenv'`
+
+このエラーは修正済みです。最新のワークフローファイルを使用してください。
+
+### エラー: `no URL specified`
+
+PRODUCTION_URLとAPI_BASE_URLがVariablesに設定されていることを確認してください。
+
+## 参考リンク
+
+- [GitHub Actions のシークレット](https://docs.github.com/ja/actions/security-guides/encrypted-secrets)
+- [GitHub Actions の変数](https://docs.github.com/ja/actions/learn-github-actions/variables)
+- [環境の使用](https://docs.github.com/ja/actions/deployment/targeting-different-environments/using-environments-for-deployment) 
