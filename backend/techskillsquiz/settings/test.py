@@ -8,8 +8,20 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # .env.testファイルを読み込み
-env_path = Path(__file__).resolve().parent.parent.parent.parent / '.env.test'
-load_dotenv(dotenv_path=env_path)
+# 複数の候補から存在するファイルを探して読み込み
+base_dir = Path(__file__).resolve().parent.parent.parent.parent
+env_candidates = [
+    base_dir / '.env.test',                    # リポジトリルート/.env.test
+    base_dir / 'backend' / '.env.test',        # backend/.env.test
+]
+
+for env_path in env_candidates:
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path)
+        print(f"環境変数ファイルを読み込みました: {env_path}")
+        break
+else:
+    print("環境変数ファイル(.env.test)が見つかりませんでした")
 
 # 基本設定を継承
 from .base import *

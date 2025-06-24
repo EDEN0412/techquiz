@@ -253,7 +253,7 @@ jobs:
       DJANGO_SETTINGS_MODULE: techskillsquiz.settings.test
       DATABASE_NAME: postgres
       DATABASE_USER: postgres
-      DATABASE_PASSWORD: this_password_is_insecure_and_should_be_updated
+      DATABASE_PASSWORD: postgres
       DATABASE_HOST: localhost
       DATABASE_PORT: 54322
 
@@ -305,9 +305,7 @@ jobs:
       
       - name: Setup backend for E2E tests
         run: |
-          cd backend
-          
-          # Create test environment file
+          # Create test environment file in repository root
           echo "DEBUG=True" > .env.test
           echo "SECRET_KEY=test-secret-key-for-e2e-ci-$(date +%s)" >> .env.test
           echo "DATABASE_HOST=${{ env.DATABASE_HOST }}" >> .env.test
@@ -318,6 +316,8 @@ jobs:
           echo "ALLOWED_HOSTS=localhost,127.0.0.1" >> .env.test
           echo "SUPABASE_URL=http://127.0.0.1:54321" >> .env.test
           echo "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0" >> .env.test
+          
+          cd backend
           
           # Run migrations
           python manage.py migrate --noinput
