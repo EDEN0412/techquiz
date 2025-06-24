@@ -41,7 +41,7 @@ export default defineConfig({
   // レポート形式（HTMLレポートとJUnitレポートを生成）
   reporter: isCI 
     ? [
-        ['github-actions'],
+        ['github'],
         ['html', { open: 'never' }],
         ['junit', { outputFile: 'test-results/junit-results.xml' }]
       ]
