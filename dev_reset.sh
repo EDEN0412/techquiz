@@ -56,17 +56,19 @@ for i in {1..30}; do
   fi
 done
 
-# 2. DB を空状態に（シードは行わない）
-echo "[dev_reset] supabase db reset --no-seed --local"
+# 2. DB を完全にリセット（--no-seedを削除してマイグレーションを適用）
+echo "[dev_reset] supabase db reset --local"
 set +e
-yes | $SPBASE db reset --no-seed --local || RESET_EXIT=$?
+yes | $SPBASE db reset --local
+RESET_EXIT=$?
 if [ "${RESET_EXIT:-0}" -ne 0 ]; then
   echo "[dev_reset] db reset failed, trying once more after 5s..."
   sleep 5
-  yes | $SPBASE db reset --no-seed --local
+  yes | $SPBASE db reset --local
+  RESET_EXIT=$?
 fi
 set -e
-# supabase CLI が 502 で終了してもコンテナは作成済みことがあるためリカバリ
+
 if [ $RESET_EXIT -ne 0 ]; then
   echo "[dev_reset] supabase reset exited with code $RESET_EXIT — attempting to restart containers"
   $SPBASE start
@@ -84,16 +86,42 @@ echo "[dev_reset] django migrate"
 # 3.5. NULL を許容しない追加カラムにデフォルト値を設定（seed の簡略化）
 echo "[dev_reset] add defaults to quiz_question / quiz_answer"
 docker exec -i supabase_db_techquiz psql -U postgres -d postgres <<'SQL'
-ALTER TABLE quiz_question ALTER COLUMN code_snippet SET DEFAULT '';
-ALTER TABLE quiz_question ALTER COLUMN image_url SET DEFAULT '';
-ALTER TABLE quiz_question ALTER COLUMN media_type SET DEFAULT 'none';
-ALTER TABLE quiz_question ALTER COLUMN syntax_highlight SET DEFAULT '';
-ALTER TABLE quiz_question ALTER COLUMN updated_at SET DEFAULT NOW();
-
-ALTER TABLE quiz_answer ALTER COLUMN feedback SET DEFAULT '';
-ALTER TABLE quiz_answer ALTER COLUMN updated_at SET DEFAULT NOW();
-
-ALTER TABLE quiz_quiz ALTER COLUMN updated_at SET DEFAULT NOW();
+-- テーブルが存在する場合のみデフォルト値を設定
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'quiz_question') THEN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_question' AND column_name = 'code_snippet') THEN
+      ALTER TABLE quiz_question ALTER COLUMN code_snippet SET DEFAULT '';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_question' AND column_name = 'image_url') THEN
+      ALTER TABLE quiz_question ALTER COLUMN image_url SET DEFAULT '';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_question' AND column_name = 'media_type') THEN
+      ALTER TABLE quiz_question ALTER COLUMN media_type SET DEFAULT 'none';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_question' AND column_name = 'syntax_highlight') THEN
+      ALTER TABLE quiz_question ALTER COLUMN syntax_highlight SET DEFAULT '';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_question' AND column_name = 'updated_at') THEN
+      ALTER TABLE quiz_question ALTER COLUMN updated_at SET DEFAULT NOW();
+    END IF;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'quiz_answer') THEN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_answer' AND column_name = 'feedback') THEN
+      ALTER TABLE quiz_answer ALTER COLUMN feedback SET DEFAULT '';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_answer' AND column_name = 'updated_at') THEN
+      ALTER TABLE quiz_answer ALTER COLUMN updated_at SET DEFAULT NOW();
+    END IF;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'quiz_quiz') THEN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quiz_quiz' AND column_name = 'updated_at') THEN
+      ALTER TABLE quiz_quiz ALTER COLUMN updated_at SET DEFAULT NOW();
+    END IF;
+  END IF;
+END $$;
 SQL
 
 # 4. 初期データ投入（カテゴリ・難易度・クイズ問題など）
