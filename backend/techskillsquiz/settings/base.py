@@ -32,7 +32,9 @@ else:
     else:
         env_file = ".env" # デフォルト
 
-dotenv_path = BASE_DIR / env_file
+# プロジェクトルートディレクトリのパス（backend/ の親ディレクトリ）
+project_root = BASE_DIR.parent
+dotenv_path = project_root / env_file
 
 if dotenv_path.exists():
     # override=True で、既に設定されている環境変数も.envファイルの値で上書きする
