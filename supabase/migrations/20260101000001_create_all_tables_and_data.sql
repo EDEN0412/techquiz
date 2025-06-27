@@ -4,11 +4,33 @@
 BEGIN;
 
 -- =========================================================
+-- 0. 既存テーブルの削除（冪等性確保のため）
+-- =========================================================
+DROP TABLE IF EXISTS quiz_activityhistory CASCADE;
+DROP TABLE IF EXISTS quiz_userstatistics CASCADE;
+DROP TABLE IF EXISTS quiz_quizresult CASCADE;
+DROP TABLE IF EXISTS quiz_answer CASCADE;
+DROP TABLE IF EXISTS quiz_question CASCADE;
+DROP TABLE IF EXISTS quiz_quiz CASCADE;
+DROP TABLE IF EXISTS quiz_difficultylevel CASCADE;
+DROP TABLE IF EXISTS quiz_category CASCADE;
+DROP TABLE IF EXISTS token_blacklist_blacklistedtoken CASCADE;
+DROP TABLE IF EXISTS token_blacklist_outstandingtoken CASCADE;
+DROP TABLE IF EXISTS django_session CASCADE;
+DROP TABLE IF EXISTS django_content_type CASCADE;
+DROP TABLE IF EXISTS auth_user_user_permissions CASCADE;
+DROP TABLE IF EXISTS auth_user_groups CASCADE;
+DROP TABLE IF EXISTS auth_permission CASCADE;
+DROP TABLE IF EXISTS auth_group CASCADE;
+DROP TABLE IF EXISTS auth_user CASCADE;
+-- django_migrations は削除しない
+
+-- =========================================================
 -- 1. テーブル作成
 -- =========================================================
 
 -- Django認証システムのユーザーテーブル
-CREATE TABLE IF NOT EXISTS auth_user (
+CREATE TABLE auth_user (
     id SERIAL PRIMARY KEY,
     password VARCHAR(128) NOT NULL,
     last_login TIMESTAMPTZ,
@@ -23,13 +45,13 @@ CREATE TABLE IF NOT EXISTS auth_user (
 );
 
 -- Django認証システムのグループテーブル
-CREATE TABLE IF NOT EXISTS auth_group (
+CREATE TABLE auth_group (
     id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL UNIQUE
 );
 
 -- Django認証システムの権限テーブル
-CREATE TABLE IF NOT EXISTS auth_permission (
+CREATE TABLE auth_permission (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     content_type_id INTEGER NOT NULL,
@@ -37,7 +59,7 @@ CREATE TABLE IF NOT EXISTS auth_permission (
 );
 
 -- Django認証システムのユーザーグループ関連テーブル
-CREATE TABLE IF NOT EXISTS auth_user_groups (
+CREATE TABLE auth_user_groups (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     group_id INTEGER NOT NULL,
@@ -45,7 +67,7 @@ CREATE TABLE IF NOT EXISTS auth_user_groups (
 );
 
 -- Django認証システムのユーザー権限関連テーブル
-CREATE TABLE IF NOT EXISTS auth_user_user_permissions (
+CREATE TABLE auth_user_user_permissions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     permission_id INTEGER NOT NULL,
@@ -53,7 +75,7 @@ CREATE TABLE IF NOT EXISTS auth_user_user_permissions (
 );
 
 -- Django content typesテーブル
-CREATE TABLE IF NOT EXISTS django_content_type (
+CREATE TABLE django_content_type (
     id SERIAL PRIMARY KEY,
     app_label VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
@@ -61,22 +83,16 @@ CREATE TABLE IF NOT EXISTS django_content_type (
 );
 
 -- Django sessionsテーブル
-CREATE TABLE IF NOT EXISTS django_session (
+CREATE TABLE django_session (
     session_key VARCHAR(40) PRIMARY KEY,
     session_data TEXT NOT NULL,
     expire_date TIMESTAMPTZ NOT NULL
 );
 
--- Django migrationsテーブル
-CREATE TABLE IF NOT EXISTS django_migrations (
-    id SERIAL PRIMARY KEY,
-    app VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    applied TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+-- Django migrationsテーブルはSupabaseが管理するため、ここでは作成しない
 
 -- カテゴリテーブル
-CREATE TABLE IF NOT EXISTS quiz_category (
+CREATE TABLE quiz_category (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(50) NOT NULL UNIQUE,
@@ -89,7 +105,7 @@ CREATE TABLE IF NOT EXISTS quiz_category (
 );
 
 -- 難易度レベルテーブル
-CREATE TABLE IF NOT EXISTS quiz_difficultylevel (
+CREATE TABLE quiz_difficultylevel (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     slug VARCHAR(50) NOT NULL UNIQUE,
@@ -102,7 +118,7 @@ CREATE TABLE IF NOT EXISTS quiz_difficultylevel (
 );
 
 -- クイズテーブル
-CREATE TABLE IF NOT EXISTS quiz_quiz (
+CREATE TABLE quiz_quiz (
     id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT,
@@ -119,7 +135,7 @@ CREATE TABLE IF NOT EXISTS quiz_quiz (
 );
 
 -- 質問テーブル
-CREATE TABLE IF NOT EXISTS quiz_question (
+CREATE TABLE quiz_question (
     id SERIAL PRIMARY KEY,
     quiz_id INTEGER NOT NULL,
     question_text TEXT NOT NULL,
@@ -132,7 +148,7 @@ CREATE TABLE IF NOT EXISTS quiz_question (
 );
 
 -- 回答選択肢テーブル
-CREATE TABLE IF NOT EXISTS quiz_answer (
+CREATE TABLE quiz_answer (
     id SERIAL PRIMARY KEY,
     question_id INTEGER NOT NULL,
     answer_text TEXT NOT NULL,
@@ -142,7 +158,7 @@ CREATE TABLE IF NOT EXISTS quiz_answer (
 );
 
 -- クイズ結果テーブル
-CREATE TABLE IF NOT EXISTS quiz_quizresult (
+CREATE TABLE quiz_quizresult (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     quiz_id INTEGER NOT NULL,
@@ -155,7 +171,7 @@ CREATE TABLE IF NOT EXISTS quiz_quizresult (
 );
 
 -- ユーザー統計テーブル
-CREATE TABLE IF NOT EXISTS quiz_userstatistics (
+CREATE TABLE quiz_userstatistics (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL UNIQUE,
     total_quizzes_completed INTEGER NOT NULL DEFAULT 0,
@@ -167,7 +183,7 @@ CREATE TABLE IF NOT EXISTS quiz_userstatistics (
 );
 
 -- 活動履歴テーブル
-CREATE TABLE IF NOT EXISTS quiz_activityhistory (
+CREATE TABLE quiz_activityhistory (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     quiz_id INTEGER NOT NULL,
@@ -177,7 +193,7 @@ CREATE TABLE IF NOT EXISTS quiz_activityhistory (
 );
 
 -- JWT トークンブラックリスト関連テーブル
-CREATE TABLE IF NOT EXISTS token_blacklist_outstandingtoken (
+CREATE TABLE token_blacklist_outstandingtoken (
     id SERIAL PRIMARY KEY,
     user_id INTEGER,
     jti VARCHAR(255) NOT NULL UNIQUE,
@@ -186,7 +202,7 @@ CREATE TABLE IF NOT EXISTS token_blacklist_outstandingtoken (
     expires_at TIMESTAMPTZ NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS token_blacklist_blacklistedtoken (
+CREATE TABLE token_blacklist_blacklistedtoken (
     id SERIAL PRIMARY KEY,
     token_id INTEGER NOT NULL UNIQUE,
     blacklisted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -196,16 +212,16 @@ CREATE TABLE IF NOT EXISTS token_blacklist_blacklistedtoken (
 -- 2. インデックス作成
 -- =========================================================
 
-CREATE INDEX IF NOT EXISTS auth_user_username_idx ON auth_user(username);
-CREATE INDEX IF NOT EXISTS auth_user_email_idx ON auth_user(email);
-CREATE INDEX IF NOT EXISTS quiz_quiz_category_id_idx ON quiz_quiz(category_id);
-CREATE INDEX IF NOT EXISTS quiz_quiz_difficulty_id_idx ON quiz_quiz(difficulty_id);
-CREATE INDEX IF NOT EXISTS quiz_question_quiz_id_idx ON quiz_question(quiz_id);
-CREATE INDEX IF NOT EXISTS quiz_answer_question_id_idx ON quiz_answer(question_id);
-CREATE INDEX IF NOT EXISTS quiz_quizresult_user_id_idx ON quiz_quizresult(user_id);
-CREATE INDEX IF NOT EXISTS quiz_quizresult_quiz_id_idx ON quiz_quizresult(quiz_id);
-CREATE INDEX IF NOT EXISTS quiz_activityhistory_user_id_idx ON quiz_activityhistory(user_id);
-CREATE INDEX IF NOT EXISTS django_session_expire_date_idx ON django_session(expire_date);
+CREATE INDEX auth_user_username_idx ON auth_user(username);
+CREATE INDEX auth_user_email_idx ON auth_user(email);
+CREATE INDEX quiz_quiz_category_id_idx ON quiz_quiz(category_id);
+CREATE INDEX quiz_quiz_difficulty_id_idx ON quiz_quiz(difficulty_id);
+CREATE INDEX quiz_question_quiz_id_idx ON quiz_question(quiz_id);
+CREATE INDEX quiz_answer_question_id_idx ON quiz_answer(question_id);
+CREATE INDEX quiz_quizresult_user_id_idx ON quiz_quizresult(user_id);
+CREATE INDEX quiz_quizresult_quiz_id_idx ON quiz_quizresult(quiz_id);
+CREATE INDEX quiz_activityhistory_user_id_idx ON quiz_activityhistory(user_id);
+CREATE INDEX django_session_expire_date_idx ON django_session(expire_date);
 
 -- =========================================================
 -- 3. 初期データ投入
