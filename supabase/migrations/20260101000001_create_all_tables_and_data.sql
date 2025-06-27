@@ -6,6 +6,7 @@ BEGIN;
 -- =========================================================
 -- 0. 既存テーブルの削除（冪等性確保のため）
 -- =========================================================
+-- Djangoが管理するテーブルは削除しない（auth_*, django_*, token_blacklist_*）
 DROP TABLE IF EXISTS quiz_activityhistory CASCADE;
 DROP TABLE IF EXISTS quiz_userstatistics CASCADE;
 DROP TABLE IF EXISTS quiz_quizresult CASCADE;
@@ -14,82 +15,12 @@ DROP TABLE IF EXISTS quiz_question CASCADE;
 DROP TABLE IF EXISTS quiz_quiz CASCADE;
 DROP TABLE IF EXISTS quiz_difficultylevel CASCADE;
 DROP TABLE IF EXISTS quiz_category CASCADE;
-DROP TABLE IF EXISTS token_blacklist_blacklistedtoken CASCADE;
-DROP TABLE IF EXISTS token_blacklist_outstandingtoken CASCADE;
-DROP TABLE IF EXISTS django_session CASCADE;
-DROP TABLE IF EXISTS django_content_type CASCADE;
-DROP TABLE IF EXISTS auth_user_user_permissions CASCADE;
-DROP TABLE IF EXISTS auth_user_groups CASCADE;
-DROP TABLE IF EXISTS auth_permission CASCADE;
-DROP TABLE IF EXISTS auth_group CASCADE;
-DROP TABLE IF EXISTS auth_user CASCADE;
--- django_migrations は削除しない
 
 -- =========================================================
 -- 1. テーブル作成
 -- =========================================================
 
--- Django認証システムのユーザーテーブル
-CREATE TABLE auth_user (
-    id SERIAL PRIMARY KEY,
-    password VARCHAR(128) NOT NULL,
-    last_login TIMESTAMPTZ,
-    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
-    username VARCHAR(150) NOT NULL UNIQUE,
-    first_name VARCHAR(150) NOT NULL DEFAULT '',
-    last_name VARCHAR(150) NOT NULL DEFAULT '',
-    email VARCHAR(254) NOT NULL DEFAULT '',
-    is_staff BOOLEAN NOT NULL DEFAULT FALSE,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    date_joined TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Django認証システムのグループテーブル
-CREATE TABLE auth_group (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(150) NOT NULL UNIQUE
-);
-
--- Django認証システムの権限テーブル
-CREATE TABLE auth_permission (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    content_type_id INTEGER NOT NULL,
-    codename VARCHAR(100) NOT NULL
-);
-
--- Django認証システムのユーザーグループ関連テーブル
-CREATE TABLE auth_user_groups (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    group_id INTEGER NOT NULL,
-    UNIQUE(user_id, group_id)
-);
-
--- Django認証システムのユーザー権限関連テーブル
-CREATE TABLE auth_user_user_permissions (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    permission_id INTEGER NOT NULL,
-    UNIQUE(user_id, permission_id)
-);
-
--- Django content typesテーブル
-CREATE TABLE django_content_type (
-    id SERIAL PRIMARY KEY,
-    app_label VARCHAR(100) NOT NULL,
-    model VARCHAR(100) NOT NULL,
-    UNIQUE(app_label, model)
-);
-
--- Django sessionsテーブル
-CREATE TABLE django_session (
-    session_key VARCHAR(40) PRIMARY KEY,
-    session_data TEXT NOT NULL,
-    expire_date TIMESTAMPTZ NOT NULL
-);
-
--- Django migrationsテーブルはSupabaseが管理するため、ここでは作成しない
+-- Django管理テーブル（auth_*, django_*, token_blacklist_*）はDjangoマイグレーションで作成
 
 -- カテゴリテーブル
 CREATE TABLE quiz_category (
@@ -192,28 +123,13 @@ CREATE TABLE quiz_activityhistory (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- JWT トークンブラックリスト関連テーブル
-CREATE TABLE token_blacklist_outstandingtoken (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER,
-    jti VARCHAR(255) NOT NULL UNIQUE,
-    token TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    expires_at TIMESTAMPTZ NOT NULL
-);
-
-CREATE TABLE token_blacklist_blacklistedtoken (
-    id SERIAL PRIMARY KEY,
-    token_id INTEGER NOT NULL UNIQUE,
-    blacklisted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+-- JWT トークンブラックリスト関連テーブルはDjangoマイグレーションで作成
 
 -- =========================================================
 -- 2. インデックス作成
 -- =========================================================
 
-CREATE INDEX auth_user_username_idx ON auth_user(username);
-CREATE INDEX auth_user_email_idx ON auth_user(email);
+-- クイズ関連テーブルのインデックス作成
 CREATE INDEX quiz_quiz_category_id_idx ON quiz_quiz(category_id);
 CREATE INDEX quiz_quiz_difficulty_id_idx ON quiz_quiz(difficulty_id);
 CREATE INDEX quiz_question_quiz_id_idx ON quiz_question(quiz_id);
@@ -221,7 +137,6 @@ CREATE INDEX quiz_answer_question_id_idx ON quiz_answer(question_id);
 CREATE INDEX quiz_quizresult_user_id_idx ON quiz_quizresult(user_id);
 CREATE INDEX quiz_quizresult_quiz_id_idx ON quiz_quizresult(quiz_id);
 CREATE INDEX quiz_activityhistory_user_id_idx ON quiz_activityhistory(user_id);
-CREATE INDEX django_session_expire_date_idx ON django_session(expire_date);
 
 -- =========================================================
 -- 3. 初期データ投入
