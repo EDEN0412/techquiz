@@ -10,6 +10,37 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# .envファイルの読み込み
+# DJANGO_SETTINGS_MODULEに応じて読み込む.envファイルを変える
+# 例: techskillsquiz.settings.development -> .env.development
+# manage.py実行時は DJANGO_SETTINGS_MODULE が設定されていないので、.env.developmentをデフォルトにする
+settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
+
+# manage.py から直接呼び出された場合（例: sync_supabase）
+# DJANGO_SETTINGS_MODULEが設定されていないことがあるため、その場合は開発用とみなす
+if settings_module is None:
+    # デフォルトを .env.development にする
+    env_file = ".env.development"
+    print("DJANGO_SETTINGS_MODULE is not set. Defaulting to .env.development")
+else:
+    if "development" in settings_module:
+        env_file = ".env.development"
+    elif "test" in settings_module:
+        env_file = ".env.test"
+    elif "production" in settings_module:
+        env_file = ".env.production"
+    else:
+        env_file = ".env" # デフォルト
+
+dotenv_path = BASE_DIR / env_file
+
+if dotenv_path.exists():
+    # override=True で、既に設定されている環境変数も.envファイルの値で上書きする
+    load_dotenv(dotenv_path=dotenv_path, override=True)
+    print(f"Loaded environment variables from: {dotenv_path}")
+else:
+    print(f"Warning: Environment file not found at {dotenv_path}. Using system environment variables.")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
