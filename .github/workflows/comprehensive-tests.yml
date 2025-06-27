@@ -294,6 +294,11 @@ jobs:
         run: |
           npx supabase@latest start --exclude gotrue,realtime,storage-api,imgproxy,inbucket,edge-runtime,logflare,vector,analytics
           echo "Supabase local instance started"
+          
+          # E2Eテスト環境では、データベースを空の状態にリセット
+          # これによりDjangoマイグレーションとの競合を回避
+          sleep 5  # Supabaseが完全に起動するまで待機
+          psql "postgresql://postgres:postgres@localhost:54322/postgres" -c "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;" || echo "Database reset completed"
       
       - name: Wait for Supabase Database to be ready
         run: |
