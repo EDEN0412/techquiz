@@ -196,14 +196,15 @@ INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, displ
 -- Ruby クイズの作成 (まず quiz_quiz テーブルに追加)
 -- ========================================
 
--- Rubyクイズ作成
-INSERT INTO quiz_quiz (category_id, difficulty_id, title, description, time_limit, pass_score, is_active, thumbnail_url, banner_image_url, media_type, created_at, updated_at) VALUES
--- 初級クイズ
-(2, 1, 'Ruby 基礎', 'Rubyの基本的な構文とデータ型について学びましょう', 300, 70, true, 'https://placehold.co/300x200?text=Ruby+Beginner', 'https://placehold.co/600x200?text=Ruby+Banner', 'image', NOW(), NOW()),
--- 中級クイズ
-(2, 2, 'Ruby 中級', 'Enumerableや例外処理、シンボルなど中級レベルの機能を学びましょう', 600, 70, true, 'https://placehold.co/300x200?text=Ruby+Intermediate', 'https://placehold.co/600x200?text=Ruby+Banner', 'image', NOW(), NOW()),
--- 上級クイズ
-(2, 3, 'Ruby 応用', 'メタプログラミングや高度な言語機能に挑戦しましょう', 900, 70, true, 'https://placehold.co/300x200?text=Ruby+Advanced', 'https://placehold.co/600x200?text=Ruby+Banner', 'image', NOW(), NOW());
+-- 既存マイグレーション(20260101000002_create_all_tables_and_data.sql)
+-- で Ruby 基礎/中級/上級の３クイズは挿入済みのため、ここでは再挿入しない
+-- INSERT INTO quiz_quiz (category_id, difficulty_id, title, description, time_limit, pass_score, is_active, thumbnail_url, banner_image_url, media_type, created_at, updated_at) VALUES
+-- -- 初級クイズ
+-- (2, 1, 'Ruby 基礎', 'Rubyの基本的な構文とデータ型について学びましょう', 300, 70, true, 'https://placehold.co/300x200?text=Ruby+Beginner', 'https://placehold.co/600x200?text=Ruby+Banner', 'image', NOW(), NOW()),
+-- -- 中級クイズ
+-- (2, 2, 'Ruby 中級', 'Enumerableや例外処理、シンボルなど中級レベルの機能を学びましょう', 600, 70, true, 'https://placehold.co/300x200?text=Ruby+Intermediate', 'https://placehold.co/600x200?text=Ruby+Banner', 'image', NOW(), NOW()),
+-- -- 上級クイズ
+-- (2, 3, 'Ruby 応用', 'メタプログラミングや高度な言語機能に挑戦しましょう', 900, 70, true, 'https://placehold.co/300x200?text=Ruby+Advanced', 'https://placehold.co/600x200?text=Ruby+Banner', 'image', NOW(), NOW());
 
 -- ========================================
 -- Ruby 初級問題 (全5問を追加)
