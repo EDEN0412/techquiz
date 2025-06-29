@@ -1,0 +1,1 @@
+-- NO-OP: クイズデータは 20260101000002_create_all_tables_and_data.sql に統合済み 

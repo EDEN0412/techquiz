@@ -1,1 +1,1 @@
--- This migration is now a NO-OP. All quiz data has been moved to 20260101130000_add_all_missing_quiz_data.sql 
+-- NO-OP: 重複回避のため空のマイグレーション 
