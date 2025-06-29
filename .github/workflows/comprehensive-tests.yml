@@ -257,6 +257,21 @@ jobs:
       DATABASE_HOST: localhost
       DATABASE_PORT: 54322
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ${{ env.DATABASE_NAME }}
+          POSTGRES_USER: ${{ env.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+        ports:
+          - 54322:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -290,23 +305,13 @@ jobs:
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       
-      - name: Start Supabase local instance
-        run: |
-          npx supabase@latest start --exclude gotrue,realtime,storage-api,imgproxy,inbucket,edge-runtime,logflare,vector,analytics
-          echo "Supabase local instance started"
-          
-          # E2Eテスト環境では、データベースを空の状態にリセット
-          # これによりDjangoマイグレーションとの競合を回避
-          sleep 5  # Supabaseが完全に起動するまで待機
-          psql "postgresql://postgres:postgres@localhost:54322/postgres" -c "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;" || echo "Database reset completed"
-      
-      - name: Wait for Supabase Database to be ready
+      - name: Confirm PostgreSQL is ready
         run: |
           until pg_isready -h localhost -p 54322 -U postgres; do
-            echo "Waiting for Supabase PostgreSQL to start..."
+            echo "Waiting for PostgreSQL service to start..."
             sleep 2
           done
-          echo "Supabase PostgreSQL started."
+          echo "PostgreSQL service is ready."
       
       - name: Setup backend for E2E tests
         run: |
@@ -319,8 +324,8 @@ jobs:
           echo "DATABASE_USER=${{ env.DATABASE_USER }}" >> .env.test
           echo "DATABASE_PASSWORD=${{ env.DATABASE_PASSWORD }}" >> .env.test
           echo "ALLOWED_HOSTS=localhost,127.0.0.1" >> .env.test
-          echo "SUPABASE_URL=http://127.0.0.1:54321" >> .env.test
-          echo "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0" >> .env.test
+          echo "SUPABASE_URL=http://localhost:8000" >> .env.test
+          echo "SUPABASE_ANON_KEY=dummy-key-for-e2e-tests" >> .env.test
           
           cd backend
           
