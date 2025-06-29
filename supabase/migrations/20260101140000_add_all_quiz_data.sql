@@ -14,13 +14,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'color: red;', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'text-color: red;', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'background: red;', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'font-color: red;', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -35,13 +35,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '<ol>', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '<ul>', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '<list>', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '<li>', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -56,13 +56,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 '.menu', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 '#menu', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 'menu', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 '@menu', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -77,13 +77,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 '<img>', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 '<image>', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 '<pic>', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 1 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 '<photo>', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -99,13 +99,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1 ORDER BY id LIMIT 1),
 'justify-content: center;', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1 ORDER BY id LIMIT 1),
 'align-items: center;', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1 ORDER BY id LIMIT 1),
 'text-align: center;', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 1 ORDER BY id LIMIT 1),
 'flex-align: center;', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -120,13 +120,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'grid-template-columns: 1fr 1fr 1fr;', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'grid-columns: 3;', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'column-count: 3;', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 2 ORDER BY id LIMIT 1),
 'flex-columns: 3;', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -141,13 +141,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '@media (max-width: 768px)', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '@media (width <= 768px)', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '@responsive (max-width: 768px)', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 3 ORDER BY id LIMIT 1),
 '@screen (width: 768px)', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -162,13 +162,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 ':hover', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 ':focus', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 ':active', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 4 ORDER BY id LIMIT 1),
 ':visited', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -183,13 +183,13 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 'fixed', true, NOW(), 1),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 'absolute', false, NOW(), 2),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 'relative', false, NOW(), 3),
-((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5),
+((SELECT id FROM quiz_question WHERE quiz_id = (SELECT id FROM quiz_quiz WHERE category_id = 1 AND difficulty_id = 2 LIMIT 1) AND display_order = 5 ORDER BY id LIMIT 1),
 'static', false, NOW(), 4)
 ON CONFLICT DO NOTHING;
 
@@ -201,10 +201,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1),'puts',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1),'print',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1),'echo',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1),'console.log',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'puts',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'print',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'echo',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'console.log',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題2: nil
@@ -214,10 +214,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2),'nil',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2),'null',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2),'None',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2),'undefined',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'nil',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'null',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'None',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'undefined',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題3: push
@@ -227,10 +227,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3),'push',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3),'add',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3),'append',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3),'insert',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'push',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'add',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'append',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'insert',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題4: 文字列連結
@@ -240,10 +240,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4),'+',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4),'&',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4),'.',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4),'=>',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'+',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'&',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'.',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'=>',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題5: pop
@@ -253,10 +253,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5),'pop',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5),'delete',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5),'remove_last',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5),'slice!',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'pop',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'delete',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'remove_last',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=1 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'slice!',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- Ruby 中級問題（全5問）
@@ -271,10 +271,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1),'ブロック結果を要素とする新しい配列',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1),'nil',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1),'self と同じ配列',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1),'Enumerator オブジェクト',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'ブロック結果を要素とする新しい配列',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'nil',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'self と同じ配列',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'Enumerator オブジェクト',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題2: &: 記法
@@ -288,10 +288,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2),'Symbol#to_proc でブロックを生成して呼び出す',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2),'each に書き換えて実行',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2),'メタプログラミングでメソッドを定義',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2),'特別な構文糖で RubyVM が最適化',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'Symbol#to_proc でブロックを生成して呼び出す',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'each に書き換えて実行',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'メタプログラミングでメソッドを定義',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'特別な構文糖で RubyVM が最適化',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題3: 例外処理の継承順
@@ -305,10 +305,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3),'サブクラスを先、スーパークラスを後',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3),'スーパークラスを先、サブクラスを後',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3),'アルファベット順',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3),'記述順は影響しない',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'サブクラスを先、スーパークラスを後',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'スーパークラスを先、サブクラスを後',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'アルファベット順',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'記述順は影響しない',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題4: attr_accessor
@@ -322,10 +322,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4),'name と name=',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4),'get_name と set_name',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4),'initialize と to_s',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4),'name? と name!',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'name と name=',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'get_name と set_name',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'initialize と to_s',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'name? と name!',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題5: include と extend
@@ -339,10 +339,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5),'include',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5),'extend',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5),'prepend',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5),'require',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'include',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'extend',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'prepend',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=2 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'require',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- Ruby 上級問題（全5問）
@@ -357,10 +357,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1),'respond_to_missing?',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1),'initialize_copy',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1),'method_added',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1),'included',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'respond_to_missing?',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'initialize_copy',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'method_added',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=1 ORDER BY id LIMIT 1),'included',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題2: eigenclass
@@ -374,10 +374,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2),'obj の特異クラス',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2),'String クラス',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2),'obj 自身 ("hello")',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2),'main オブジェクト',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'obj の特異クラス',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'String クラス',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'obj 自身 ("hello")',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=2 ORDER BY id LIMIT 1),'main オブジェクト',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題3: refine
@@ -391,10 +391,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3),'using',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3),'import',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3),'include',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3),'extend',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'using',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'import',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'include',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=3 ORDER BY id LIMIT 1),'extend',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題4: Fiber#resume の戻り値
@@ -408,10 +408,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4),'Fiber 内から yield された値',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4),'nil 固定',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4),'Fiber オブジェクト自身',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4),'次に resume で渡す引数',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'Fiber 内から yield された値',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'nil 固定',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'Fiber オブジェクト自身',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=4 ORDER BY id LIMIT 1),'次に resume で渡す引数',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 -- 問題5: prepend
@@ -425,10 +425,10 @@ INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanat
 ON CONFLICT DO NOTHING;
 
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5),'モジュール → クラス → 既存の祖先',true,NOW(),1),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5),'クラス → モジュール → 既存の祖先',false,NOW(),2),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5),'既存の祖先 → クラス → モジュール',false,NOW(),3),
-((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5),'モジュールは探索に含まれない',false,NOW(),4)
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'モジュール → クラス → 既存の祖先',true,NOW(),1),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'クラス → モジュール → 既存の祖先',false,NOW(),2),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'既存の祖先 → クラス → モジュール',false,NOW(),3),
+((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=2 AND difficulty_id=3 LIMIT 1) AND display_order=5 ORDER BY id LIMIT 1),'モジュールは探索に含まれない',false,NOW(),4)
 ON CONFLICT DO NOTHING;
 
 COMMIT;
