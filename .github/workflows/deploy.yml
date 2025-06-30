@@ -105,8 +105,6 @@ jobs:
     if: false
     runs-on: ubuntu-latest
     needs: check_tests
-    if: needs.check_tests.outputs.deploy == 'true'
-      && vars.S3_BUCKET != ''   # 変数が設定されているときだけ実行
     environment: ${{ needs.check_tests.outputs.environment }}
     
     steps:
@@ -196,7 +194,6 @@ jobs:
     if: false
     runs-on: ubuntu-latest
     needs: [deploy_backend, deploy_frontend, update_supabase]
-    if: always() && needs.check_tests.outputs.deploy == 'true'
     environment: ${{ needs.check_tests.outputs.environment }}
     
     steps:
