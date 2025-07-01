@@ -72,9 +72,20 @@ jobs:
           python -c "import dotenv; print('python-dotenv installed successfully')"
           python -c "import psycopg2; print('psycopg2-binary installed successfully')"
       
+      - name: Get Supabase DB IPv4 Address
+        id: db_ip
+        run: |
+          DB_IP=$(dig +short A db.${{ vars.SUPABASE_PROJECT_ID }}.supabase.co)
+          echo "IP=${DB_IP}" >> $GITHUB_OUTPUT
+          echo "Found DB IP: ${DB_IP}"
+
       - name: Run database migrations
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_HOST: ${{ steps.db_ip.outputs.IP }}
+          DATABASE_NAME: postgres
+          DATABASE_USER: postgres
+          DATABASE_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          DATABASE_PORT: 5432
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DJANGO_SETTINGS_MODULE: techskillsquiz.settings.production
           SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
