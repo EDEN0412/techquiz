@@ -35,26 +35,12 @@ CORS_ALLOWED_ORIGINS = [
 SUPABASE_AUTO_SYNC = os.environ.get("SUPABASE_AUTO_SYNC", "False").lower() in ("true", "1", "t")
 
 # 本番環境用データベース設定
-if 'DATABASE_URL' in os.environ:
-    DATABASES = {
-        'default': dj_database_url.config(conn_max_age=60, ssl_require=True)
-    }
-else:
-    # 従来の設定もフォールバックとして残す
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("DATABASE_NAME"),
-            "USER": os.environ.get("DATABASE_USER"),
-            "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
-            "HOST": os.environ.get("DATABASE_HOST"),
-            "PORT": os.environ.get("DATABASE_PORT", "5432"),
-            "CONN_MAX_AGE": 60,  # 接続プーリングの設定
-            "OPTIONS": {
-                "sslmode": "require",  # SSL接続を強制
-            }
-        }
-    }
+DATABASES = {
+    'default': dj_database_url.config(
+        conn_max_age=60,
+        ssl_require=True
+    )
+}
 
 # 本番環境でのHTTPSリダイレクト
 SECURE_SSL_REDIRECT = True

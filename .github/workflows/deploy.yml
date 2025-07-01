@@ -71,12 +71,22 @@ jobs:
       
       - name: Run database migrations
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL_TEMPLATE: ${{ secrets.DATABASE_URL }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DJANGO_SETTINGS_MODULE: techskillsquiz.settings.production
           SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
         run: |
+          # IPv4アドレスを強制的に解決
+          DB_HOST_IPV4=$(dig +short A db.${{ vars.SUPABASE_PROJECT_ID }}.supabase.co)
+          echo "Resolved DB Host IPv4: $DB_HOST_IPV4"
+          
+          # 元のDATABASE_URLからホスト名を抜き出し、IPv4アドレスに置換
+          DB_HOST_ORIGINAL="db.${{ vars.SUPABASE_PROJECT_ID }}.supabase.co"
+          export DATABASE_URL=${DATABASE_URL_TEMPLATE/@$DB_HOST_ORIGINAL/@$DB_HOST_IPV4}
+          
+          echo "Using DATABASE_URL with IPv4: $DATABASE_URL"
+          
           cd backend
           python manage.py migrate --noinput
       
