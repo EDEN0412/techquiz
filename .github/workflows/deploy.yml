@@ -67,6 +67,7 @@ jobs:
           cd backend
           poetry config virtualenvs.create false
           poetry install --without dev
+          pip install dj-database-url
           # 念のため重要なパッケージが確実にインストールされているか確認
           python -c "import dotenv; print('python-dotenv installed successfully')"
           python -c "import psycopg2; print('psycopg2-binary installed successfully')"
