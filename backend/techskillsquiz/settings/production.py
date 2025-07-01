@@ -35,13 +35,9 @@ CORS_ALLOWED_ORIGINS = [
 SUPABASE_AUTO_SYNC = os.environ.get("SUPABASE_AUTO_SYNC", "False").lower() in ("true", "1", "t")
 
 # 本番環境用データベース設定
-# DATABASE_URL を使用して設定を簡素化
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
-        'default': dj_database_url.config(
-            conn_max_age=60,
-            ssl_require=True
-        )
+        'default': dj_database_url.config(conn_max_age=60, ssl_require=True)
     }
 else:
     # 従来の設定もフォールバックとして残す

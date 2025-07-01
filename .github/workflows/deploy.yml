@@ -67,25 +67,11 @@ jobs:
           cd backend
           poetry config virtualenvs.create false
           poetry install --without dev
-          pip install dj-database-url
-          # 念のため重要なパッケージが確実にインストールされているか確認
-          python -c "import dotenv; print('python-dotenv installed successfully')"
-          python -c "import psycopg2; print('psycopg2-binary installed successfully')"
+          pip install dj-database-url psycopg2-binary
       
-      - name: Get Supabase DB IPv4 Address
-        id: db_ip
-        run: |
-          DB_IP=$(dig +short A db.${{ vars.SUPABASE_PROJECT_ID }}.supabase.co)
-          echo "IP=${DB_IP}" >> $GITHUB_OUTPUT
-          echo "Found DB IP: ${DB_IP}"
-
       - name: Run database migrations
         env:
-          DATABASE_HOST: ${{ steps.db_ip.outputs.IP }}
-          DATABASE_NAME: postgres
-          DATABASE_USER: postgres
-          DATABASE_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          DATABASE_PORT: 5432
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DJANGO_SETTINGS_MODULE: techskillsquiz.settings.production
           SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
