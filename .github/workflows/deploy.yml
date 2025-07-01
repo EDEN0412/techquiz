@@ -80,16 +80,10 @@ jobs:
           SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
         run: |
-          # IPv4アドレスを強制的に解決
-          DB_HOST_IPV4=$(dig +short A db.${{ vars.SUPABASE_PROJECT_ID }}.supabase.co)
-          echo "Resolved DB Host IPv4: $DB_HOST_IPV4"
-          
-          # 元のDATABASE_URLからホスト名を抜き出し、IPv4アドレスに置換
+          DB_HOST_IPV4=${{ vars.SUPABASE_DB_IPV4 }}
           DB_HOST_ORIGINAL="db.${{ vars.SUPABASE_PROJECT_ID }}.supabase.co"
           export DATABASE_URL=${DATABASE_URL_TEMPLATE/@$DB_HOST_ORIGINAL/@$DB_HOST_IPV4}
-          
-          echo "Using DATABASE_URL with IPv4: $DATABASE_URL"
-          
+          echo "Using DATABASE_URL: $DATABASE_URL"
           cd backend
           python manage.py migrate --noinput
       
