@@ -73,16 +73,9 @@ jobs:
       
       - name: Run database migrations
         env:
-          # --- データベース接続情報 ---
-          DATABASE_NAME: postgres
-          DATABASE_USER: postgres
-          DATABASE_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          DATABASE_HOST: db.${{ vars.SUPABASE_PROJECT_ID }}.supabase.co
-          DATABASE_PORT: 5432
-          # --- Django設定 ---
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DJANGO_SETTINGS_MODULE: techskillsquiz.settings.production
-          # --- Supabaseクライアント初期化情報 ---
           SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
         run: |
