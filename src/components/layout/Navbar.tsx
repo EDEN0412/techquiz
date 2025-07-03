@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Brain, User, LogIn, PlayCircle, Home } from 'lucide-react';
+import { Brain, User, LogIn, Home } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../lib/contexts/AuthContext';
 
@@ -17,41 +17,35 @@ export function Navbar() {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="/quiz/demo">
-              <Button variant="outline" size="sm">
-                <PlayCircle className="mr-2 h-4 w-4" />
-                クイズデモ
-              </Button>
-            </Link>
             {isAuthenticated ? (
               <>
                 <Link to="/">
-                  <Button variant="secondary" size="sm">
+                  <Button variant="outline" size="sm">
                     <Home className="mr-2 h-4 w-4" />
                     ダッシュボード
                   </Button>
                 </Link>
                 <Link to="/profile">
-                  <Button variant="secondary" size="sm">
+                  <Button variant="outline" size="sm">
                     <User className="mr-2 h-4 w-4" />
                     プロフィール
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" onClick={logout}>
+                <Button onClick={logout} variant="secondary" size="sm">
                   ログアウト
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="secondary" size="sm">
+                  <Button variant="outline" size="sm">
                     <LogIn className="mr-2 h-4 w-4" />
                     ログイン
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button size="sm">
-                    アカウント作成
+                  <Button variant="primary" size="sm">
+                    サインアップ
                   </Button>
                 </Link>
               </>

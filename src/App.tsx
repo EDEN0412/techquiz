@@ -9,7 +9,6 @@ import QuizPage from './pages/QuizPage';
 import { CompletedQuizzes } from './pages/CompletedQuizzes';
 import { QuizResultDetail } from './pages/QuizResultDetail';
 import { AuthProvider } from './lib/contexts/AuthContext';
-import QuizQuestionDemo from './components/quiz/QuizQuestionDemo';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -30,7 +29,6 @@ function App() {
             
             {/* クイズ関連ページ - 認証不要 */}
             <Route path="/quiz" element={<div>クイズ画面</div>} />
-            <Route path="/quiz/demo" element={<QuizQuestionDemo />} />
             <Route path="/quiz/:categoryId" element={<div>カテゴリー別クイズ画面</div>} />
             <Route path="/quiz/:categoryId/difficulty" element={<DifficultySelection />} />
             <Route path="/quiz/:categoryId/:difficultyId/start" element={<QuizPage />} />
