@@ -27,8 +27,9 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 # 本番環境ではCORSをより制限的に
 CORS_ALLOW_ALL_ORIGINS = False
+# 環境変数からカンマ区切りのURLリストを取得し、リストに変換
 CORS_ALLOWED_ORIGINS = [
-    os.environ.get("FRONTEND_URL", "https://techquiz.example.com"),
+    origin.strip() for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if origin
 ]
 
 # 本番環境でのSupabase同期は適切に設定
