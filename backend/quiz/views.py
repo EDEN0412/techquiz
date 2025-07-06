@@ -61,7 +61,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]  # 誰でもアクセス可能に設定
     
     @action(detail=True, methods=['get'])
-    def quizzes(self, request, pk=None):
+    def quizzes(self, request, slug=None, **kwargs):
         """
         特定のカテゴリに属するクイズのリストを取得する
         """
