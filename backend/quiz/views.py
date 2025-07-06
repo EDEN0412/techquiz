@@ -53,6 +53,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     """
     queryset = Category.objects.all().order_by('display_order')
     serializer_class = CategorySerializer
+    lookup_field = 'slug'
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     search_fields = ['name', 'description']
     filterset_fields = ['is_active']
@@ -76,6 +77,7 @@ class DifficultyLevelViewSet(viewsets.ModelViewSet):
     """
     queryset = DifficultyLevel.objects.all().order_by('level')
     serializer_class = DifficultyLevelSerializer
+    lookup_field = 'slug'
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['level', 'name', 'created_at']
