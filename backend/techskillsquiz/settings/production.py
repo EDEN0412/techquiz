@@ -23,13 +23,33 @@ IS_LOCAL_DEVELOPMENT = False
 DEBUG = False
 
 # 本番環境では厳格なホスト制限
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+# デフォルト値としてバックエンドのホスト名を含める
+default_hosts = "techquiz-production.up.railway.app"
+ALLOWED_HOSTS = [
+    host.strip() for host in os.environ.get("ALLOWED_HOSTS", default_hosts).split(",") if host
+]
 
 # 本番環境ではCORSをより制限的に
 CORS_ALLOW_ALL_ORIGINS = False
 # 環境変数からカンマ区切りのURLリストを取得し、リストに変換
+# デフォルト値としてフロントエンドのURLを含める
+default_origins = "https://resplendent-celebration-production.up.railway.app"
 CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if origin
+    origin.strip() for origin in os.environ.get("CORS_ALLOWED_ORIGINS", default_origins).split(",") if origin
+]
+
+# CORSの追加設定
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 # 本番環境でのSupabase同期は適切に設定
@@ -44,7 +64,8 @@ DATABASES = {
 }
 
 # 本番環境でのHTTPSリダイレクト
-SECURE_SSL_REDIRECT = True
+# Railwayが自動的にHTTPSを処理するため、Djangoレベルでのリダイレクトは不要
+SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 31536000  # 1年間
