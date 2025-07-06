@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Category, Difficulty, QuizQuestion as QuizQuestionType, QuizResultRequest } from '../lib/api/types';
-import { 
-  fetchCategoryFromSupabase, 
-  fetchDifficultyLevelsFromSupabase,
-  fetchQuestionsByCategoryAndDifficulty 
-} from '../lib/api/supabase-direct';
 import { QuizService } from '../lib/api/services/quiz.service';
 import { useAuth } from '../lib/contexts/AuthContext';
 import QuizQuestion from '../components/quiz/QuizQuestion';
@@ -31,7 +26,7 @@ const QuizPage: React.FC = () => {
 
   // 復習モードの検出
   const isReviewMode = location.pathname.includes('/review');
-  const quizId = routeQuizId || searchParams.get('quizId');
+  const quizIdFromUrl = routeQuizId || searchParams.get('quizId');
 
   // State管理
   const [questions, setQuestions] = useState<QuizQuestionType[]>([]);
@@ -61,109 +56,55 @@ const QuizPage: React.FC = () => {
         setIsLoading(true);
         setError(null);
 
-        if (isReviewMode) {
-          // 復習モードの処理
-          if (!quizId) {
-            setError('復習用のクイズIDが指定されていません');
-            return;
-          }
+        let categoryData: Category;
+        let difficultyData: Difficulty;
+        let questionsData: QuizQuestionType[];
+        let quizData: any;
 
-          const quizIdNum = parseInt(quizId);
-          if (isNaN(quizIdNum)) {
-            setError('無効なクイズIDです');
-            return;
-          }
-
-          // QuizServiceを使ってクイズ詳細を取得
-          const quizData = await quizService.getQuizById(quizIdNum);
+        if (isReviewMode && quizIdFromUrl) {
+          // --- 復習モード (QuizServiceを使用) ---
+          const quizIdNum = parseInt(quizIdFromUrl, 10);
+          quizData = await quizService.getQuizById(quizIdNum);
           
-          // カテゴリーと難易度のデータを取得
-          const [categoryData, difficultyLevels] = await Promise.all([
-            fetchCategoryFromSupabase(quizData.category),
-            fetchDifficultyLevelsFromSupabase()
+          const [cat, diffs] = await Promise.all([
+            quizService.getCategory(quizData.category),
+            quizService.getDifficultyLevels()
           ]);
+          categoryData = cat;
+          difficultyData = diffs.find(d => d.id === quizData.difficulty)!;
+          questionsData = await quizService.getQuestions(quizData.id);
 
-          const difficultyData = difficultyLevels.find((d: Difficulty) => d.id === quizData.difficulty);
-          if (!difficultyData) {
-            throw new Error('指定された難易度が見つかりません');
+        } else if (categoryId && difficultyId) {
+          // --- 通常モード (QuizServiceを使用) ---
+          const categoryIdNum = parseInt(categoryId, 10);
+          const difficultyIdNum = parseInt(difficultyId, 10);
+
+          const [cat, diffs, quizzes] = await Promise.all([
+            quizService.getCategory(categoryIdNum),
+            quizService.getDifficultyLevels(),
+            quizService.getQuizzesByCategoryAndDifficulty(categoryIdNum, difficultyIdNum)
+          ]);
+          
+          categoryData = cat;
+          difficultyData = diffs.find(d => d.id === difficultyIdNum)!;
+          
+          if (!quizzes || quizzes.length === 0) {
+            throw new Error("このカテゴリーと難易度の組み合わせのクイズが見つかりません。");
           }
-
-          // クイズの問題を取得
-          const questionsData = await fetchQuestionsByCategoryAndDifficulty(
-            quizData.category,
-            quizData.difficulty,
-            10
-          );
-
-          if (!questionsData || questionsData.length === 0) {
-            throw new Error('復習用の問題が見つかりません');
-          }
-
-          setCategory(categoryData);
-          setDifficulty(difficultyData);
-          setQuestions(questionsData);
-          setQuiz(quizData);
+          quizData = quizzes[0]; // 該当する最初のクイズを使用
+          questionsData = await quizService.getQuestions(quizData.id);
 
         } else {
-          // 通常モードの処理
-          if (!categoryId || !difficultyId) {
-            setError('カテゴリーまたは難易度が指定されていません');
-            return;
-          }
-          
-          const categoryIdNum = parseInt(categoryId);
-          const difficultyIdNum = parseInt(difficultyId);
-          
-          if (isNaN(categoryIdNum) || isNaN(difficultyIdNum)) {
-            setError(`無効なパラメータです。カテゴリーID: ${categoryId}, 難易度ID: ${difficultyId}`);
-            return;
-          }
-
-          // カテゴリー、難易度、問題を並行して取得
-          const [categoryData, difficultyLevels, questionsData] = await Promise.all([
-            fetchCategoryFromSupabase(categoryIdNum),
-            fetchDifficultyLevelsFromSupabase(),
-            fetchQuestionsByCategoryAndDifficulty(
-              categoryIdNum, 
-              difficultyIdNum,
-              10 // 最大10問
-            )
-          ]);
-
-          // 難易度データから該当するものを探す
-          const difficultyData = difficultyLevels.find((d: Difficulty) => d.id === difficultyIdNum);
-          
-          if (!difficultyData) {
-            throw new Error('指定された難易度が見つかりません');
-          }
-
-          if (!questionsData || questionsData.length === 0) {
-            throw new Error('この組み合わせのクイズ問題が見つかりません');
-          }
-
-          setCategory(categoryData);
-          setDifficulty(difficultyData);
-          setQuestions(questionsData);
-          
-          // クイズデータを設定（結果保存のため）
-          if (questionsData.length > 0) {
-            const firstQuestion = questionsData[0];
-            const quizData = {
-              id: firstQuestion.quiz,
-              title: `${categoryData.name} - ${difficultyData.name}`,
-              category: categoryData.id,
-              difficulty: difficultyData.id,
-              pass_score: 70, // デフォルト値
-              total_questions: questionsData.length
-            };
-            console.log('クイズデータを設定:', quizData);
-            setQuiz(quizData);
-          } else {
-            console.log('問題データが空のため、クイズデータを設定できません');
-          }
+          throw new Error("クイズを開始するための情報が不足しています。");
         }
-        
-        // クイズ開始時間を記録
+
+        if (!difficultyData) throw new Error('難易度情報が見つかりません');
+        if (!questionsData || questionsData.length === 0) throw new Error('問題が見つかりません');
+
+        setCategory(categoryData);
+        setDifficulty(difficultyData);
+        setQuestions(questionsData);
+        setQuiz(quizData);
         setStartTime(new Date());
 
       } catch (err) {
@@ -175,7 +116,7 @@ const QuizPage: React.FC = () => {
     };
 
     fetchQuizData();
-  }, [categoryId, difficultyId, isReviewMode, quizId]);
+  }, [categoryId, difficultyId, isReviewMode, quizIdFromUrl]);
 
   // 現在の問題が変わったときに選択答えをリセット
   useEffect(() => {
@@ -225,51 +166,26 @@ const QuizPage: React.FC = () => {
 
   // クイズ完了処理
   const handleQuizCompletion = async () => {
-    console.log('=== クイズ完了処理開始 ===');
-    console.log('現在のユーザー:', user);
-    console.log('現在のクイズ:', quiz);
-    console.log('復習モード:', isReviewMode);
-    console.log('開始時間:', startTime);
-    
     setIsQuizCompleted(true);
     setEndTime(new Date());
     
     // 認証済みユーザーかつクイズデータが存在する場合のみ結果を保存
     if (user && quiz && startTime) {
-      console.log('認証済みユーザーのため、結果を保存します');
       await saveQuizResult();
-    } else {
-      console.log('未認証または必要な情報が不足しているため、結果保存をスキップしました:');
-      console.log('- 認証状態:', !!user);
-      console.log('- quiz:', !!quiz);
-      console.log('- startTime:', !!startTime);
-      // 未認証時でもクイズ結果画面は表示する
     }
   };
 
   // クイズ結果保存
   const saveQuizResult = async () => {
-    console.log('=== クイズ結果保存開始 ===');
-    console.log('user:', user);
-    console.log('quiz:', quiz);
-    console.log('startTime:', startTime);
-    
     if (!user || !quiz || !startTime) {
-      console.warn('結果保存に必要なデータが不足しています');
-      console.log('user:', !!user, 'quiz:', !!quiz, 'startTime:', !!startTime);
       return;
     }
 
     try {
       setIsResultSaving(true);
-      console.log('保存処理開始...');
-      
       const results = calculateResults();
       const currentTime = endTime || new Date();
       const timeTaken = Math.round((currentTime.getTime() - startTime.getTime()) / 1000);
-      
-      console.log('計算結果:', results);
-      console.log('所要時間:', timeTaken, '秒');
       
       const resultData: QuizResultRequest = {
         quiz: quiz.id,
@@ -279,18 +195,11 @@ const QuizPage: React.FC = () => {
         time_taken: timeTaken,
       };
 
-      console.log('送信データ:', resultData);
-      console.log('API呼び出し開始...');
-      
-      const savedResult = await quizService.saveQuizResult(resultData);
-      console.log('API呼び出し成功:', savedResult);
-      console.log('クイズ結果が保存されました:', savedResult);
+      await quizService.saveQuizResult(resultData);
       setResultSaved(true);
-      console.log('結果保存完了');
       
     } catch (error) {
       console.error('クイズ結果の保存に失敗しました:', error);
-      // エラーが発生しても結果画面は表示する
     } finally {
       setIsResultSaving(false);
     }
@@ -299,7 +208,7 @@ const QuizPage: React.FC = () => {
   // 前の問題への移動
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
+      setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
@@ -339,12 +248,11 @@ const QuizPage: React.FC = () => {
     return {
       totalQuestions: questions.length,
       correctAnswers: correctCount,
-      score: Math.round((correctCount / questions.length) * 100),
+      score: questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0,
       questions: questionResults
     };
   };
 
-  // ローディング状態
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -356,7 +264,6 @@ const QuizPage: React.FC = () => {
     );
   }
 
-  // エラー状態
   if (error) {
     return (
       <div className="max-w-md mx-auto text-center py-12">
@@ -374,7 +281,6 @@ const QuizPage: React.FC = () => {
     );
   }
 
-  // クイズ完了後は結果画面を表示
   if (isQuizCompleted) {
     const results = calculateResults();
     return (
@@ -389,7 +295,6 @@ const QuizPage: React.FC = () => {
     );
   }
 
-  // 問題が存在しない場合
   if (questions.length === 0) {
     return (
       <div className="max-w-md mx-auto text-center py-12">
@@ -414,7 +319,6 @@ const QuizPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      {/* ヘッダー情報 */}
       <div className="max-w-4xl mx-auto mb-6 px-6">
         <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between">
@@ -422,7 +326,6 @@ const QuizPage: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">
                 {category?.name} - {difficulty?.name}
               </h1>
-
             </div>
             <button
               onClick={handleBackToHome}
@@ -434,7 +337,6 @@ const QuizPage: React.FC = () => {
         </div>
       </div>
 
-      {/* クイズ問題 */}
       <QuizQuestion
         question={currentQuestion}
         currentQuestionNumber={currentQuestionIndex + 1}
