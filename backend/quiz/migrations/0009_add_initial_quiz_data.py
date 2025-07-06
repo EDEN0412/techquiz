@@ -4,7 +4,7 @@ from django.db import migrations
 from django.utils import timezone
 
 def create_initial_data(apps, schema_editor):
-    """初期データを作成する関数"""
+    """初期データを作成する関数（べき等的 - 何度実行しても安全）"""
     # モデルを取得
     Category = apps.get_model('quiz', 'Category')
     DifficultyLevel = apps.get_model('quiz', 'DifficultyLevel')
@@ -12,9 +12,7 @@ def create_initial_data(apps, schema_editor):
     Question = apps.get_model('quiz', 'Question')
     Answer = apps.get_model('quiz', 'Answer')
     
-    # 既存データがある場合は処理をスキップ
-    if Category.objects.exists() or DifficultyLevel.objects.exists():
-        return
+    # スキップ条件を削除し、常にデータを確実に作成/更新する
     
     # 1. カテゴリの作成
     categories_data = [
@@ -31,15 +29,17 @@ def create_initial_data(apps, schema_editor):
     
     categories = []
     for cat_data in categories_data:
-        category = Category.objects.create(
-            name=cat_data['name'],
-            slug=cat_data['slug'],
-            description=cat_data['description'],
-            icon=cat_data['icon'],
-            display_order=cat_data['display_order'],
-            is_active=True,
-            created_at=timezone.now(),
-            updated_at=timezone.now()
+        category, created = Category.objects.update_or_create(
+            slug=cat_data['slug'],  # slugで検索
+            defaults={
+                'name': cat_data['name'],
+                'description': cat_data['description'],
+                'icon': cat_data['icon'],
+                'display_order': cat_data['display_order'],
+                'is_active': True,
+                'created_at': timezone.now(),
+                'updated_at': timezone.now()
+            }
         )
         categories.append(category)
     
@@ -52,15 +52,17 @@ def create_initial_data(apps, schema_editor):
     
     difficulties = []
     for diff_data in difficulties_data:
-        difficulty = DifficultyLevel.objects.create(
-            name=diff_data['name'],
-            slug=diff_data['slug'],
-            level=diff_data['level'],
-            description=diff_data['description'],
-            point_multiplier=diff_data['point_multiplier'],
-            time_limit=diff_data['time_limit'],
-            created_at=timezone.now(),
-            updated_at=timezone.now()
+        difficulty, created = DifficultyLevel.objects.update_or_create(
+            slug=diff_data['slug'],  # slugで検索
+            defaults={
+                'name': diff_data['name'],
+                'level': diff_data['level'],
+                'description': diff_data['description'],
+                'point_multiplier': diff_data['point_multiplier'],
+                'time_limit': diff_data['time_limit'],
+                'created_at': timezone.now(),
+                'updated_at': timezone.now()
+            }
         )
         difficulties.append(difficulty)
     
@@ -77,19 +79,21 @@ def create_initial_data(apps, schema_editor):
     ]
     
     for quiz_data in html_css_quiz_data:
-        quiz = Quiz.objects.create(
+        quiz, created = Quiz.objects.update_or_create(
             category=html_css_category,
             difficulty=quiz_data['difficulty'],
-            title=quiz_data['title'],
-            description=quiz_data['description'],
-            time_limit=quiz_data['time_limit'],
-            pass_score=70,
-            is_active=True,
-            thumbnail_url='',
-            banner_image_url='',
-            media_type='none',
-            created_at=timezone.now(),
-            updated_at=timezone.now()
+            title=quiz_data['title'],  # タイトルも検索条件に含める
+            defaults={
+                'description': quiz_data['description'],
+                'time_limit': quiz_data['time_limit'],
+                'pass_score': 70,
+                'is_active': True,
+                'thumbnail_url': '',
+                'banner_image_url': '',
+                'media_type': 'none',
+                'created_at': timezone.now(),
+                'updated_at': timezone.now()
+            }
         )
         html_css_quizzes.append(quiz)
     
@@ -154,17 +158,21 @@ def create_initial_data(apps, schema_editor):
     
     # HTML & CSS 初級の質問と回答を作成
     for i, q_data in enumerate(html_css_beginner_questions, 1):
-        question = Question.objects.create(
+        question, created = Question.objects.update_or_create(
             quiz=html_css_quizzes[0],  # 初級クイズ
-            question_text=q_data['question_text'],
-            question_type='multiple_choice',
-            hint=q_data['hint'],
-            explanation=q_data['explanation'],
-            points=1,
             display_order=i,
-            created_at=timezone.now()
+            defaults={
+                'question_text': q_data['question_text'],
+                'question_type': 'multiple_choice',
+                'hint': q_data['hint'],
+                'explanation': q_data['explanation'],
+                'points': 1,
+                'created_at': timezone.now()
+            }
         )
         
+        # 既存の回答を削除してから新しい回答を作成
+        Answer.objects.filter(question=question).delete()
         for j, ans_data in enumerate(q_data['answers'], 1):
             Answer.objects.create(
                 question=question,
@@ -235,17 +243,21 @@ def create_initial_data(apps, schema_editor):
     
     # HTML & CSS 中級の質問と回答を作成
     for i, q_data in enumerate(html_css_intermediate_questions, 1):
-        question = Question.objects.create(
+        question, created = Question.objects.update_or_create(
             quiz=html_css_quizzes[1],  # 中級クイズ
-            question_text=q_data['question_text'],
-            question_type='multiple_choice',
-            hint=q_data['hint'],
-            explanation=q_data['explanation'],
-            points=2,
             display_order=i,
-            created_at=timezone.now()
+            defaults={
+                'question_text': q_data['question_text'],
+                'question_type': 'multiple_choice',
+                'hint': q_data['hint'],
+                'explanation': q_data['explanation'],
+                'points': 2,
+                'created_at': timezone.now()
+            }
         )
         
+        # 既存の回答を削除してから新しい回答を作成
+        Answer.objects.filter(question=question).delete()
         for j, ans_data in enumerate(q_data['answers'], 1):
             Answer.objects.create(
                 question=question,
@@ -264,19 +276,21 @@ def create_initial_data(apps, schema_editor):
     ]
     
     for quiz_data in ruby_quiz_data:
-        quiz = Quiz.objects.create(
+        quiz, created = Quiz.objects.update_or_create(
             category=ruby_category,
             difficulty=quiz_data['difficulty'],
-            title=quiz_data['title'],
-            description=quiz_data['description'],
-            time_limit=quiz_data['time_limit'],
-            pass_score=70,
-            is_active=True,
-            thumbnail_url='https://placehold.co/300x200?text=Ruby+Beginner',
-            banner_image_url='https://placehold.co/600x200?text=Ruby+Banner',
-            media_type='image',
-            created_at=timezone.now(),
-            updated_at=timezone.now()
+            title=quiz_data['title'],  # タイトルも検索条件に含める
+            defaults={
+                'description': quiz_data['description'],
+                'time_limit': quiz_data['time_limit'],
+                'pass_score': 70,
+                'is_active': True,
+                'thumbnail_url': 'https://placehold.co/300x200?text=Ruby+Beginner',
+                'banner_image_url': 'https://placehold.co/600x200?text=Ruby+Banner',
+                'media_type': 'image',
+                'created_at': timezone.now(),
+                'updated_at': timezone.now()
+            }
         )
         ruby_quizzes.append(quiz)
     
@@ -341,17 +355,21 @@ def create_initial_data(apps, schema_editor):
     
     # Ruby 初級の質問と回答を作成
     for i, q_data in enumerate(ruby_beginner_questions, 1):
-        question = Question.objects.create(
+        question, created = Question.objects.update_or_create(
             quiz=ruby_quizzes[0],  # 初級クイズ
-            question_text=q_data['question_text'],
-            question_type='multiple_choice',
-            hint=q_data['hint'],
-            explanation=q_data['explanation'],
-            points=1,
             display_order=i,
-            created_at=timezone.now()
+            defaults={
+                'question_text': q_data['question_text'],
+                'question_type': 'multiple_choice',
+                'hint': q_data['hint'],
+                'explanation': q_data['explanation'],
+                'points': 1,
+                'created_at': timezone.now()
+            }
         )
         
+        # 既存の回答を削除してから新しい回答を作成
+        Answer.objects.filter(question=question).delete()
         for j, ans_data in enumerate(q_data['answers'], 1):
             Answer.objects.create(
                 question=question,
