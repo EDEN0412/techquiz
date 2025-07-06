@@ -164,14 +164,11 @@ export function DifficultySelection() {
 
           setCategory(foundCategory);
 
-          // 2. 難易度一覧とクイズ一覧を取得
-          const [difficultyLevels, quizzes] = await Promise.all([
-            quizService.getDifficultyLevels(),
-            quizService.getQuizzes()
-          ]);
+          // 2. 指定されたカテゴリのクイズ一覧を取得
+          const categoryQuizzes = await quizService.getQuizzesByCategory(foundCategory.slug);
 
-          // 3. このカテゴリーのクイズのみ抽出
-          const categoryQuizzes = quizzes.filter(quiz => quiz.category === foundCategory.id);
+          // 3. 難易度一覧を取得
+          const difficultyLevels = await quizService.getDifficultyLevels();
 
           // 4. クイズごとに難易度データを紐付け
           const quizCardList: QuizCardData[] = categoryQuizzes.map(quiz => {
