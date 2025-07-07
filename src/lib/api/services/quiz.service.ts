@@ -59,8 +59,8 @@ export class QuizService {
   /**
    * 特定のカテゴリに属するクイズ一覧を取得
    */
-  async getQuizzesByCategory(categorySlug: string): Promise<any[]> {
-    const response = await api.get<any>(`${this.baseUrl}/categories/${categorySlug}/quizzes/`);
+  async getQuizzesByCategory(categoryId: number): Promise<any[]> {
+    const response = await api.get<any>(`${this.baseUrl}/categories/${categoryId}/quizzes/`);
     // APIはカテゴリに属するクイズの配列を直接返すので、そのまま返す
     return response.data;
   }

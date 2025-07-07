@@ -152,20 +152,19 @@ export function DifficultySelection() {
         } else {
           // Django APIからデータを取得
           
-          // 1. カテゴリー一覧を取得してslugから該当するカテゴリーを見つける
-          const categories = await quizService.getCategories();
-          const foundCategory = categories.find(cat => cat.slug === categoryId);
-          
-          if (!foundCategory) {
-            setError('指定されたカテゴリーが見つかりません');
+          // 1. カテゴリーIDから直接カテゴリーを取得
+          const categoryIdNum = parseInt(categoryId, 10);
+          if (isNaN(categoryIdNum)) {
+            setError('無効なカテゴリーIDです');
             setLoading(false);
             return;
           }
 
+          const foundCategory = await quizService.getCategory(categoryIdNum);
           setCategory(foundCategory);
 
           // 2. 指定されたカテゴリのクイズ一覧を取得
-          const categoryQuizzes = await quizService.getQuizzesByCategory(foundCategory.slug);
+          const categoryQuizzes = await quizService.getQuizzesByCategory(categoryIdNum);
 
           // 3. 難易度一覧を取得
           const difficultyLevels = await quizService.getDifficultyLevels();
@@ -184,7 +183,8 @@ export function DifficultySelection() {
         // API失敗時はモックデータにフォールバック
         if (!USE_MOCK_DATA) {
           console.log('APIが失敗したため、モックデータを使用します');
-          const foundCategory = mockCategories.find(cat => cat.slug === categoryId);
+          const categoryIdNum = parseInt(categoryId, 10);
+          const foundCategory = mockCategories.find(cat => cat.id === categoryIdNum);
           if (foundCategory) {
             setCategory(foundCategory);
             // モックデータ使用時はクイズ一覧を定義していないため、空配列で代用

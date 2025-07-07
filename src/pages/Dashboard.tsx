@@ -32,8 +32,8 @@ export function Dashboard() {
   // カテゴリーにアイコン情報を追加
   const categories = enrichCategoriesWithIcons(rawCategories);
 
-  const handleStartQuiz = (categorySlug: string) => {
-    navigate(`/quiz/${categorySlug}/difficulty`);
+  const handleStartQuiz = (categoryId: number) => {
+    navigate(`/quiz/${categoryId}/difficulty`);
   };
 
   // 復習機能のハンドラー
@@ -270,7 +270,7 @@ export function Dashboard() {
                   <CardContent>
                     <Button 
                       className="w-full" 
-                      onClick={() => handleStartQuiz(category.slug)}
+                      onClick={() => handleStartQuiz(category.id)}
                     >
                       クイズを開始
                     </Button>
