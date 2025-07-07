@@ -211,9 +211,7 @@ class QuizResultViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        クイズ結果を保存する際に、正答率と合否のみ計算して保存する。
-        ActivityHistory と UserStatistics の更新は Supabase 側の
-        trigger_update_user_statistics に委任する。
+        クイズ結果を保存し、統計情報と活動履歴を更新する
         """
         quiz = serializer.validated_data.get('quiz')
         score = serializer.validated_data.get('score')
@@ -223,8 +221,119 @@ class QuizResultViewSet(viewsets.ModelViewSet):
         percentage = (score / total_possible) * 100 if total_possible else 0
         passed = percentage >= quiz.pass_score if total_possible else False
 
-        # QuizResult だけを保存（後続処理は DB トリガーに任せる）
-        serializer.save(user=self.request.user, passed=passed, percentage=percentage)
+        # トランザクション内でクイズ結果を保存し、統計情報と活動履歴を更新
+        with transaction.atomic():
+            # クイズ結果を保存
+            quiz_result = serializer.save(user=self.request.user, passed=passed, percentage=percentage)
+            
+            # 統計情報を更新（全体統計）
+            overall_stats, created = UserStatistics.objects.get_or_create(
+                user=self.request.user,
+                category=None,
+                difficulty=None,
+                defaults={
+                    'quizzes_completed': 0,
+                    'total_points': 0,
+                    'avg_score': 0.0,
+                    'highest_score': 0,
+                    'last_quiz_date': quiz_result.completed_at
+                }
+            )
+            
+            # 統計情報を更新
+            overall_stats.quizzes_completed += 1
+            overall_stats.total_points += score
+            overall_stats.avg_score = (
+                (overall_stats.avg_score * (overall_stats.quizzes_completed - 1) + percentage) / 
+                overall_stats.quizzes_completed
+            )
+            overall_stats.highest_score = max(overall_stats.highest_score, score)
+            overall_stats.last_quiz_date = quiz_result.completed_at
+            overall_stats.save()
+            
+            # カテゴリ別統計情報を更新
+            category_stats, created = UserStatistics.objects.get_or_create(
+                user=self.request.user,
+                category=quiz.category,
+                difficulty=None,
+                defaults={
+                    'quizzes_completed': 0,
+                    'total_points': 0,
+                    'avg_score': 0.0,
+                    'highest_score': 0,
+                    'last_quiz_date': quiz_result.completed_at
+                }
+            )
+            
+            category_stats.quizzes_completed += 1
+            category_stats.total_points += score
+            category_stats.avg_score = (
+                (category_stats.avg_score * (category_stats.quizzes_completed - 1) + percentage) / 
+                category_stats.quizzes_completed
+            )
+            category_stats.highest_score = max(category_stats.highest_score, score)
+            category_stats.last_quiz_date = quiz_result.completed_at
+            category_stats.save()
+            
+            # 難易度別統計情報を更新
+            difficulty_stats, created = UserStatistics.objects.get_or_create(
+                user=self.request.user,
+                category=None,
+                difficulty=quiz.difficulty,
+                defaults={
+                    'quizzes_completed': 0,
+                    'total_points': 0,
+                    'avg_score': 0.0,
+                    'highest_score': 0,
+                    'last_quiz_date': quiz_result.completed_at
+                }
+            )
+            
+            difficulty_stats.quizzes_completed += 1
+            difficulty_stats.total_points += score
+            difficulty_stats.avg_score = (
+                (difficulty_stats.avg_score * (difficulty_stats.quizzes_completed - 1) + percentage) / 
+                difficulty_stats.quizzes_completed
+            )
+            difficulty_stats.highest_score = max(difficulty_stats.highest_score, score)
+            difficulty_stats.last_quiz_date = quiz_result.completed_at
+            difficulty_stats.save()
+            
+            # カテゴリ×難易度別統計情報を更新
+            category_difficulty_stats, created = UserStatistics.objects.get_or_create(
+                user=self.request.user,
+                category=quiz.category,
+                difficulty=quiz.difficulty,
+                defaults={
+                    'quizzes_completed': 0,
+                    'total_points': 0,
+                    'avg_score': 0.0,
+                    'highest_score': 0,
+                    'last_quiz_date': quiz_result.completed_at
+                }
+            )
+            
+            category_difficulty_stats.quizzes_completed += 1
+            category_difficulty_stats.total_points += score
+            category_difficulty_stats.avg_score = (
+                (category_difficulty_stats.avg_score * (category_difficulty_stats.quizzes_completed - 1) + percentage) / 
+                category_difficulty_stats.quizzes_completed
+            )
+            category_difficulty_stats.highest_score = max(category_difficulty_stats.highest_score, score)
+            category_difficulty_stats.last_quiz_date = quiz_result.completed_at
+            category_difficulty_stats.save()
+            
+            # 活動履歴を作成
+            ActivityHistory.objects.create(
+                user=self.request.user,
+                quiz=quiz,
+                category=quiz.category,
+                difficulty=quiz.difficulty,
+                score=score,
+                percentage=percentage,
+                activity_type='quiz_completed',
+                activity_date=quiz_result.completed_at
+            )
 
 
 class UserStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
