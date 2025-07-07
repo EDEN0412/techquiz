@@ -53,7 +53,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
     """
     queryset = Category.objects.all().order_by('display_order')
     serializer_class = CategorySerializer
-    lookup_field = 'slug'
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     search_fields = ['name', 'description']
     filterset_fields = ['is_active']
@@ -61,7 +60,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]  # 誰でもアクセス可能に設定
     
     @action(detail=True, methods=['get'])
-    def quizzes(self, request, slug=None, **kwargs):
+    def quizzes(self, request, pk=None):
         """
         特定のカテゴリに属するクイズのリストを取得する
         """
@@ -77,7 +76,6 @@ class DifficultyLevelViewSet(viewsets.ModelViewSet):
     """
     queryset = DifficultyLevel.objects.all().order_by('level')
     serializer_class = DifficultyLevelSerializer
-    lookup_field = 'slug'
     filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['level', 'name', 'created_at']
