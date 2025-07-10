@@ -267,7 +267,92 @@ def create_initial_data(apps, schema_editor):
                 created_at=timezone.now()
             )
     
-    # 6. Rubyクイズの作成
+    # 6. HTML & CSS 上級クイズの質問と回答
+    html_css_advanced_questions = [
+        {
+            'question_text': 'CSSのtransformプロパティで要素を水平方向に100px、垂直方向に50px移動させる記述はどれですか？',
+            'hint': 'translate関数を使用します',
+            'explanation': 'transform: translate(100px, 50px); で要素を指定した距離だけ移動できます。第1引数がX軸（水平）、第2引数がY軸（垂直）方向の移動量です。',
+            'answers': [
+                {'text': 'transform: translate(100px, 50px);', 'is_correct': True},
+                {'text': 'transform: move(100px, 50px);', 'is_correct': False},
+                {'text': 'position: translate(100px, 50px);', 'is_correct': False},
+                {'text': 'transform: position(100px, 50px);', 'is_correct': False},
+            ]
+        },
+        {
+            'question_text': 'CSS変数（カスタムプロパティ）を定義し、使用する正しい記述はどれですか？',
+            'hint': '-- で始まり、var()で使用します',
+            'explanation': 'CSS変数は --variable-name で定義し、var(--variable-name) で使用します。再利用可能で動的な値の管理に便利です。',
+            'answers': [
+                {'text': ':root { --main-color: blue; } .element { color: var(--main-color); }', 'is_correct': True},
+                {'text': ':root { $main-color: blue; } .element { color: $(main-color); }', 'is_correct': False},
+                {'text': ':root { main-color: blue; } .element { color: var(main-color); }', 'is_correct': False},
+                {'text': ':root { --main-color: blue; } .element { color: main-color; }', 'is_correct': False},
+            ]
+        },
+        {
+            'question_text': 'CSS疑似クラスで「3番目以降の偶数番目の要素」を選択するセレクタはどれですか？',
+            'hint': 'nth-child()で計算式を使用します',
+            'explanation': ':nth-child(2n+2) または :nth-child(even):nth-child(n+3) で3番目以降の偶数番目要素を選択できます。nは0から始まる自然数です。',
+            'answers': [
+                {'text': ':nth-child(2n+2)', 'is_correct': True},
+                {'text': ':nth-child(3n+2)', 'is_correct': False},
+                {'text': ':nth-child(even+3)', 'is_correct': False},
+                {'text': ':nth-child(2n-1)', 'is_correct': False},
+            ]
+        },
+        {
+            'question_text': 'CSS calc()関数で「ビューポート幅から40pxを引いた値」を設定する正しい記述はどれですか？',
+            'hint': '異なる単位間で計算ができます',
+            'explanation': 'calc(100vw - 40px) でビューポート幅から40pxを引いた値を計算できます。演算子の前後にはスペースが必要です。',
+            'answers': [
+                {'text': 'calc(100vw - 40px)', 'is_correct': True},
+                {'text': 'calc(100vw-40px)', 'is_correct': False},
+                {'text': 'calc(100% - 40px)', 'is_correct': False},
+                {'text': 'calculate(100vw - 40px)', 'is_correct': False},
+            ]
+        },
+        {
+            'question_text': 'CSS Gridで名前付きエリアを定義するプロパティはどれですか？',
+            'hint': 'テンプレートとエリアがキーワードです',
+            'explanation': 'grid-template-areas プロパティで名前付きグリッドエリアを定義し、grid-area プロパティで要素を配置します。',
+            'answers': [
+                {'text': 'grid-template-areas', 'is_correct': True},
+                {'text': 'grid-area-template', 'is_correct': False},
+                {'text': 'grid-areas', 'is_correct': False},
+                {'text': 'grid-template-names', 'is_correct': False},
+            ]
+        },
+    ]
+    
+    # HTML & CSS 上級の質問と回答を作成
+    for i, q_data in enumerate(html_css_advanced_questions, 1):
+        question, created = Question.objects.update_or_create(
+            quiz=html_css_quizzes[2],  # 上級クイズ
+            display_order=i,
+            defaults={
+                'question_text': q_data['question_text'],
+                'question_type': 'multiple_choice',
+                'hint': q_data['hint'],
+                'explanation': q_data['explanation'],
+                'points': 3,
+                'created_at': timezone.now()
+            }
+        )
+        
+        # 既存の回答を削除してから新しい回答を作成
+        Answer.objects.filter(question=question).delete()
+        for j, ans_data in enumerate(q_data['answers'], 1):
+            Answer.objects.create(
+                question=question,
+                answer_text=ans_data['text'],
+                is_correct=ans_data['is_correct'],
+                display_order=j,
+                created_at=timezone.now()
+            )
+    
+    # 7. Rubyクイズの作成
     ruby_quizzes = []
     ruby_quiz_data = [
         {'difficulty': difficulties[0], 'title': 'Ruby 基礎', 'description': 'Rubyの基本的な構文とデータ型について学びましょう', 'time_limit': 300},
@@ -294,7 +379,7 @@ def create_initial_data(apps, schema_editor):
         )
         ruby_quizzes.append(quiz)
     
-    # 7. Ruby 初級クイズの質問と回答
+    # 8. Ruby 初級クイズの質問と回答
     ruby_beginner_questions = [
         {
             'question_text': 'Rubyでコンソールに文字列を改行付きで出力するメソッドはどれですか？',
