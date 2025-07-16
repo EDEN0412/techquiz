@@ -407,7 +407,9 @@ alwaysApply: true
 - [x] Rubyカテゴリーのクイズ問題作成
   Done
   Rubyカテゴリーの3難易度（初級・中級・上級）各5問、合計15問のクイズ問題をSQLマイグレーションとseed.sqlに追加し、必須カラム（thumbnail_url, banner_image_url, media_type）を設定してNOT NULL制約エラーを解消しました。
-- [ ] Railsカテゴリーのクイズ問題作成
+- [x] Railsカテゴリーのクイズ問題作成
+  Done
+  Railsカテゴリーの3難易度（初級・中級・上級）各5問、合計15問のクイズ問題を作成し、seed.sqlと専用マイグレーションファイル（20260101150000_add_rails_quiz.sql）に追加しました。MVC、コマンド、ActiveRecord、バリデーション、コールバック、Strong Parameters、N+1問題、concern、API専用アプリ作成など、実践的なRails開発に必要な知識を網羅した問題構成です。
 - [ ] JavaScriptカテゴリーのクイズ問題作成
 - [ ] Webアプリケーション基礎カテゴリーのクイズ問題作成
 - [ ] Pythonカテゴリーのクイズ問題作成
