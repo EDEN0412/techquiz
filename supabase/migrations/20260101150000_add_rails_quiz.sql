@@ -6,11 +6,11 @@ BEGIN;
 -- 1. クイズの作成
 INSERT INTO quiz_quiz (category_id, difficulty_id, title, description, time_limit, pass_score, is_active, thumbnail_url, banner_image_url, media_type, created_at, updated_at) VALUES
 -- 初級クイズ
-(3, 1, 'Rails 初級', 'Railsの基本構造やコマンドについて学びましょう', 300, 70, true, 'https://placehold.co/300x200?text=Rails+Beginner', 'https://placehold.co/600x200?text=Rails+Banner', 'image', NOW(), NOW()),
+(3, 1, 'Rails on rails 初級', 'Railsの基本構造やコマンドについて学びましょう', 300, 70, true, 'https://placehold.co/300x200?text=Rails+Beginner', 'https://placehold.co/600x200?text=Rails+Banner', 'image', NOW(), NOW()),
 -- 中級クイズ
-(3, 2, 'Rails 中級', 'ActiveRecordやバリデーション、関連付けなど中級レベルの機能を学びましょう', 600, 70, true, 'https://placehold.co/300x200?text=Rails+Intermediate', 'https://placehold.co/600x200?text=Rails+Banner', 'image', NOW(), NOW()),
+(3, 2, 'Rails on rails 中級', 'ActiveRecordやバリデーション、関連付けなど中級レベルの機能を学びましょう', 600, 70, true, 'https://placehold.co/300x200?text=Rails+Intermediate', 'https://placehold.co/600x200?text=Rails+Banner', 'image', NOW(), NOW()),
 -- 上級クイズ
-(3, 3, 'Rails 上級', 'コールバックやStrong Parameters、N+1問題など応用的な内容に挑戦しましょう', 900, 70, true, 'https://placehold.co/300x200?text=Rails+Advanced', 'https://placehold.co/600x200?text=Rails+Banner', 'image', NOW(), NOW());
+(3, 3, 'Rails on rails 上級', 'コールバックやStrong Parameters、N+1問題など応用的な内容に挑戦しましょう', 900, 70, true, 'https://placehold.co/300x200?text=Rails+Advanced', 'https://placehold.co/600x200?text=Rails+Banner', 'image', NOW(), NOW());
 
 -- 2. 初級レベルの問題作成
 -- 問題1
