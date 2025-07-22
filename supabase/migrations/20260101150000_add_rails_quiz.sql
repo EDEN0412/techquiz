@@ -99,7 +99,7 @@ INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, displ
 -- 問題5
 INSERT INTO quiz_question (quiz_id, question_text, question_type, hint, explanation, points, display_order, created_at) VALUES
 ((SELECT id FROM quiz_quiz WHERE category_id = 3 AND difficulty_id = 2),
-'Railsで部分テンプレートを呼び出すメソッドは？','multiple_choice','render メソッドを思い出しましょう','render partial: \'ファイル名\' で部分テンプレートを呼び出します。',2,5,NOW());
+'Railsで部分テンプレートを呼び出すメソッドは？','multiple_choice','render メソッドを思い出しましょう','render partial: ''ファイル名'' で部分テンプレートを呼び出します。',2,5,NOW());
 INSERT INTO quiz_answer (question_id, answer_text, is_correct, created_at, display_order) VALUES
 ((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=3 AND difficulty_id=2) AND display_order=5),'render',true,NOW(),1),
 ((SELECT id FROM quiz_question WHERE quiz_id=(SELECT id FROM quiz_quiz WHERE category_id=3 AND difficulty_id=2) AND display_order=5),'partial',false,NOW(),2),
